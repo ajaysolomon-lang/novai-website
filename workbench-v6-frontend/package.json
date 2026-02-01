@@ -1,0 +1,14 @@
+{
+  "name": "workbench-v6-frontend",
+  "version": "6.3.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "vite build && npx wrangler pages deploy dist --project-name=workbench-frontend"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

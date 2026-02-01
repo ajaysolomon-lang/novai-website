@@ -1,0 +1,10 @@
+{
+  "name": "works-v6-api",
+  "version": "6.3.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute workbench_db --file=./schema.sql --remote"
+  }
+}

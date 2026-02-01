@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novai Workbench V6.3</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header id="header" class="hidden">
+      <div class="header-inner">
+        <h1>Novai Workbench <span class="version">v6.3</span></h1>
+        <nav id="nav">
+          <a href="#dashboard" class="nav-link active">Dashboard</a>
+          <a href="#jobs" class="nav-link">Jobs</a>
+          <a href="#search" class="nav-link">Search</a>
+          <a href="#schedule" class="nav-link">Schedule</a>
+          <a href="#settings" class="nav-link">Settings</a>
+          <button id="logout-btn" class="btn btn-sm">Logout</button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main">
+      <!-- Login Page -->
+      <div id="page-login" class="page">
+        <div class="auth-card">
+          <h2>Novai Workbench</h2>
+          <p class="subtitle">V6.3 — AI Innovation Platform</p>
+          <form id="login-form">
+            <input type="email" id="login-email" placeholder="Email" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+          </form>
+          <p class="auth-toggle">No account? <a href="#register">Register</a></p>
+          <div id="login-error" class="error-msg hidden"></div>
+        </div>
+      </div>
+
+      <!-- Register Page -->
+      <div id="page-register" class="page hidden">
+        <div class="auth-card">
+          <h2>Create Account</h2>
+          <form id="register-form">
+            <input type="text" id="reg-name" placeholder="Full Name" required>
+            <input type="email" id="reg-email" placeholder="Email" required>
+            <input type="tel" id="reg-phone" placeholder="Phone (optional)">
+            <input type="password" id="reg-password" placeholder="Password (8+ chars, uppercase, number)" required>
+            <button type="submit" class="btn btn-primary btn-full">Register</button>
+          </form>
+          <p class="auth-toggle">Have an account? <a href="#login">Sign In</a></p>
+          <div id="register-error" class="error-msg hidden"></div>
+        </div>
+      </div>
+
+      <!-- Dashboard Page -->
+      <div id="page-dashboard" class="page hidden">
+        <div class="container">
+          <h2>Dashboard</h2>
+          <div id="verification-banner" class="banner hidden">
+            <p id="verification-msg"></p>
+            <button id="verify-email-btn" class="btn btn-sm">Verify Email</button>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3 id="stat-jobs">0</h3>
+              <p>Active Jobs</p>
+            </div>
+            <div class="stat-card">
+              <h3 id="stat-matched">0</h3>
+              <p>Matched</p>
+            </div>
+            <div class="stat-card">
+              <h3 id="stat-scheduled">0</h3>
+              <p>Scheduled</p>
+            </div>
+            <div class="stat-card">
+              <h3 id="stat-tier">0</h3>
+              <p>Verification Tier</p>
+            </div>
+          </div>
+          <div class="section">
+            <h3>Recent Jobs</h3>
+            <div id="recent-jobs" class="list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jobs Page -->
+      <div id="page-jobs" class="page hidden">
+        <div class="container">
+          <div class="page-header">
+            <h2>Jobs</h2>
+            <button id="new-job-btn" class="btn btn-primary">+ New Job</button>
+          </div>
+          <!-- New Job Form -->
+          <div id="job-form-section" class="card hidden">
+            <h3>Create Job</h3>
+            <form id="job-form">
+              <input type="text" id="job-title" placeholder="Job Title" required>
+              <textarea id="job-desc" placeholder="Description" required></textarea>
+              <select id="job-category" required>
+                <option value="">Select Category</option>
+                <option value="plumbing">Plumbing</option>
+                <option value="electrical">Electrical</option>
+                <option value="hvac">HVAC</option>
+                <option value="roofing">Roofing</option>
+                <option value="landscaping">Landscaping</option>
+                <option value="cleaning">Cleaning</option>
+                <option value="painting">Painting</option>
+                <option value="moving">Moving</option>
+                <option value="pest-control">Pest Control</option>
+                <option value="handyman">Handyman</option>
+                <option value="auto-repair">Auto Repair</option>
+                <option value="tutoring">Tutoring</option>
+                <option value="consulting">Consulting</option>
+                <option value="design">Design</option>
+                <option value="development">Development</option>
+              </select>
+              <input type="text" id="job-zip" placeholder="ZIP Code" pattern="\d{5}" required>
+              <div class="row">
+                <input type="number" id="job-budget-min" placeholder="Budget Min ($)">
+                <input type="number" id="job-budget-max" placeholder="Budget Max ($)">
+              </div>
+              <select id="job-urgency">
+                <option value="normal">Normal</option>
+                <option value="urgent">Urgent</option>
+                <option value="low">Low Priority</option>
+              </select>
+              <button type="submit" class="btn btn-primary">Create Job</button>
+            </form>
+          </div>
+          <!-- Jobs List -->
+          <div id="jobs-list" class="list"></div>
+          <!-- Job Detail -->
+          <div id="job-detail" class="card hidden"></div>
+        </div>
+      </div>
+
+      <!-- Search Page -->
+      <div id="page-search" class="page hidden">
+        <div class="container">
+          <h2>Search</h2>
+          <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search providers, jobs...">
+            <select id="search-category">
+              <option value="">All Categories</option>
+              <option value="plumbing">Plumbing</option>
+              <option value="electrical">Electrical</option>
+              <option value="hvac">HVAC</option>
+              <option value="roofing">Roofing</option>
+              <option value="landscaping">Landscaping</option>
+              <option value="cleaning">Cleaning</option>
+              <option value="painting">Painting</option>
+              <option value="handyman">Handyman</option>
+              <option value="development">Development</option>
+            </select>
+            <input type="text" id="search-zip" placeholder="ZIP">
+            <button id="search-btn" class="btn btn-primary">Search</button>
+          </div>
+          <div id="search-results" class="list"></div>
+        </div>
+      </div>
+
+      <!-- Schedule Page -->
+      <div id="page-schedule" class="page hidden">
+        <div class="container">
+          <h2>Schedules</h2>
+          <div id="schedules-list" class="list"></div>
+        </div>
+      </div>
+
+      <!-- Settings Page -->
+      <div id="page-settings" class="page hidden">
+        <div class="container">
+          <h2>Settings & Verification</h2>
+          <div class="card">
+            <h3>Account</h3>
+            <div id="account-info"></div>
+          </div>
+          <div class="card">
+            <h3>Email Verification</h3>
+            <div id="email-verify-section"></div>
+          </div>
+          <div class="card">
+            <h3>Phone Verification</h3>
+            <div id="phone-verify-section"></div>
+          </div>
+          <div class="card">
+            <h3>Register as Provider</h3>
+            <form id="provider-form">
+              <input type="text" id="prov-name" placeholder="Business Name" required>
+              <select id="prov-category" required>
+                <option value="">Select Category</option>
+                <option value="plumbing">Plumbing</option>
+                <option value="electrical">Electrical</option>
+                <option value="hvac">HVAC</option>
+                <option value="cleaning">Cleaning</option>
+                <option value="handyman">Handyman</option>
+                <option value="development">Development</option>
+              </select>
+              <input type="text" id="prov-services" placeholder='Services (comma-separated)' required>
+              <input type="text" id="prov-zips" placeholder='ZIP codes (comma-separated)' required>
+              <button type="submit" class="btn btn-primary">Register Provider</button>
+            </form>
+            <div id="provider-msg" class="hidden"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
