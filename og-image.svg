@@ -1,0 +1,25 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0A1628;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a2d4a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="580" width="1200" height="50" fill="url(#accent)" opacity="0.8"/>
+  <rect x="60" y="60" width="8" height="120" fill="url(#accent)" rx="4"/>
+  <text x="90" y="120" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="72" font-weight="700" fill="#ffffff">WorkBench</text>
+  <text x="90" y="165" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="28" font-weight="400" fill="#94a3b8">by Novai Systems</text>
+  <text x="90" y="270" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="38" font-weight="600" fill="#e2e8f0">Local Services Marketplace</text>
+  <text x="90" y="330" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="32" font-weight="400" fill="#94a3b8">Connecting you with trusted workers</text>
+  <text x="90" y="375" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="32" font-weight="400" fill="#94a3b8">in Los Angeles</text>
+  <text x="90" y="460" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="500" fill="#3b82f6">✦ Browse Services</text>
+  <text x="380" y="460" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="500" fill="#3b82f6">✦ Book Instantly</text>
+  <text x="640" y="460" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="500" fill="#3b82f6">✦ Pay Securely</text>
+  <text x="90" y="540" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="400" fill="#64748b">workbench.novaisystems.online</text>
+  <text x="90" y="615" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="18" font-weight="600" fill="#ffffff">Free to sign up  •  Los Angeles, CA  •  Powered by Novai Systems LLC</text>
+</svg>

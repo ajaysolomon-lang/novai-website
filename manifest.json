@@ -1,0 +1,19 @@
+{
+  "name": "WorkBench by Novai Systems",
+  "short_name": "WorkBench",
+  "description": "Local services marketplace connecting you with trusted workers in Los Angeles",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A1628",
+  "theme_color": "#0A1628",
+  "orientation": "portrait-primary",
+  "categories": ["business", "lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
