@@ -1,0 +1,8 @@
+# Static SEO/discovery files — serve as-is (ABOVE catch-all)
+/robots.txt /robots.txt 200
+/sitemap.xml /sitemap.xml 200
+/humans.txt /humans.txt 200
+/.well-known/security.txt /.well-known/security.txt 200
+
+# SPA catch-all fallback (existing behavior)
+/* /index.html 200
