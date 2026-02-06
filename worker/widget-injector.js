@@ -14,6 +14,8 @@ const WIDGET_HTML = `
   </a>
 </div>`;
 
+const SALES_AGENT_SCRIPT = `<script src="https://novaisystems.online/sales-agent.js"><\/script>`;
+
 export default {
   async fetch(request) {
     const res = await fetch(request);
@@ -23,6 +25,7 @@ export default {
       .on("body", {
         element(el) {
           el.append(WIDGET_HTML, { html: true });
+          el.append(SALES_AGENT_SCRIPT, { html: true });
         }
       })
       .transform(res);
