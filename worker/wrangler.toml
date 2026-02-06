@@ -5,3 +5,7 @@ compatibility_date = "2024-01-01"
 [[routes]]
 pattern = "novaisystems.online/*"
 zone_name = "novaisystems.online"
+
+[[routes]]
+pattern = "workbench.novaisystems.online/*"
+zone_name = "novaisystems.online"
