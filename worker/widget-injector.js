@@ -714,6 +714,16 @@ const SALES_AGENT_CODE = `(function() {
 
       state.capturedLeads.push(lead);
 
+      // Send to server (KV-backed) — localStorage as fallback
+      try {
+        fetch('/_wb-leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(lead)
+        }).then(function(r) {
+          if (r.ok) console.log('[WorkBench Agent] Lead saved to server');
+        }).catch(function() {});
+      } catch(e) {}
       try {
         var stored = JSON.parse(localStorage.getItem('wb_leads') || '[]');
         stored.push(lead);
@@ -810,9 +820,91 @@ const SALES_AGENT_CODE = `(function() {
 `;
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const url = new URL(request.url);
     const isWorkbench = url.hostname === "workbench.novaisystems.online";
+
+    // ─── CORS preflight for lead API ───
+    if (request.method === "OPTIONS" && url.pathname.startsWith("/_wb-leads")) {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+          "Access-Control-Max-Age": "86400"
+        }
+      });
+    }
+
+    // ─── Lead Capture API: POST /_wb-leads ───
+    if (url.pathname === "/_wb-leads" && request.method === "POST") {
+      try {
+        const lead = await request.json();
+        if (!lead.email) {
+          return new Response(JSON.stringify({ error: "email required" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+          });
+        }
+        const id = "lead_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+        lead.id = id;
+        lead.created = new Date().toISOString();
+        lead.source_host = url.hostname;
+
+        if (env.WB_LEADS) {
+          // Store individual lead
+          await env.WB_LEADS.put(id, JSON.stringify(lead));
+          // Update index (list of all lead IDs)
+          const indexRaw = await env.WB_LEADS.get("_index");
+          const index = indexRaw ? JSON.parse(indexRaw) : [];
+          index.unshift(id);
+          await env.WB_LEADS.put("_index", JSON.stringify(index));
+        }
+
+        return new Response(JSON.stringify({ ok: true, id }), {
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
+    }
+
+    // ─── Lead Viewer API: GET /_wb-leads?key=ADMIN_KEY ───
+    if (url.pathname === "/_wb-leads" && request.method === "GET") {
+      const key = url.searchParams.get("key");
+      if (key !== "novai2025wb") {
+        return new Response(JSON.stringify({ error: "unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+      try {
+        if (!env.WB_LEADS) {
+          return new Response(JSON.stringify({ leads: [], note: "KV not configured" }), {
+            headers: { "Content-Type": "application/json" }
+          });
+        }
+        const indexRaw = await env.WB_LEADS.get("_index");
+        const index = indexRaw ? JSON.parse(indexRaw) : [];
+        const limit = parseInt(url.searchParams.get("limit") || "50");
+        const leads = [];
+        for (let i = 0; i < Math.min(index.length, limit); i++) {
+          const raw = await env.WB_LEADS.get(index[i]);
+          if (raw) leads.push(JSON.parse(raw));
+        }
+        return new Response(JSON.stringify({ total: index.length, leads }, null, 2), {
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+    }
 
     // Serve the sales agent JS as an external file (bypasses CSP inline-script blocks)
     if (isWorkbench && url.pathname === "/_wb-sales-agent.js") {

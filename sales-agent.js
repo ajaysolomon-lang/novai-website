@@ -694,6 +694,16 @@
 
       state.capturedLeads.push(lead);
 
+      // Send to server (KV-backed) — localStorage as fallback
+      try {
+        fetch('/_wb-leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(lead)
+        }).then(function(r) {
+          if (r.ok) console.log('[WorkBench Agent] Lead saved to server');
+        }).catch(function() {});
+      } catch(e) {}
       try {
         var stored = JSON.parse(localStorage.getItem('wb_leads') || '[]');
         stored.push(lead);
