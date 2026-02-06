@@ -577,7 +577,21 @@ const SALES_AGENT_CODE = `(function() {
     '.wb-sa-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#ff3b3b;border-radius:50%;border:2px solid var(--wb-bg);animation:wb-fadeIn .3s ease}' +
     '.wb-sales-agent.is-open .wb-sa-badge{display:none}' +
 
-    '@media(max-width:480px){.wb-sa-panel{width:calc(100vw - 32px);right:-8px;bottom:64px;max-height:70vh}.wb-sa-toggle{width:50px;height:50px}.wb-sales-agent{bottom:16px;right:16px}}' +
+    // Voice call button styles
+    '.wb-voice-btn{position:absolute;bottom:66px;right:0;width:44px;height:44px;border-radius:50%;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(16,185,129,.4);transition:transform .2s,box-shadow .2s,background .3s;z-index:1}' +
+    '.wb-voice-btn:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(16,185,129,.5)}' +
+    '.wb-voice-btn.wb-voice-connecting{background:linear-gradient(135deg,#f59e0b,#d97706);animation:wb-pulse-voice 1s ease-in-out infinite}' +
+    '.wb-voice-btn.wb-voice-active{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 4px 16px rgba(239,68,68,.4)}' +
+    '.wb-voice-btn.wb-voice-active:hover{box-shadow:0 6px 24px rgba(239,68,68,.5)}' +
+    '@keyframes wb-pulse-voice{0%,100%{opacity:1}50%{opacity:.7}}' +
+    '.wb-voice-status{position:absolute;top:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:#10b981;border:2px solid var(--wb-bg,#0d1117)}' +
+    '.wb-voice-connecting .wb-voice-status{background:#f59e0b}' +
+    '.wb-voice-active .wb-voice-status{background:#ef4444;animation:wb-pulse-voice 1s ease-in-out infinite}' +
+    '.wb-voice-tooltip{position:absolute;right:52px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.85);color:#fff;font-size:11px;font-weight:500;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s}' +
+    '.wb-voice-btn:hover .wb-voice-tooltip{opacity:1}' +
+    '.wb-sales-agent.is-open .wb-voice-btn{bottom:auto;top:-54px}' +
+
+    '@media(max-width:480px){.wb-sa-panel{width:calc(100vw - 32px);right:-8px;bottom:64px;max-height:70vh}.wb-sa-toggle{width:50px;height:50px}.wb-sales-agent{bottom:16px;right:16px}.wb-voice-btn{width:40px;height:40px}}' +
     '@keyframes wb-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}';
 
   document.head.appendChild(style);
@@ -813,6 +827,99 @@ const SALES_AGENT_CODE = `(function() {
     setTimeout(wbFixAdminLink, 5000);
     setTimeout(wbFixAdminLink, 8000);
   } catch(e) {}
+
+  // ─── Vapi Voice Call Button ──────────────────────────────────────
+  // Adds a phone button above the chat toggle for browser-based voice calls
+  (function initVoiceButton() {
+    var VAPI_PUBLIC_KEY = '6c4b7bf5-65ba-4855-aebb-1778f7c8994c';
+    var VAPI_ASSISTANT_ID = '66890f6b-a091-4922-83ed-46328ecfecd1';
+    var vapiInstance = null;
+    var callActive = false;
+
+    // Phone button
+    var phoneBtn = document.createElement('button');
+    phoneBtn.className = 'wb-voice-btn';
+    phoneBtn.setAttribute('aria-label', 'Call WorkBench AI');
+    phoneBtn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>';
+
+    // Status indicator
+    var statusDot = document.createElement('span');
+    statusDot.className = 'wb-voice-status';
+    phoneBtn.appendChild(statusDot);
+
+    // Tooltip
+    var tooltip = document.createElement('span');
+    tooltip.className = 'wb-voice-tooltip';
+    tooltip.textContent = 'Talk to AI';
+    phoneBtn.appendChild(tooltip);
+
+    function loadVapiSDK(cb) {
+      if (window.Vapi) return cb();
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js';
+      s.onload = function() {
+        // Vapi SDK attaches to window
+        setTimeout(cb, 100);
+      };
+      s.onerror = function() {
+        console.error('[WorkBench Voice] Failed to load Vapi SDK');
+        phoneBtn.classList.remove('wb-voice-connecting');
+      };
+      document.head.appendChild(s);
+    }
+
+    function startCall() {
+      if (callActive) {
+        // End call
+        if (vapiInstance) {
+          vapiInstance.stop();
+        }
+        return;
+      }
+
+      phoneBtn.classList.add('wb-voice-connecting');
+      tooltip.textContent = 'Connecting...';
+
+      loadVapiSDK(function() {
+        try {
+          vapiInstance = new window.Vapi(VAPI_PUBLIC_KEY);
+
+          vapiInstance.on('call-start', function() {
+            callActive = true;
+            phoneBtn.classList.remove('wb-voice-connecting');
+            phoneBtn.classList.add('wb-voice-active');
+            tooltip.textContent = 'End call';
+            console.log('[WorkBench Voice] Call started');
+          });
+
+          vapiInstance.on('call-end', function() {
+            callActive = false;
+            phoneBtn.classList.remove('wb-voice-active', 'wb-voice-connecting');
+            tooltip.textContent = 'Talk to AI';
+            vapiInstance = null;
+            console.log('[WorkBench Voice] Call ended');
+          });
+
+          vapiInstance.on('error', function(e) {
+            console.error('[WorkBench Voice] Error:', e);
+            callActive = false;
+            phoneBtn.classList.remove('wb-voice-active', 'wb-voice-connecting');
+            tooltip.textContent = 'Talk to AI';
+            vapiInstance = null;
+          });
+
+          vapiInstance.start(VAPI_ASSISTANT_ID);
+        } catch(e) {
+          console.error('[WorkBench Voice] Init error:', e);
+          phoneBtn.classList.remove('wb-voice-connecting');
+          tooltip.textContent = 'Talk to AI';
+        }
+      });
+    }
+
+    phoneBtn.addEventListener('click', startCall);
+    container.appendChild(phoneBtn);
+  })();
 
   // ─── Mount ────────────────────────────────────────────────────────
   document.body.appendChild(container);
