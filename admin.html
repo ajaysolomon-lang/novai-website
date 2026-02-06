@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novai Admin — Leads &amp; Analytics</title>
+  <meta name="robots" content="noindex,nofollow">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#050a12;--surface:#0d1117;--surface2:#161b22;--border:rgba(255,255,255,.08);--text:#e6edf3;--dim:rgba(255,255,255,.5);--accent:#0077ff;--accent2:#00bbff;--green:#00c853;--red:#ff3b3b;--orange:#ff9800}
+    body{background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+    a{color:var(--accent);text-decoration:none}
+
+    /* Header */
+    .admin-header{padding:20px 32px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .admin-header h1{font-size:18px;font-weight:700}
+    .admin-header h1 span{color:var(--accent)}
+    .admin-actions{display:flex;gap:10px}
+    .admin-actions button{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer;transition:all .15s;font-family:inherit}
+    .admin-actions button:hover{border-color:var(--accent);background:rgba(0,119,255,.1)}
+    .admin-actions button.danger{border-color:rgba(255,59,59,.3)}
+    .admin-actions button.danger:hover{border-color:var(--red);background:rgba(255,59,59,.1)}
+
+    /* Stats bar */
+    .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;padding:24px 32px}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px}
+    .stat-card .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .stat-card .value{font-size:28px;font-weight:700}
+    .stat-card .value.green{color:var(--green)}
+    .stat-card .value.blue{color:var(--accent)}
+    .stat-card .value.orange{color:var(--orange)}
+
+    /* Tabs */
+    .tabs{display:flex;gap:0;padding:0 32px;border-bottom:1px solid var(--border)}
+    .tab{padding:12px 24px;font-size:14px;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+    /* Content */
+    .content{padding:24px 32px}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    /* Table */
+    .data-table{width:100%;border-collapse:collapse;font-size:13px}
+    .data-table th{text-align:left;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);font-weight:600;position:sticky;top:0}
+    .data-table td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:top}
+    .data-table tr:hover td{background:rgba(0,119,255,.03)}
+    .data-table .empty{text-align:center;padding:48px;color:var(--dim)}
+
+    /* Badges */
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+    .badge-blue{background:rgba(0,119,255,.15);color:var(--accent2)}
+    .badge-green{background:rgba(0,200,83,.15);color:var(--green)}
+    .badge-orange{background:rgba(255,152,0,.15);color:var(--orange)}
+
+    /* Log entries */
+    .log-entry{padding:12px 16px;border-bottom:1px solid var(--border);font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.6}
+    .log-entry .timestamp{color:var(--dim);margin-right:12px}
+    .log-entry .event{color:var(--green)}
+    .log-entry .data{color:var(--accent2)}
+
+    /* Export area */
+    .export-area{margin-top:16px}
+    .export-area textarea{width:100%;height:200px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:16px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-size:12px;resize:vertical}
+
+    /* Responsive */
+    @media(max-width:768px){
+      .stats-bar{grid-template-columns:repeat(2,1fr);padding:16px}
+      .content,.tabs{padding-left:16px;padding-right:16px}
+      .admin-header{padding:16px}
+      .data-table{font-size:12px}
+      .data-table th,.data-table td{padding:8px 10px}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-header">
+    <h1>NOVAI <span>ADMIN</span></h1>
+    <div class="admin-actions">
+      <button onclick="refreshData()">Refresh</button>
+      <button onclick="exportCSV()">Export CSV</button>
+      <button onclick="exportJSON()">Export JSON</button>
+      <button class="danger" onclick="clearData()">Clear All</button>
+    </div>
+  </div>
+
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="leads">Leads</div>
+    <div class="tab" data-tab="analytics">Analytics</div>
+    <div class="tab" data-tab="logs">Activity Log</div>
+    <div class="tab" data-tab="export">Export</div>
+  </div>
+
+  <div class="content">
+    <!-- Leads Table -->
+    <div class="tab-panel active" id="panel-leads">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Product</th>
+            <th>Need</th>
+            <th>Page</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="leads-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Analytics -->
+    <div class="tab-panel" id="panel-analytics">
+      <div class="stats-bar" id="analytics-details" style="padding:0;margin-bottom:24px"></div>
+      <h3 style="font-size:14px;margin-bottom:16px;color:var(--dim)">Leads by Product</h3>
+      <div id="product-breakdown"></div>
+      <h3 style="font-size:14px;margin:24px 0 16px;color:var(--dim)">Leads by Day</h3>
+      <div id="daily-breakdown"></div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="tab-panel" id="panel-logs">
+      <div id="activity-log"></div>
+    </div>
+
+    <!-- Export -->
+    <div class="tab-panel" id="panel-export">
+      <h3 style="font-size:14px;margin-bottom:12px">Raw JSON Data</h3>
+      <div class="export-area">
+        <textarea id="export-json" readonly></textarea>
+      </div>
+      <h3 style="font-size:14px;margin:24px 0 12px">CSV Data</h3>
+      <div class="export-area">
+        <textarea id="export-csv" readonly></textarea>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ─── Data Access ───
+      function getLeads() {
+        try {
+          return JSON.parse(localStorage.getItem('novai_leads') || '[]');
+        } catch(e) { return []; }
+      }
+
+      function getActivityLog() {
+        try {
+          return JSON.parse(localStorage.getItem('novai_activity_log') || '[]');
+        } catch(e) { return []; }
+      }
+
+      // ─── Render Stats Bar ───
+      function renderStats() {
+        var leads = getLeads();
+        var today = new Date().toISOString().split('T')[0];
+        var todayLeads = leads.filter(function(l) {
+          return l.timestamp && l.timestamp.split('T')[0] === today;
+        });
+
+        var products = {};
+        leads.forEach(function(l) {
+          var p = l.product || 'Unknown';
+          products[p] = (products[p] || 0) + 1;
+        });
+        var topProduct = Object.keys(products).sort(function(a,b) { return products[b] - products[a]; })[0] || 'N/A';
+
+        var withPhone = leads.filter(function(l) { return l.phone; }).length;
+
+        document.getElementById('stats-bar').innerHTML =
+          '<div class="stat-card"><div class="label">Total Leads</div><div class="value blue">' + leads.length + '</div></div>' +
+          '<div class="stat-card"><div class="label">Today</div><div class="value green">' + todayLeads.length + '</div></div>' +
+          '<div class="stat-card"><div class="label">With Phone #</div><div class="value orange">' + withPhone + '</div></div>' +
+          '<div class="stat-card"><div class="label">Top Product</div><div class="value" style="font-size:16px">' + topProduct + '</div></div>';
+      }
+
+      // ─── Render Leads Table ───
+      function renderLeads() {
+        var leads = getLeads();
+        var tbody = document.getElementById('leads-body');
+
+        if (leads.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="empty">No leads captured yet. Leads from the sales agent will appear here.</td></tr>';
+          return;
+        }
+
+        // Show newest first
+        var sorted = leads.slice().reverse();
+        tbody.innerHTML = sorted.map(function(lead, i) {
+          var date = lead.timestamp ? new Date(lead.timestamp).toLocaleString() : 'N/A';
+          var page = lead.page || '';
+          var shortPage = page.replace(/https?:\/\/[^/]+/, '').substring(0, 30) || '/';
+          var productClass = 'blue';
+          if (lead.product && lead.product.indexOf('AIREC') !== -1) productClass = 'green';
+          if (lead.product && lead.product.indexOf('General') !== -1) productClass = 'orange';
+
+          return '<tr>' +
+            '<td>' + (leads.length - i) + '</td>' +
+            '<td><strong>' + esc(lead.name || '') + '</strong></td>' +
+            '<td>' + esc(lead.email || '') + '</td>' +
+            '<td>' + (lead.phone ? '<a href="tel:' + esc(lead.phone) + '">' + esc(lead.phone) + '</a>' : '<span style="color:var(--dim)">—</span>') + '</td>' +
+            '<td><span class="badge badge-' + productClass + '">' + esc(lead.product || 'N/A') + '</span></td>' +
+            '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(lead.need || '—') + '</td>' +
+            '<td title="' + esc(page) + '">' + esc(shortPage) + '</td>' +
+            '<td style="white-space:nowrap">' + date + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      // ─── Render Analytics ───
+      function renderAnalytics() {
+        var leads = getLeads();
+
+        // Product breakdown
+        var products = {};
+        leads.forEach(function(l) {
+          var p = l.product || 'Unknown';
+          products[p] = (products[p] || 0) + 1;
+        });
+
+        var productHTML = '<table class="data-table"><thead><tr><th>Product</th><th>Leads</th><th>% of Total</th></tr></thead><tbody>';
+        Object.keys(products).sort(function(a,b) { return products[b] - products[a]; }).forEach(function(p) {
+          var pct = leads.length > 0 ? ((products[p] / leads.length) * 100).toFixed(1) : '0';
+          productHTML += '<tr><td>' + esc(p) + '</td><td><strong>' + products[p] + '</strong></td><td>' + pct + '%</td></tr>';
+        });
+        productHTML += '</tbody></table>';
+        if (leads.length === 0) productHTML = '<p style="color:var(--dim)">No data yet.</p>';
+        document.getElementById('product-breakdown').innerHTML = productHTML;
+
+        // Daily breakdown
+        var days = {};
+        leads.forEach(function(l) {
+          var d = l.timestamp ? l.timestamp.split('T')[0] : 'Unknown';
+          days[d] = (days[d] || 0) + 1;
+        });
+
+        var dayHTML = '<table class="data-table"><thead><tr><th>Date</th><th>Leads</th></tr></thead><tbody>';
+        Object.keys(days).sort().reverse().forEach(function(d) {
+          dayHTML += '<tr><td>' + d + '</td><td><strong>' + days[d] + '</strong></td></tr>';
+        });
+        dayHTML += '</tbody></table>';
+        if (leads.length === 0) dayHTML = '<p style="color:var(--dim)">No data yet.</p>';
+        document.getElementById('daily-breakdown').innerHTML = dayHTML;
+      }
+
+      // ─── Render Activity Log ───
+      function renderLog() {
+        var leads = getLeads();
+        var logEl = document.getElementById('activity-log');
+
+        if (leads.length === 0) {
+          logEl.innerHTML = '<div class="log-entry" style="color:var(--dim)">No activity recorded yet.</div>';
+          return;
+        }
+
+        var sorted = leads.slice().reverse();
+        logEl.innerHTML = sorted.map(function(lead) {
+          var ts = lead.timestamp ? new Date(lead.timestamp).toLocaleString() : 'unknown time';
+          return '<div class="log-entry">' +
+            '<span class="timestamp">[' + ts + ']</span>' +
+            '<span class="event">LEAD_CAPTURED</span> ' +
+            '<span class="data">' + esc(lead.name) + ' &lt;' + esc(lead.email) + '&gt; — ' + esc(lead.product || 'N/A') + '</span>' +
+          '</div>';
+        }).join('');
+      }
+
+      // ─── Render Export ───
+      function renderExport() {
+        var leads = getLeads();
+        document.getElementById('export-json').value = JSON.stringify(leads, null, 2);
+
+        if (leads.length === 0) {
+          document.getElementById('export-csv').value = 'No data to export.';
+          return;
+        }
+
+        var headers = ['name', 'email', 'phone', 'product', 'need', 'page', 'timestamp'];
+        var csv = headers.join(',') + '\n';
+        leads.forEach(function(l) {
+          csv += headers.map(function(h) {
+            var val = (l[h] || '').toString().replace(/"/g, '""');
+            return '"' + val + '"';
+          }).join(',') + '\n';
+        });
+        document.getElementById('export-csv').value = csv;
+      }
+
+      // ─── Helpers ───
+      function esc(str) {
+        var el = document.createElement('span');
+        el.textContent = str;
+        return el.innerHTML;
+      }
+
+      // ─── Tab Switching ───
+      document.querySelectorAll('.tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+          document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+          tab.classList.add('active');
+          document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+
+      // ─── Global Functions ───
+      window.refreshData = function() {
+        renderStats();
+        renderLeads();
+        renderAnalytics();
+        renderLog();
+        renderExport();
+      };
+
+      window.exportCSV = function() {
+        var csv = document.getElementById('export-csv').value;
+        var blob = new Blob([csv], { type: 'text/csv' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'novai-leads-' + new Date().toISOString().split('T')[0] + '.csv';
+        a.click();
+      };
+
+      window.exportJSON = function() {
+        var json = document.getElementById('export-json').value;
+        var blob = new Blob([json], { type: 'application/json' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'novai-leads-' + new Date().toISOString().split('T')[0] + '.json';
+        a.click();
+      };
+
+      window.clearData = function() {
+        if (confirm('Are you sure? This will permanently delete all captured leads.')) {
+          localStorage.removeItem('novai_leads');
+          localStorage.removeItem('novai_activity_log');
+          refreshData();
+        }
+      };
+
+      // ─── Init ───
+      refreshData();
+    })();
+  </script>
+</body>
+</html>

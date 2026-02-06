@@ -1,12 +1,19 @@
-# CLAUDE.md — Novai Systems Marketing Website
+# CLAUDE.md — Novai Systems
+
+## Current Focus: WorkBench
+
+**WorkBench** (the local services marketplace) is the active product. All development effort goes here. The enterprise marketing site (`index.html`) is secondary.
 
 ## Project Overview
 
-Static marketing and lead-capture website for **Novai Systems LLC**, an AI tools company based in Los Angeles. The site promotes four products (AIREC, Industry Diagnostic, Command Console, WorkBench) and captures leads via an interactive sales chatbot.
+Website and supporting infrastructure for **Novai Systems LLC**, an AI tools company in Los Angeles. This repo contains:
+1. The enterprise marketing site (`index.html`) — secondary
+2. The **"Let's Talk" call widget** + **sales agent chatbot** injected into WorkBench via Cloudflare Worker
+3. Admin dashboard for viewing captured leads and analytics (`admin.html`)
 
 - **Domain:** `novaisystems.online`
-- **Hosting:** Netlify (static files) + Cloudflare Workers (widget injection)
-- **Related domain:** `workbench.novaisystems.online` (separate product)
+- **WorkBench domain:** `workbench.novaisystems.online` (the primary product)
+- **Hosting:** Netlify (static files) + Cloudflare Workers (widget injection into WorkBench)
 
 ## Tech Stack
 
@@ -22,7 +29,8 @@ Static marketing and lead-capture website for **Novai Systems LLC**, an AI tools
 ├── style.css               # Global stylesheet (CSS custom properties)
 ├── script.js               # Minimal init script (console log only)
 ├── sales-agent.js          # Interactive GTM sales chatbot (~676 lines, IIFE)
-├── widget.js               # WorkBench floating widget (IIFE)
+├── widget.js               # "Let's Talk" call widget — tel: link to +1(213)943-3042 (IIFE)
+├── admin.html              # Leads & analytics dashboard (noindex, localStorage-based)
 ├── _redirects              # Netlify SPA routing + static file rules
 ├── _headers                # Netlify response headers (CORS for widget.js)
 ├── robots.txt              # Allows search engines, blocks AI crawlers
@@ -48,7 +56,7 @@ Files are served as-is. There is no compilation, transpilation, or bundling. Edi
 
 ### Cloudflare Worker (`worker/`)
 
-- `widget-injector.js` intercepts requests on `novaisystems.online/*` and injects the WorkBench widget HTML and sales-agent script into all HTML responses.
+- `widget-injector.js` intercepts requests on `novaisystems.online/*` and injects the "Let's Talk" call widget + sales-agent script into all HTML responses (including WorkBench pages).
 - Configured via `wrangler.toml` with compatibility date `2024-01-01`.
 
 ## Code Conventions
@@ -89,9 +97,19 @@ The largest file in the project. A self-contained conversational sales agent tha
 
 Product knowledge and conversation flows are embedded as JS objects (`PRODUCTS`, `FLOWS`).
 
-### `widget.js` (WorkBench Widget)
+### `widget.js` ("Let's Talk" Call Widget)
 
-A floating bottom-right widget linking to WorkBench. Self-contained with inline styles. Positioned at `bottom: 92px` to sit above the sales agent toggle.
+A floating bottom-right call button that dials `+1 (213) 943-3042` via `tel:` link. Green phone icon, says "Let's Talk" with the number shown below. Positioned at `bottom: 92px` to sit above the sales agent toggle. Injected into WorkBench pages via the Cloudflare Worker.
+
+### `admin.html` (Leads & Analytics Dashboard)
+
+Client-side admin panel at `/admin` for viewing captured leads. Reads from `localStorage` (same data the sales agent writes). Features:
+- Leads table (name, email, phone, product, need, timestamp)
+- Stats cards (total leads, today's leads, phone numbers captured, top product)
+- Product and daily breakdowns
+- Activity log
+- CSV and JSON export
+- No authentication (relies on being unlisted + robots noindex)
 
 ### `index.html` (Marketing Page)
 
