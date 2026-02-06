@@ -819,10 +819,39 @@ const SALES_AGENT_CODE = `(function() {
 })();
 `;
 
+import { handleVoiceWebhook, handleCallLog, handleAnalytics } from './voice-agent.js';
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const isWorkbench = url.hostname === "workbench.novaisystems.online";
+
+    // ─── Voice Agent: Vapi webhooks + analytics ───
+    if (url.pathname.startsWith("/_wb-voice/")) {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Max-Age": "86400"
+          }
+        });
+      }
+      if (url.pathname === "/_wb-voice/webhook" && request.method === "POST") {
+        return handleVoiceWebhook(request, env);
+      }
+      if (url.pathname === "/_wb-voice/calls" && request.method === "GET") {
+        return handleCallLog(request, env);
+      }
+      if (url.pathname === "/_wb-voice/analytics" && request.method === "GET") {
+        return handleAnalytics(request, env);
+      }
+      return new Response(JSON.stringify({ error: "not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
 
     // ─── CORS preflight for lead API ───
     if (request.method === "OPTIONS" && url.pathname.startsWith("/_wb-leads")) {
