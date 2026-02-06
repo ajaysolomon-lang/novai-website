@@ -1,0 +1,7 @@
+name = "novai-widget-injector"
+main = "widget-injector.js"
+compatibility_date = "2024-01-01"
+
+[[routes]]
+pattern = "novaisystems.online/*"
+zone_name = "novaisystems.online"
