@@ -1,1 +1,1 @@
-console.log('[Novai Systems] Site loaded — sales agent active');
+console.log('Novai site loaded');
