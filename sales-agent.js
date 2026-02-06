@@ -758,45 +758,30 @@
   // ─── Fix "Go to Admin" button on dashboard ─────────────────────────
   try {
     function wbFixAdminLink() {
-      if (window.location.pathname.indexOf('/dashboard') !== 0) return;
-      var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-      while (walker.nextNode()) {
-        var tNode = walker.currentNode;
-        if (tNode.textContent.trim() === 'Go to Admin') {
-          var el = tNode.parentElement;
-          // Walk up to the card container
-          var card = el;
-          for (var u = 0; u < 5; u++) {
-            if (!card.parentElement || card.parentElement === document.body) break;
-            card = card.parentElement;
-            if (card.offsetWidth > 150 && card.offsetHeight > 80) break;
+      if (window.location.pathname !== '/dashboard') return;
+      var els = document.querySelectorAll('*');
+      for (var i = 0; i < els.length; i++) {
+        if (els[i].childElementCount === 0 && els[i].textContent.trim() === 'Go to Admin') {
+          // Found the text element — walk up to the card (look for a styled container)
+          var node = els[i];
+          for (var p = 0; p < 8; p++) {
+            node = node.parentElement;
+            if (!node || node === document.body) break;
+            var cs = window.getComputedStyle(node);
+            if (cs.borderRadius && cs.borderRadius !== '0px') break;
           }
-          if (card && !card.closest('a[href="/admin"]')) {
-            card.style.cursor = 'pointer';
-            card.addEventListener('click', function(e) {
-              if (e.target.tagName !== 'A') window.location.href = '/admin';
-            });
-            // Wrap any arrow character in a link
-            var allSpans = card.querySelectorAll('*');
-            for (var s = 0; s < allSpans.length; s++) {
-              var txt = allSpans[s].textContent.trim();
-              if ((txt === '\u2192' || txt === '\u203A' || txt === '\u2794') && allSpans[s].children.length === 0) {
-                var aLink = document.createElement('a');
-                aLink.href = '/admin';
-                aLink.style.cssText = 'color:inherit;text-decoration:none';
-                allSpans[s].parentNode.insertBefore(aLink, allSpans[s]);
-                aLink.appendChild(allSpans[s]);
-                break;
-              }
-            }
+          if (node && node !== document.body && !node._wbFixed) {
+            node._wbFixed = true;
+            node.style.cursor = 'pointer';
+            node.addEventListener('click', function() { window.location.href = '/admin'; });
           }
-          break;
+          return;
         }
       }
     }
-    // Run after SPA renders — retry a couple times
-    setTimeout(wbFixAdminLink, 1500);
-    setTimeout(wbFixAdminLink, 4000);
+    setTimeout(wbFixAdminLink, 2000);
+    setTimeout(wbFixAdminLink, 5000);
+    setTimeout(wbFixAdminLink, 8000);
   } catch(e) {}
 
   // ─── Mount ────────────────────────────────────────────────────────
