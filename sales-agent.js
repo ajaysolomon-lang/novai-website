@@ -808,6 +808,46 @@
     setTimeout(wbFixAdminLink, 8000);
   } catch(e) {}
 
+  // ─── Inject GTM Dashboard into admin sidebar ─────────────────────
+  try {
+    function wbInjectGTMLink() {
+      if (window.location.pathname !== '/admin') return;
+      if (document.getElementById('wb-gtm-link')) return;
+      // Find the sidebar nav — look for "Audit Log" or similar text to locate the nav
+      var navItems = document.querySelectorAll('a[href], [role="menuitem"], nav a, aside a');
+      var sidebar = null;
+      for (var i = 0; i < navItems.length; i++) {
+        var text = navItems[i].textContent.trim().toLowerCase();
+        if (text === 'audit log' || text === 'analytics' || text === 'leaderboard' || text === 'dashboard') {
+          sidebar = navItems[i].parentElement;
+          break;
+        }
+      }
+      if (!sidebar) {
+        // Try finding sidebar by structure — look for vertical nav
+        var asides = document.querySelectorAll('aside, nav, [class*="sidebar"], [class*="Sidebar"], [class*="nav"]');
+        for (var j = 0; j < asides.length; j++) {
+          if (asides[j].querySelectorAll('a').length >= 3) {
+            sidebar = asides[j];
+            break;
+          }
+        }
+      }
+      if (!sidebar) return;
+
+      var link = document.createElement('a');
+      link.id = 'wb-gtm-link';
+      link.href = '/_wb-admin?key=novai2025wb';
+      link.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 16px;color:#e6edf3;text-decoration:none;font-size:14px;font-weight:500;border-radius:8px;margin:4px 8px;background:linear-gradient(135deg,rgba(0,119,255,0.15),rgba(0,187,255,0.1));border:1px solid rgba(0,119,255,0.2);transition:all 0.15s;';
+      link.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0077ff" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> GTM Dashboard';
+      link.onmouseover = function() { this.style.background = 'linear-gradient(135deg,rgba(0,119,255,0.25),rgba(0,187,255,0.15))'; };
+      link.onmouseout = function() { this.style.background = 'linear-gradient(135deg,rgba(0,119,255,0.15),rgba(0,187,255,0.1))'; };
+      sidebar.appendChild(link);
+    }
+    setTimeout(wbInjectGTMLink, 2000);
+    setTimeout(wbInjectGTMLink, 5000);
+  } catch(e) {}
+
   // ─── Voice Call Button ──────────────────────────────────────────
   // Mobile: dials +1 (943) 223-9707 directly
   // Desktop: browser-based Vapi call via WebRTC
