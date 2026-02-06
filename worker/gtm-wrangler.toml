@@ -17,5 +17,6 @@ VAPI_ASSISTANT_ID = ""
 # binding = "LEADS"
 # id = ""
 
-# Secret (set via CLI, not in this file):
+# Secrets (set via CLI, not in this file):
 #   npx wrangler secret put VAPI_API_KEY --config gtm-wrangler.toml
+#   npx wrangler secret put ADMIN_API_KEY --config gtm-wrangler.toml

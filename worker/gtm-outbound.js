@@ -9,6 +9,7 @@
 //
 // Secrets (set via wrangler secret put):
 //   VAPI_API_KEY          — Vapi Bearer token
+//   ADMIN_API_KEY         — Required for GET /leads, GET /leads/stats, DELETE /leads
 //
 // Environment vars (set in wrangler.toml [vars]):
 //   VAPI_PHONE_NUMBER_ID  — WorkBench GTM Agent phone number ID (outbound from)
@@ -21,7 +22,7 @@
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 function json(data, status = 200) {
@@ -29,6 +30,20 @@ function json(data, status = 200) {
     status,
     headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
   });
+}
+
+// ─── Auth: validate Bearer token against ADMIN_API_KEY ──────────
+function requireAuth(request, env) {
+  if (!env.ADMIN_API_KEY) return null; // No key configured = open (dev mode)
+  const auth = request.headers.get('Authorization');
+  if (!auth || !auth.startsWith('Bearer ')) {
+    return json({ error: 'Unauthorized — Bearer token required' }, 401);
+  }
+  const token = auth.slice(7);
+  if (token !== env.ADMIN_API_KEY) {
+    return json({ error: 'Forbidden — invalid API key' }, 403);
+  }
+  return null; // Authorized
 }
 
 export default {
@@ -105,6 +120,8 @@ export default {
 
     // ─── GET /leads ───────────────────────────────────────
     if (request.method === 'GET' && path === '/leads') {
+      const authErr = requireAuth(request, env);
+      if (authErr) return authErr;
       if (!env.LEADS) {
         return json([]);
       }
@@ -114,6 +131,8 @@ export default {
 
     // ─── GET /leads/stats ─────────────────────────────────
     if (request.method === 'GET' && path === '/leads/stats') {
+      const authErr = requireAuth(request, env);
+      if (authErr) return authErr;
       if (!env.LEADS) {
         return json({ total: 0, today: 0, withPhone: 0, products: {}, daily: {} });
       }
@@ -146,6 +165,8 @@ export default {
 
     // ─── DELETE /leads ────────────────────────────────────
     if (request.method === 'DELETE' && path === '/leads') {
+      const authErr = requireAuth(request, env);
+      if (authErr) return authErr;
       if (env.LEADS) {
         await env.LEADS.put('all_leads', '[]');
       }

@@ -113,7 +113,7 @@ Client-side admin panel at `/admin` for viewing captured leads. Reads from `loca
 - Product and daily breakdowns
 - Activity log
 - CSV and JSON export
-- No authentication (relies on being unlisted + robots noindex)
+- Protected by API key gate (prompts on load, stored in `sessionStorage`)
 
 ### `index.html` (Marketing Page)
 
@@ -165,23 +165,47 @@ cd worker
 # 1. Deploy Vapi Server (webhook handler)
 npx wrangler kv namespace create LEADS --config vapi-wrangler.toml
 # Update vapi-wrangler.toml with KV binding ID
+npx wrangler secret put VAPI_SERVER_SECRET --config vapi-wrangler.toml
 npx wrangler deploy --config vapi-wrangler.toml
 
 # 2. Deploy GTM Outbound (lead capture + auto-call)
 npx wrangler kv namespace create LEADS --config gtm-wrangler.toml
 npx wrangler secret put VAPI_API_KEY --config gtm-wrangler.toml
+npx wrangler secret put ADMIN_API_KEY --config gtm-wrangler.toml
 # Update gtm-wrangler.toml with KV binding ID + assistant ID
 npx wrangler deploy --config gtm-wrangler.toml
 
 # 3. In Vapi Dashboard, set BOTH phone numbers' Server URL to:
 #    https://novai-vapi-server.ajay-solomon.workers.dev
+#    AND set the Server URL "Secret" to the same VAPI_SERVER_SECRET value
 ```
 
 ### GTM Worker Endpoints
-- `POST /lead` — Capture lead, trigger outbound call
-- `GET /leads` — List all leads (used by admin dashboard)
-- `GET /leads/stats` — Aggregate stats
-- `DELETE /leads` — Clear all leads
+- `POST /lead` — Capture lead, trigger outbound call (open — called from browser)
+- `GET /leads` — List all leads (requires `Authorization: Bearer <ADMIN_API_KEY>`)
+- `GET /leads/stats` — Aggregate stats (requires auth)
+- `DELETE /leads` — Clear all leads (requires auth)
+
+## Security
+
+### 1. Admin Dashboard Auth
+`admin.html` prompts for an API key on load. The key is stored in `sessionStorage` (cleared when tab closes) and sent as `Authorization: Bearer` header on every GTM Worker API call. If the key is wrong, the worker returns 401/403 and the dashboard shows "Invalid API key" with a retry link.
+
+### 2. GTM Worker API Auth
+`GET /leads`, `GET /leads/stats`, and `DELETE /leads` require a valid `Authorization: Bearer <ADMIN_API_KEY>` header. The `ADMIN_API_KEY` is a Cloudflare Worker secret. `POST /lead` remains open (must be callable from the browser sales agent). If `ADMIN_API_KEY` is not set, all endpoints are open (dev mode fallback).
+
+### 3. Vapi Webhook Secret
+`vapi-server.js` validates the `x-vapi-secret` header against the `VAPI_SERVER_SECRET` Cloudflare secret. This prevents unauthorized parties from sending fake webhook events. Set the same secret value in Vapi Dashboard under each phone number's Server URL configuration. If `VAPI_SERVER_SECRET` is not set, all webhooks are accepted (dev mode fallback).
+
+### Secrets Checklist
+```bash
+# GTM Outbound Worker
+npx wrangler secret put VAPI_API_KEY --config gtm-wrangler.toml      # Vapi API Bearer token
+npx wrangler secret put ADMIN_API_KEY --config gtm-wrangler.toml     # Admin dashboard API key
+
+# Vapi Server Worker
+npx wrangler secret put VAPI_SERVER_SECRET --config vapi-wrangler.toml  # Webhook validation secret
+```
 
 ## Development Workflow
 

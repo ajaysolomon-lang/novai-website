@@ -174,7 +174,20 @@
     (function() {
       'use strict';
 
+      // ─── Auth Gate ────────────────────────────────────────
+      // Prompt for admin API key. Stored in sessionStorage so it persists per tab.
+      var ADMIN_KEY = sessionStorage.getItem('novai_admin_key');
+      if (!ADMIN_KEY) {
+        ADMIN_KEY = prompt('Enter admin API key:');
+        if (!ADMIN_KEY) {
+          document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#ff3b3b;font-size:18px;font-family:monospace">Access denied — no API key provided.</div>';
+          return;
+        }
+        sessionStorage.setItem('novai_admin_key', ADMIN_KEY);
+      }
+
       var GTM_WORKER_URL = 'https://novai-gtm-outbound.ajay-solomon.workers.dev';
+      var AUTH_HEADERS = { 'Authorization': 'Bearer ' + ADMIN_KEY };
       var allLeads = [];
       var dataSource = 'localStorage';
 
@@ -186,8 +199,15 @@
       }
 
       function fetchWorkerLeads() {
-        return fetch(GTM_WORKER_URL + '/leads')
-          .then(function(res) { return res.json(); })
+        return fetch(GTM_WORKER_URL + '/leads', { headers: AUTH_HEADERS })
+          .then(function(res) {
+            if (res.status === 401 || res.status === 403) {
+              sessionStorage.removeItem('novai_admin_key');
+              document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#ff3b3b;font-size:18px;font-family:monospace">Invalid API key — <a href="" style="color:#0077ff;margin-left:8px">retry</a></div>';
+              return null;
+            }
+            return res.json();
+          })
           .catch(function() { return null; });
       }
 
@@ -511,7 +531,7 @@
         if (confirm('Are you sure? This will permanently delete all captured leads from localStorage AND the API.')) {
           localStorage.removeItem('novai_leads');
           // Also clear worker KV
-          fetch(GTM_WORKER_URL + '/leads', { method: 'DELETE' }).catch(function(){});
+          fetch(GTM_WORKER_URL + '/leads', { method: 'DELETE', headers: AUTH_HEADERS }).catch(function(){});
           allLeads = [];
           renderStats();
           renderLeads();

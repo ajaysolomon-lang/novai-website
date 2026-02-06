@@ -10,6 +10,9 @@
 //   end-of-call-report — Log call outcomes
 //   status-update      — Track call status changes
 //
+// Secrets (set via wrangler secret put):
+//   VAPI_SERVER_SECRET    — Webhook secret (set same value in Vapi Dashboard > Server URL > Secret)
+//
 // Deploy: npx wrangler deploy --config vapi-wrangler.toml
 
 // ─── WorkBench Knowledge Base ────────────────────────────────────
@@ -385,6 +388,17 @@ export default {
 
     if (request.method !== 'POST') {
       return json({ error: 'POST only' }, 405);
+    }
+
+    // ─── Webhook secret validation ──────────────────────
+    // Vapi sends the secret in the x-vapi-secret header.
+    // If VAPI_SERVER_SECRET is set, reject requests without a matching header.
+    if (env.VAPI_SERVER_SECRET) {
+      const incomingSecret = request.headers.get('x-vapi-secret');
+      if (incomingSecret !== env.VAPI_SERVER_SECRET) {
+        console.warn('[Vapi Server] Unauthorized webhook — invalid or missing x-vapi-secret');
+        return json({ error: 'Unauthorized' }, 401);
+      }
     }
 
     try {
