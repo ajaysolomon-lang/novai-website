@@ -424,7 +424,7 @@
     },
 
     talk_human: {
-      message: "Real people, no gatekeepers:\n\n\u260E +1 (213) 943-3042\n\nOr drop your details \u2014 we\u2019ll reach out, usually same day.",
+      message: "Real people, no gatekeepers:\n\n\u260E +1 (213) 943-3042 \u2014 Human team\n\u{1F916} +1 (943) 223-9707 \u2014 AI Voice Agent (24/7)\n\nOr drop your details \u2014 we\u2019ll reach out, usually same day.",
       capture: true,
       product: 'WorkBench \u2014 Contact Request',
       options: []

@@ -444,7 +444,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     talk_human: {
-      message: "Real people, no gatekeepers:\\n\\n\\u260E +1 (213) 943-3042\\n\\nOr drop your details \\u2014 we\\u2019ll reach out, usually same day.",
+      message: "Real people, no gatekeepers:\\n\\n\\u260E +1 (213) 943-3042 \\u2014 Human team\\n\\u{1F916} +1 (943) 223-9707 \\u2014 AI Voice Agent (24/7)\\n\\nOr drop your details \\u2014 we\\u2019ll reach out, usually same day.",
       capture: true,
       product: 'WorkBench \\u2014 Contact Request',
       options: []
@@ -1050,26 +1050,6 @@ export default {
           "Cache-Control": "no-cache",
           "Access-Control-Allow-Origin": "*"
         }
-      });
-    }
-
-    // Debug endpoint — shows what the worker sees
-    if (isWorkbench && url.pathname === "/_wb-debug") {
-      const testRes = await fetch(new Request(url.origin + "/", {
-        headers: request.headers,
-        redirect: "manual"
-      }));
-      const info = {
-        worker: "novai-widget-injector",
-        hostname: url.hostname,
-        isWorkbench,
-        originStatus: testRes.status,
-        originContentType: testRes.headers.get("content-type"),
-        originCSP: testRes.headers.get("content-security-policy"),
-        originHeaders: Object.fromEntries(testRes.headers.entries())
-      };
-      return new Response(JSON.stringify(info, null, 2), {
-        headers: { "Content-Type": "application/json" }
       });
     }
 

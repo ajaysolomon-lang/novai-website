@@ -61,7 +61,7 @@ async function handleFunctionCall(event, env) {
       return handleCaptureLead(fn.parameters, event.call, env);
     case "transfer_human":
       return corsResponse({
-        result: "Transferring to human agent. The team can be reached at +1 (213) 943-3042."
+        result: "Transferring to human agent. The team can be reached at +1 (213) 943-3042. Or call our AI line anytime at +1 (943) 223-9707."
       });
     case "check_services":
       return corsResponse({
