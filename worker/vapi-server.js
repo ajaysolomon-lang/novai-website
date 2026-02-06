@@ -92,10 +92,19 @@ const WORKBENCH_KNOWLEDGE = {
     location: 'Los Angeles, CA',
   },
 
-  otherProducts: {
-    airec: 'AIREC Smart Ads Optimizer — self-correcting AI ad optimization that cuts wasted spend by up to 40%.',
-    diagnostic: 'Industry Diagnostic Intelligence — competitive landscape scanning and market gap identification.',
-    command: 'Life & Business Command Console — unified AI-powered dashboard for operations, productivity, and decision support.',
+  enterprise: {
+    about: 'Novai Systems LLC is an AI technology company headquartered in Los Angeles. We build self-correcting AI tools powered by AIREC technology — predictive intelligence that learns, adapts, and delivers measurable results without manual babysitting.',
+    mission: 'We build AI that actually works — not the "sprinkle AI on it" kind. Every product uses self-correcting loops with predictive intelligence baked in.',
+    founded: 'Los Angeles, CA',
+    website: 'novaisystems.online',
+    tagline: 'AI That Actually Works',
+  },
+
+  products: {
+    workbench: 'WorkBench — LA\'s local services marketplace. Free for customers, vetted providers, direct booking. Currently live and the primary focus.',
+    airec: 'AIREC Smart Ads Optimizer — self-correcting AI ad optimization engine. Uses predictive intelligence and real-time feedback loops to optimize campaigns across Google, Meta, TikTok, LinkedIn. Cuts wasted spend by up to 40%. Works with any business spending $10K+/month on ads.',
+    diagnostic: 'Industry Diagnostic Intelligence — deep diagnostic engine that scans competitive landscapes, market trends, and industry patterns. Delivers actionable briefs, not 50-page PDFs. Covers tech, SaaS, e-commerce, professional services, real estate, healthcare, and local businesses.',
+    command: 'Life & Business Command Console — unified AI-powered command center for business operations, personal productivity, finances, and decision support. Comes opinionated and AI-powered out of the box. Learns your patterns and surfaces what needs attention.',
   },
 };
 
@@ -140,10 +149,16 @@ ${kb.coverage}
 ## What Makes WorkBench Different
 ${kb.differentiators.join('. ')}.
 
-## Other Novai Products (if asked)
-- ${kb.otherProducts.airec}
-- ${kb.otherProducts.diagnostic}
-- ${kb.otherProducts.command}
+## About Novai Systems (The Company)
+${kb.enterprise.about}
+Mission: ${kb.enterprise.mission}
+Website: ${kb.enterprise.website}
+
+## All Novai Products
+- ${kb.products.workbench}
+- ${kb.products.airec}
+- ${kb.products.diagnostic}
+- ${kb.products.command}
 
 ## Your Capabilities
 You can:
@@ -161,7 +176,10 @@ You can:
 - If they ask about pricing for providers, explain it's a fair commission — lower than Thumbtack/Angi — and offer to have someone discuss specifics
 - If they need something urgent (emergency plumbing, lockout, etc.), acknowledge the urgency and direct them to the website for immediate booking
 - If they want to talk to a human, use the transferCall tool
-- If asked about other Novai products (AIREC, Diagnostic, Command Console), give a brief overview and offer to connect them with the right team
+- If asked about AIREC: explain it's our self-correcting ad optimizer — cuts wasted spend by up to 40%, works across Google/Meta/TikTok/LinkedIn, ideal for businesses spending $10K+/month on ads. Offer to set up a call with the AIREC team.
+- If asked about Industry Diagnostic: explain it scans competitive landscapes and delivers actionable intel, not useless dashboards. Works across tech, SaaS, e-commerce, healthcare, local business. Offer to set up a diagnostic.
+- If asked about Command Console: explain it's a unified AI command center for business ops, productivity, finances, and decisions — learns your patterns. Built for founders and operators.
+- If asked about Novai Systems broadly: we're an LA-based AI company building self-correcting tools powered by AIREC technology. Four products in market. No fluff, just results.
 - Always try to capture their name and what they need before the call ends`;
 }
 

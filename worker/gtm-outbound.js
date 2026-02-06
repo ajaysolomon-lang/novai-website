@@ -12,7 +12,8 @@
 //
 // Environment vars (set in wrangler.toml [vars]):
 //   VAPI_PHONE_NUMBER_ID  — WorkBench GTM Agent phone number ID (outbound from)
-//   VAPI_ASSISTANT_ID     — WorkBench GTM Agent assistant ID
+//   VAPI_ASSISTANT_ID     — (optional) WorkBench GTM Agent assistant ID
+//                           If empty, vapi-server.js handles via assistant-request webhook
 //
 // KV Namespace:
 //   LEADS — bound in wrangler.toml
@@ -67,7 +68,7 @@ export default {
 
         // Trigger outbound call if phone number provided
         let callResult = null;
-        if (lead.phone && env.VAPI_API_KEY && env.VAPI_PHONE_NUMBER_ID && env.VAPI_ASSISTANT_ID) {
+        if (lead.phone && env.VAPI_API_KEY && env.VAPI_PHONE_NUMBER_ID) {
           callResult = await triggerOutboundCall(env, lead);
 
           // Update lead with call status
@@ -167,13 +168,16 @@ async function triggerOutboundCall(env, lead) {
 
     const body = {
       phoneNumberId: env.VAPI_PHONE_NUMBER_ID,
-      assistantId: env.VAPI_ASSISTANT_ID,
       customer: {
         number: phone,
         name: lead.name,
       },
-      // Pass lead context so the AI agent knows who it's calling and why
-      assistantOverrides: {
+    };
+
+    // Use explicit assistant ID if configured, otherwise server URL handles it
+    if (env.VAPI_ASSISTANT_ID) {
+      body.assistantId = env.VAPI_ASSISTANT_ID;
+      body.assistantOverrides = {
         variableValues: {
           customerName: lead.name,
           customerEmail: lead.email,
@@ -181,8 +185,20 @@ async function triggerOutboundCall(env, lead) {
           customerNeed: lead.need || '',
           leadSource: lead.source || 'website',
         },
-      },
-    };
+      };
+    } else {
+      // No assistant ID — server URL's assistant-request webhook provides the config
+      // Pass lead context so vapi-server.js can personalize the agent
+      body.assistantOverrides = {
+        variableValues: {
+          customerName: lead.name,
+          customerEmail: lead.email,
+          productInterest: lead.product || 'General',
+          customerNeed: lead.need || '',
+          leadSource: lead.source || 'website',
+        },
+      };
+    }
 
     const res = await fetch('https://api.vapi.ai/call', {
       method: 'POST',

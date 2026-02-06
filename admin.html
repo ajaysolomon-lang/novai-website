@@ -510,7 +510,6 @@
       window.clearData = function() {
         if (confirm('Are you sure? This will permanently delete all captured leads from localStorage AND the API.')) {
           localStorage.removeItem('novai_leads');
-          localStorage.removeItem('novai_activity_log');
           // Also clear worker KV
           fetch(GTM_WORKER_URL + '/leads', { method: 'DELETE' }).catch(function(){});
           allLeads = [];
