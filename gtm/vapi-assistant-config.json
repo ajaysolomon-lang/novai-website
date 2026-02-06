@@ -14,7 +14,7 @@
   },
   "voice": {
     "provider": "vapi",
-    "voiceId": "Cole"
+    "voiceId": "Dan"
   },
   "transcriber": {
     "provider": "deepgram",
