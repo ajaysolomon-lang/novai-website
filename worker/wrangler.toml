@@ -10,9 +10,6 @@ zone_name = "novaisystems.online"
 pattern = "workbench.novaisystems.online/*"
 zone_name = "novaisystems.online"
 
-# To enable server-side lead storage, run:
-#   wrangler kv:namespace create WB_LEADS
-# Then uncomment below and paste the id:
-# [[kv_namespaces]]
-# binding = "WB_LEADS"
-# id = "YOUR_KV_ID_HERE"
+[[kv_namespaces]]
+binding = "WB_LEADS"
+id = "331bad4c06524bbdbb892299a308e32b"
