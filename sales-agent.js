@@ -1,300 +1,361 @@
 (function() {
   'use strict';
+  console.log('[WorkBench Agent] Loaded');
   if (document.querySelector('.wb-sales-agent')) return;
 
   // ─── Conversation Flows ───────────────────────────────────────────
+  // GTM Strategy: every path → signup, browse, or lead capture
+  // Support paths → discovery moments → deeper engagement
   var FLOWS = {
-    greeting: {
-      message: "Hey — welcome to WorkBench. I'm here to help you find the right local service or get your business listed. No runaround, just straight answers. What are you looking for?",
-      options: [
-        { label: 'I need to find a service provider', next: 'customer_start' },
-        { label: 'I want to list my services', next: 'provider_start' },
-        { label: 'What is WorkBench exactly?', next: 'what_is_wb' },
-        { label: 'What services are available?', next: 'customer_start' },
-        { label: 'Tell me about Novai Systems', next: 'about_novai' },
-        { label: 'I want to talk to someone', next: 'talk_human' }
-      ]
-    },
 
-    // ── What is WorkBench ──
-    what_is_wb: {
-      message: "WorkBench is LA's local services marketplace — built by Novai Systems.\n\nWe connect you with vetted, trusted service providers for home, business, and lifestyle needs. Free to use as a customer. No bidding wars, no mystery pricing, no middlemen taking 40% cuts.\n\nWhether you need a service or you are the service — this is your platform.",
+    // ── GREETING ──
+    greeting: {
+      message: "What's up! I'm your WorkBench guide \u2014 whether you need a local pro, want to grow your business, or have questions. How can I help?",
       options: [
         { label: 'I need a service provider', next: 'customer_start' },
         { label: 'I want to list my services', next: 'provider_start' },
-        { label: 'What areas do you serve?', next: 'areas_served' },
-        { label: 'Is it really free?', next: 'pricing_customer' }
+        { label: 'How does WorkBench work?', next: 'how_it_works' },
+        { label: 'I need help with my account', next: 'support_menu' },
+        { label: 'Pricing questions', next: 'pricing_overview' },
+        { label: 'Talk to someone', next: 'talk_human' }
       ]
     },
 
-    // ── Customer Flows ──
-    customer_start: {
-      message: "Nice — let's find you the right pro. What kind of service do you need?",
+    // ── HOW IT WORKS ──
+    how_it_works: {
+      message: "WorkBench connects you with vetted local service providers in LA. Think of it as your neighborhood marketplace \u2014 minus the sketchy Craigslist vibes.\n\nFor customers: Browse, compare, book directly. No fees on your end.\n\nFor providers: List your services, set your rates, get discovered by people who actually need what you offer.\n\nSimple as that.",
       options: [
-        { label: 'Home services (repairs, cleaning, landscaping)', next: 'cat_home' },
-        { label: 'Business services (consulting, accounting, marketing)', next: 'cat_business' },
-        { label: 'Lifestyle (personal training, beauty, wellness)', next: 'cat_lifestyle' },
+        { label: 'Find a service', next: 'customer_start' },
+        { label: 'Get listed as a provider', next: 'provider_start' },
+        { label: 'How are providers vetted?', next: 'vetting' },
+        { label: 'What makes WorkBench different?', next: 'differentiator' }
+      ]
+    },
+
+    differentiator: {
+      message: "Real talk? Most platforms charge insane fees, bury small providers, or have zero quality control.\n\nWorkBench is different:\n\n\u2022 Vetted providers only \u2014 no random listings\n\u2022 Fair pricing \u2014 providers keep more\n\u2022 Zero fees for customers\n\u2022 Built for LA first \u2014 we know this market\n\u2022 Real support from real people\n\nWe\u2019re not trying to be everything everywhere. We\u2019re building the best local services marketplace in LA.",
+      options: [
+        { label: 'Sign me up', next: 'signup_choice' },
+        { label: 'Browse services', next: 'link_services' },
+        { label: 'How do you vet providers?', next: 'vetting' },
+        { label: 'Back to start', next: 'greeting' }
+      ]
+    },
+
+    // ── CUSTOMER FLOWS (acquisition) ──
+    customer_start: {
+      message: "Let\u2019s find your person. What kind of service do you need?",
+      options: [
+        { label: 'Home (repairs, cleaning, landscaping)', next: 'cat_home' },
+        { label: 'Business (consulting, accounting, IT)', next: 'cat_business' },
+        { label: 'Lifestyle (training, beauty, wellness)', next: 'cat_lifestyle' },
         { label: 'Something else', next: 'cat_other' }
       ]
     },
 
     cat_home: {
-      message: "Home services — we've got you covered. Plumbing, electrical, HVAC, cleaning, landscaping, handyman work, painting, moving — the whole range.\n\nBrowse our providers, check their profiles, and book directly. No middleman markups.",
+      message: "Home services \u2014 plumbing, electrical, HVAC, cleaning, landscaping, handyman, painting, moving. All vetted, all on WorkBench.\n\nNo more calling 5 people and hoping one shows up.",
       options: [
-        { label: 'Browse home services now', next: 'browse_services' },
-        { label: 'How do I know they\'re vetted?', next: 'vetting_process' },
-        { label: 'What does it cost me?', next: 'pricing_customer' },
-        { label: 'I need a different category', next: 'customer_start' }
+        { label: 'Browse home services', next: 'link_services' },
+        { label: 'How much does it cost?', next: 'pricing_customer' },
+        { label: 'Sign me up', next: 'link_signup_customer' },
+        { label: 'Different category', next: 'customer_start' }
       ]
     },
 
     cat_business: {
-      message: "Business services — consulting, bookkeeping, accounting, legal, marketing, IT support, design, web development. Local pros who understand the LA market.\n\nNo agencies billing you $300/hour for junior work. Real professionals, transparent rates.",
+      message: "Business services \u2014 accounting, legal, marketing, design, IT, consulting, web dev. Local pros who get the LA market.\n\nSkip the agency markup. Work directly with the people doing the work.",
       options: [
-        { label: 'Browse business services', next: 'browse_services' },
-        { label: 'How are providers vetted?', next: 'vetting_process' },
-        { label: 'What does it cost?', next: 'pricing_customer' },
+        { label: 'Browse business services', next: 'link_services' },
+        { label: 'Pricing?', next: 'pricing_customer' },
+        { label: 'Sign me up', next: 'link_signup_customer' },
         { label: 'Different category', next: 'customer_start' }
       ]
     },
 
     cat_lifestyle: {
-      message: "Lifestyle services — personal trainers, beauty pros, wellness coaches, event planners, photographers, tutors. The people who make life in LA actually work.\n\nAll on one platform. Browse, compare, book.",
+      message: "Lifestyle services \u2014 personal trainers, beauty pros, wellness coaches, photographers, tutors, event planners. LA at its finest.\n\nAll on one platform. Browse, book, done.",
       options: [
-        { label: 'Browse lifestyle services', next: 'browse_services' },
-        { label: 'How vetted are they?', next: 'vetting_process' },
+        { label: 'Browse lifestyle services', next: 'link_services' },
         { label: 'Pricing?', next: 'pricing_customer' },
+        { label: 'Sign me up', next: 'link_signup_customer' },
         { label: 'Different category', next: 'customer_start' }
       ]
     },
 
     cat_other: {
-      message: "No problem — if someone in LA offers it, we probably have it or we're adding it. Tell me what you need and I'll point you in the right direction.\n\nOr browse the full services directory — you might find exactly what you're looking for.",
+      message: "If it\u2019s a service in LA, we probably have it or we\u2019re adding it fast. Browse the full directory or tell me what you need \u2014 I\u2019ll point you right.",
       options: [
-        { label: 'Browse all services', next: 'browse_services' },
+        { label: 'Browse all services', next: 'link_services' },
         { label: 'Tell you what I need', next: 'capture_customer' },
-        { label: 'Go back to categories', next: 'customer_start' }
+        { label: 'Back to categories', next: 'customer_start' }
       ]
     },
 
-    browse_services: {
-      message: "Head to the Services page to browse and book directly. You can filter by category, location, and availability.\n\nIf you don't have an account yet, sign up takes 30 seconds — and it's free.",
-      options: [
-        { label: 'Go to Services', next: 'link_services' },
-        { label: 'Sign me up first', next: 'link_signup' },
-        { label: 'I have more questions', next: 'greeting' }
-      ]
-    },
-
-    link_services: {
-      message: "Here you go:",
-      link: '/services',
-      linkText: 'Browse Services',
-      options: [
-        { label: 'How does booking work?', next: 'how_booking' },
-        { label: 'I have other questions', next: 'greeting' }
-      ]
-    },
-
-    link_signup: {
-      message: "Quick and free — just need your name and email to get started:",
-      link: '/signup',
-      linkText: 'Create Your Account',
-      options: [
-        { label: 'What happens after I sign up?', next: 'after_signup_customer' },
-        { label: 'Back to main menu', next: 'greeting' }
-      ]
-    },
-
-    after_signup_customer: {
-      message: "Once you're in, you can browse the full directory, view provider profiles and reviews, and book services directly. No approval process, no waiting. You're in immediately.\n\nYou can also save favorite providers and get notified when new pros join in categories you care about.",
-      options: [
-        { label: 'Sign me up', next: 'link_signup' },
-        { label: 'More questions', next: 'greeting' }
-      ]
-    },
-
-    how_booking: {
-      message: "Simple: find a provider, check their profile and rates, and book directly through the platform. You deal with the provider directly — WorkBench just makes the connection.\n\nNo platform fees on your end. The provider sets their rates, you see exactly what you'll pay.",
-      options: [
-        { label: 'Browse services', next: 'link_services' },
-        { label: 'Other questions', next: 'greeting' }
-      ]
-    },
-
-    vetting_process: {
-      message: "Every provider on WorkBench goes through verification. We check credentials, reviews, and legitimacy before they go live on the platform.\n\nWe're not a free-for-all listing site. Quality matters — that's why people come to WorkBench instead of scrolling through random search results and hoping for the best.",
-      options: [
-        { label: 'Good enough — show me services', next: 'browse_services' },
-        { label: 'What if I have a bad experience?', next: 'bad_experience' },
-        { label: 'Back to main', next: 'greeting' }
-      ]
-    },
-
-    bad_experience: {
-      message: "Reach out to us directly. We take quality seriously — if a provider doesn't deliver, we want to know. We'll help resolve it and, if necessary, remove providers who don't meet standards.\n\nThis isn't Craigslist. We stand behind the marketplace.",
-      options: [
-        { label: 'Good to know — browse services', next: 'browse_services' },
-        { label: 'Contact support', next: 'talk_human' },
-        { label: 'Back to main', next: 'greeting' }
-      ]
-    },
-
-    pricing_customer: {
-      message: "Free. Zero. Nothing.\n\nSigning up, browsing, and booking on WorkBench is completely free for customers. No subscription, no hidden fees, no \"premium tier\" to unlock basic features.\n\nYou pay the service provider directly for their work. That's it.",
-      options: [
-        { label: 'Sign me up', next: 'link_signup' },
-        { label: 'Browse services', next: 'browse_services' },
-        { label: 'Back to main', next: 'greeting' }
-      ]
-    },
-
-    areas_served: {
-      message: "WorkBench currently serves the greater Los Angeles area — our launch market. We're expanding fast, but right now LA is where we're focused and where we deliver the best experience.\n\nIf you're in LA, you're covered.",
-      options: [
-        { label: 'Find services in my area', next: 'browse_services' },
-        { label: 'When are you expanding?', next: 'expansion' },
-        { label: 'Back to main', next: 'greeting' }
-      ]
-    },
-
-    expansion: {
-      message: "Soon. We're building the foundation right in LA first — getting the quality, the providers, and the experience locked in. Once that's solid, we scale.\n\nWant to be first to know when we hit your area? Drop your info and we'll keep you posted.",
-      options: [
-        { label: 'Notify me about expansion', next: 'capture_expansion' },
-        { label: 'I\'m in LA — let\'s go', next: 'browse_services' },
-        { label: 'Back to main', next: 'greeting' }
-      ]
-    },
-
-    // ── Provider Flows ──
+    // ── PROVIDER FLOWS (supply-side acquisition) ──
     provider_start: {
-      message: "Smart move. If you're a service provider in LA, WorkBench is where your next customers are finding you — not buried on page 3 of Google.\n\nWhat kind of services do you offer?",
+      message: "Smart. If you\u2019re a service pro in LA, this is your platform. What do you do?",
       options: [
         { label: 'Home services', next: 'provider_home' },
-        { label: 'Business services', next: 'provider_business' },
-        { label: 'Lifestyle services', next: 'provider_lifestyle' },
-        { label: 'How much does listing cost?', next: 'pricing_provider' },
+        { label: 'Business services', next: 'provider_biz' },
+        { label: 'Lifestyle services', next: 'provider_life' },
+        { label: 'How much does it cost to list?', next: 'pricing_provider' },
         { label: 'Why should I list here?', next: 'why_list' }
       ]
     },
 
     provider_home: {
-      message: "Home services are in high demand on WorkBench — cleaning, repairs, plumbing, electrical, landscaping, painting, HVAC, handyman. LA homeowners and renters are actively looking.\n\nList your services, set your rates, get booked. You control your schedule and your pricing.",
+      message: "Home services are in demand \u2014 cleaning, repairs, plumbing, electrical, HVAC, landscaping, painting, moving. LA homeowners are actively looking.\n\nSet your rates. Control your schedule. Get booked.",
       options: [
-        { label: 'Sign up as a provider', next: 'link_provider_signup' },
-        { label: 'What does it cost me?', next: 'pricing_provider' },
-        { label: 'How do customers find me?', next: 'how_discovery' },
-        { label: 'Back to main', next: 'greeting' }
+        { label: 'Sign up as a provider', next: 'link_signup_provider' },
+        { label: 'What\u2019s the cost?', next: 'pricing_provider' },
+        { label: 'How will customers find me?', next: 'discovery' },
+        { label: 'Back', next: 'greeting' }
       ]
     },
 
-    provider_business: {
-      message: "Business services — consulting, accounting, legal, marketing, design, IT, development. Local businesses in LA need local expertise, and they're looking on WorkBench.\n\nSet up your profile, showcase your work, and let customers come to you.",
+    provider_biz: {
+      message: "Business services \u2014 consulting, accounting, legal, marketing, design, IT, dev. Local businesses want local experts, not faceless agencies.\n\nShow your work. Set your terms. Let clients come to you.",
       options: [
-        { label: 'Sign up as a provider', next: 'link_provider_signup' },
-        { label: 'Listing costs?', next: 'pricing_provider' },
-        { label: 'How do I get found?', next: 'how_discovery' },
-        { label: 'Back to main', next: 'greeting' }
+        { label: 'Sign up', next: 'link_signup_provider' },
+        { label: 'Cost?', next: 'pricing_provider' },
+        { label: 'How do clients find me?', next: 'discovery' },
+        { label: 'Back', next: 'greeting' }
       ]
     },
 
-    provider_lifestyle: {
-      message: "Lifestyle services are booming — personal training, beauty, wellness, photography, event planning, tutoring. LA lives for this. And WorkBench puts you right in front of people who are ready to book.\n\nNo competing with mega-platforms that bury small providers.",
+    provider_life: {
+      message: "Lifestyle is booming in LA \u2014 trainers, beauty, wellness, photography, events, tutoring. People are ready to book.\n\nNo competing with corporate chains. This is the local marketplace.",
       options: [
-        { label: 'Sign up as a provider', next: 'link_provider_signup' },
-        { label: 'What\'s the cost?', next: 'pricing_provider' },
-        { label: 'How are customers finding me?', next: 'how_discovery' },
-        { label: 'Back to main', next: 'greeting' }
-      ]
-    },
-
-    link_provider_signup: {
-      message: "Let's get you listed. Sign up takes a few minutes — set up your profile, add your services and rates, and you're live:",
-      link: '/signup',
-      linkText: 'Sign Up as a Provider',
-      options: [
-        { label: 'What happens after I sign up?', next: 'after_signup_provider' },
-        { label: 'More questions first', next: 'provider_start' }
-      ]
-    },
-
-    after_signup_provider: {
-      message: "You create your profile, add your services with descriptions and pricing, and go through our verification process. Once approved, you're live on the marketplace.\n\nCustomers can find you by searching, browsing categories, or getting matched based on their needs. You get notified when someone's interested, and you manage bookings directly.",
-      options: [
-        { label: 'Let\'s do it', next: 'link_provider_signup' },
-        { label: 'How long is verification?', next: 'verification_time' },
-        { label: 'Back to main', next: 'greeting' }
-      ]
-    },
-
-    verification_time: {
-      message: "We move fast. Verification is typically completed within a few business days. We're not trying to gatekeep — we just need to make sure providers are legit and customers can trust the marketplace.\n\nOnce you're verified, you're live immediately.",
-      options: [
-        { label: 'Sign me up', next: 'link_provider_signup' },
-        { label: 'Other questions', next: 'provider_start' }
-      ]
-    },
-
-    pricing_provider: {
-      message: "We keep it fair. No massive percentage cuts like the big platforms. WorkBench is built to help providers keep more of what they earn — not to extract value from every transaction.\n\nThe specifics depend on your service category and volume. Sign up and we'll walk you through it — no surprises.",
-      options: [
-        { label: 'Fair enough — sign me up', next: 'link_provider_signup' },
-        { label: 'How is this different from other platforms?', next: 'why_list' },
-        { label: 'Back to main', next: 'greeting' }
+        { label: 'Sign up', next: 'link_signup_provider' },
+        { label: 'Cost?', next: 'pricing_provider' },
+        { label: 'How do I get found?', next: 'discovery' },
+        { label: 'Back', next: 'greeting' }
       ]
     },
 
     why_list: {
-      message: "Real talk: most platforms bury small providers, charge absurd fees, and treat you like inventory. WorkBench is built different.\n\n- You set your own rates\n- You keep more of what you earn\n- You get discovered by local customers who are actually ready to book\n- No competing against mega-companies with infinite ad budgets\n- Built specifically for LA — not a generic national platform\n\nThis is your marketplace. Not theirs.",
+      message: "Most platforms treat providers like inventory. High fees, buried in search, competing against companies with infinite ad budgets.\n\nWorkBench flips that:\n\n\u2022 Set your own rates\n\u2022 Keep more of what you earn\n\u2022 Get discovered by locals ready to book\n\u2022 No ad spend required\n\u2022 Built for LA \u2014 not a generic nationwide platform\n\nYour skills, your business, your marketplace.",
       options: [
-        { label: 'Sold — let me sign up', next: 'link_provider_signup' },
-        { label: 'How do customers find me?', next: 'how_discovery' },
+        { label: 'I\u2019m in \u2014 sign me up', next: 'link_signup_provider' },
+        { label: 'How do customers find me?', next: 'discovery' },
         { label: 'Still thinking...', next: 'objection_think' },
-        { label: 'Back to main', next: 'greeting' }
+        { label: 'Back', next: 'greeting' }
       ]
     },
 
-    how_discovery: {
-      message: "Customers find you through:\n\n- Direct search on WorkBench (by service type, category, location)\n- Browsing the services directory\n- Our recommendation matching (we surface relevant providers based on what customers need)\n- SEO — WorkBench ranks for local service searches in LA\n\nYou don't need to run ads or hustle for visibility. The platform does the work.",
+    discovery: {
+      message: "Customers find you through:\n\n\u2022 Search by service type and location\n\u2022 Browsing the directory\n\u2022 Our matching recommendations\n\u2022 SEO \u2014 we rank for LA service searches\n\nNo ads needed. The platform brings customers to you.",
       options: [
-        { label: 'Let\'s get started', next: 'link_provider_signup' },
+        { label: 'Let\u2019s go', next: 'link_signup_provider' },
         { label: 'Back to provider info', next: 'provider_start' },
-        { label: 'Back to main', next: 'greeting' }
+        { label: 'Back to start', next: 'greeting' }
       ]
     },
 
-    // ── Objection Handling ──
     objection_think: {
-      message: "Take your time. But every day you're not listed is a day customers in LA are finding someone else.\n\nSigning up is free and takes minutes. You can see how it works before committing to anything. No lock-in, no contracts.\n\nWhen you're ready — we're here.",
+      message: "Take your time. But every day you\u2019re not listed, someone in LA is finding a different provider.\n\nFree to sign up. No lock-in. See how it works before committing.\n\nWhen you\u2019re ready \u2014 we\u2019re here.",
       options: [
-        { label: 'Alright, let me try it', next: 'link_provider_signup' },
-        { label: 'Tell me more about WorkBench', next: 'what_is_wb' },
-        { label: 'I\'ll be back', next: 'close_thanks' }
+        { label: 'Alright, let me try', next: 'link_signup_provider' },
+        { label: 'More about WorkBench', next: 'how_it_works' },
+        { label: 'I\u2019ll come back', next: 'close_thanks' }
       ]
     },
 
-    // ── About Novai (company questions) ──
+    // ── PRICING ──
+    pricing_overview: {
+      message: "Quick breakdown:\n\nCustomers: Completely free. Browse, book, done. You pay the provider directly. No platform fees.\n\nProviders: Fair and transparent. No massive percentage cuts. Sign up to see details for your service category.",
+      options: [
+        { label: 'Sign up as a customer', next: 'link_signup_customer' },
+        { label: 'Sign up as a provider', next: 'link_signup_provider' },
+        { label: 'How is this sustainable?', next: 'sustainable' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    pricing_customer: {
+      message: "Free. No subscription, no hidden fees, no \"premium tier\" BS.\n\nYou browse, you book, you pay the provider directly. WorkBench doesn\u2019t touch your wallet.",
+      options: [
+        { label: 'Sign me up', next: 'link_signup_customer' },
+        { label: 'Browse services', next: 'link_services' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    pricing_provider: {
+      message: "We keep it fair. No 30-40% cuts like the big platforms. WorkBench is built for providers to actually earn.\n\nThe exact rate depends on your service category and volume. Sign up and we\u2019ll walk you through it \u2014 no surprises, no lock-in.",
+      options: [
+        { label: 'Fair enough \u2014 sign me up', next: 'link_signup_provider' },
+        { label: 'Why is this better?', next: 'why_list' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    sustainable: {
+      message: "Fair question. We take a small service fee from providers \u2014 way less than what other platforms charge.\n\nOur model works because we focus on quality over quantity, and we\u2019re growing sustainably in LA first. No VC burn-rate race. Just building something that works.",
+      options: [
+        { label: 'Makes sense \u2014 sign me up', next: 'signup_choice' },
+        { label: 'Tell me about the company', next: 'about_novai' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    // ── TRUST & VETTING ──
+    vetting: {
+      message: "Every provider goes through verification. We check credentials, reviews, and legitimacy before anyone goes live.\n\nThis isn\u2019t a free-for-all listing site. Quality is the whole point. That\u2019s why people trust WorkBench over random Google results.",
+      options: [
+        { label: 'Show me services', next: 'link_services' },
+        { label: 'What if I have a bad experience?', next: 'bad_experience' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    bad_experience: {
+      message: "Contact us directly. We take quality seriously. If a provider doesn\u2019t deliver, we handle it \u2014 resolution, refund assistance, and if needed, removal.\n\nWe stand behind every listing on this platform.",
+      options: [
+        { label: 'Browse services', next: 'link_services' },
+        { label: 'Contact support', next: 'talk_human' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    // ── SUPPORT FLOWS ──
+    support_menu: {
+      message: "I\u2019ve got you. What do you need help with?",
+      options: [
+        { label: 'How to book a service', next: 'help_booking' },
+        { label: 'My account or profile', next: 'help_account' },
+        { label: 'Payments & payouts', next: 'help_payments' },
+        { label: 'Job status or issues', next: 'help_jobs' },
+        { label: 'ID verification', next: 'help_verification' },
+        { label: 'Something else', next: 'talk_human' }
+      ]
+    },
+
+    help_booking: {
+      message: "Find a provider on the Services page, check their profile and rates, and book directly. You deal with them directly \u2014 WorkBench makes the connection.\n\nNeed help finding the right service?",
+      options: [
+        { label: 'Browse services', next: 'link_services' },
+        { label: 'Other help', next: 'support_menu' },
+        { label: 'Back to start', next: 'greeting' }
+      ]
+    },
+
+    help_account: {
+      message: "Head to your Profile page to update your info, change settings, or manage your account.\n\nIf something\u2019s broken, reach out \u2014 we\u2019ll fix it.",
+      options: [
+        { label: 'Go to Profile', next: 'link_profile' },
+        { label: 'Contact support', next: 'talk_human' },
+        { label: 'Back', next: 'support_menu' }
+      ]
+    },
+
+    help_payments: {
+      message: "Customers: You pay providers directly. No surprise charges from WorkBench.\n\nProviders: Payouts are processed through your dashboard. Check the Payouts section for status and history.\n\nStill stuck?",
+      options: [
+        { label: 'Contact support', next: 'talk_human' },
+        { label: 'Go to Dashboard', next: 'link_dashboard' },
+        { label: 'Back', next: 'support_menu' }
+      ]
+    },
+
+    help_jobs: {
+      message: "Check your Dashboard for job status, active bookings, and updates. Everything\u2019s tracked there.\n\nIf something\u2019s off with a job, reach out directly.",
+      options: [
+        { label: 'Go to Dashboard', next: 'link_dashboard' },
+        { label: 'Contact support', next: 'talk_human' },
+        { label: 'Back', next: 'support_menu' }
+      ]
+    },
+
+    help_verification: {
+      message: "ID verification is part of our provider vetting process. Typically takes a few business days. We need to make sure every provider is legit.\n\nSubmitted docs and haven\u2019t heard back? Reach out \u2014 we\u2019ll check on it.",
+      options: [
+        { label: 'Contact support', next: 'talk_human' },
+        { label: 'Back', next: 'support_menu' }
+      ]
+    },
+
+    // ── ABOUT NOVAI ──
     about_novai: {
-      message: "WorkBench is built by Novai Systems LLC — an AI and technology company based in Los Angeles.\n\nNovai builds intelligent systems: multi-agent architectures, AI engines, and platforms designed for real-world impact. WorkBench is our local services marketplace — bringing that same engineering quality to connecting people with trusted service providers.\n\nWant to know more about what Novai does?",
+      message: "WorkBench is by Novai Systems \u2014 an AI and tech company based in LA.\n\nWe build intelligent systems: multi-agent architectures, predictive engines, and platforms built for real impact. WorkBench brings that engineering DNA to local services.",
       options: [
         { label: 'What else does Novai build?', next: 'novai_products' },
-        { label: 'Visit Novai Systems website', next: 'link_novai' },
+        { label: 'Visit Novai Systems', next: 'link_novai' },
         { label: 'Back to WorkBench', next: 'greeting' }
       ]
     },
 
     novai_products: {
-      message: "Novai Systems builds enterprise AI solutions:\n\n- AIREC Smart Ads Optimizer — self-correcting ad engine with predictive intelligence\n- Industry Diagnostic Intelligence — competitive analysis and market insights\n- Life & Business Command Console — unified operations dashboard\n- WorkBench — the local services marketplace you're on right now\n\nAll powered by AIREC technology: self-correcting loops and predictive intelligence.",
+      message: "Novai Systems builds:\n\n\u2022 AIREC Smart Ads Optimizer \u2014 self-correcting ad intelligence\n\u2022 Industry Diagnostic Intelligence \u2014 competitive analysis\n\u2022 Life & Business Command Console \u2014 unified operations\n\u2022 WorkBench \u2014 the marketplace you\u2019re on now\n\nAll powered by AIREC technology: self-correcting loops and predictive intelligence.",
       options: [
         { label: 'Visit novaisystems.online', next: 'link_novai' },
-        { label: 'Contact Novai Systems', next: 'talk_human' },
+        { label: 'Contact Novai', next: 'talk_human' },
         { label: 'Back to WorkBench', next: 'greeting' }
       ]
     },
 
+    // ── NAVIGATION LINKS ──
+    signup_choice: {
+      message: "Who are you signing up as?",
+      options: [
+        { label: 'Customer \u2014 I need services', next: 'link_signup_customer' },
+        { label: 'Provider \u2014 I offer services', next: 'link_signup_provider' }
+      ]
+    },
+
+    link_services: {
+      message: "Here\u2019s the services directory:",
+      link: '/services',
+      linkText: 'Browse Services',
+      options: [
+        { label: 'How does booking work?', next: 'help_booking' },
+        { label: 'Back to start', next: 'greeting' }
+      ]
+    },
+
+    link_signup_customer: {
+      message: "Quick and free \u2014 30 seconds to get started:",
+      link: '/signup',
+      linkText: 'Create Free Account',
+      options: [
+        { label: 'What happens after signup?', next: 'after_signup_customer' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    link_signup_provider: {
+      message: "Set up your profile and start getting discovered:",
+      link: '/signup',
+      linkText: 'Get Listed on WorkBench',
+      options: [
+        { label: 'What\u2019s the process?', next: 'after_signup_provider' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    link_profile: {
+      message: "Manage your account here:",
+      link: '/profile',
+      linkText: 'Go to Profile',
+      options: [
+        { label: 'More help', next: 'support_menu' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    link_dashboard: {
+      message: "Your jobs, bookings, and activity:",
+      link: '/dashboard',
+      linkText: 'Go to Dashboard',
+      options: [
+        { label: 'More help', next: 'support_menu' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
     link_novai: {
-      message: "Check out the full Novai Systems story here:",
+      message: "The full Novai Systems story:",
       externalLink: 'https://novaisystems.online/',
       linkText: 'Visit Novai Systems',
       options: [
@@ -302,44 +363,87 @@
       ]
     },
 
-    // ── Lead Capture ──
+    // ── POST-SIGNUP INFO ──
+    after_signup_customer: {
+      message: "You\u2019re in immediately. Browse the full directory, check provider profiles and reviews, book directly. No approval wait.\n\nSave favorites, get notified when new pros join categories you care about.",
+      options: [
+        { label: 'Sign me up', next: 'link_signup_customer' },
+        { label: 'More questions', next: 'greeting' }
+      ]
+    },
+
+    after_signup_provider: {
+      message: "Create your profile, add services with descriptions and pricing, go through our quick verification. Once approved, you\u2019re live.\n\nCustomers find you through search, categories, and our matching. You manage bookings from your dashboard.",
+      options: [
+        { label: 'Let\u2019s do it', next: 'link_signup_provider' },
+        { label: 'How long is verification?', next: 'verification_time' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    verification_time: {
+      message: "Few business days, max. We move fast \u2014 just need to make sure everything checks out. Once verified, you\u2019re live immediately.",
+      options: [
+        { label: 'Sign me up', next: 'link_signup_provider' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    // ── AREAS ──
+    areas_served: {
+      message: "WorkBench currently serves the greater Los Angeles area \u2014 our launch market. We\u2019re expanding, but LA is where we deliver the best experience right now.\n\nIf you\u2019re in LA, you\u2019re covered.",
+      options: [
+        { label: 'Find services in LA', next: 'link_services' },
+        { label: 'When are you expanding?', next: 'expansion' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    expansion: {
+      message: "Soon. Building the foundation right in LA first \u2014 quality, providers, experience locked in. Then we scale.\n\nWant to know when we hit your area? Drop your info.",
+      options: [
+        { label: 'Notify me', next: 'capture_expansion' },
+        { label: 'I\u2019m in LA \u2014 let\u2019s go', next: 'link_services' },
+        { label: 'Back', next: 'greeting' }
+      ]
+    },
+
+    // ── LEAD CAPTURE ──
     capture_customer: {
-      message: "Tell us what you need — we'll help match you with the right provider. Drop your details and we'll get back to you fast.",
+      message: "Tell us what you need \u2014 we\u2019ll match you with the right provider. Quick details:",
       capture: true,
-      product: 'WorkBench — Customer Request',
+      product: 'WorkBench \u2014 Service Request',
       options: []
     },
 
     capture_expansion: {
-      message: "Drop your email and we'll notify you when WorkBench launches in your area. No spam — just the heads-up.",
+      message: "Drop your email and we\u2019ll notify you when WorkBench launches in your area. No spam \u2014 just the heads-up.",
       capture: true,
-      product: 'WorkBench — Expansion Interest',
+      product: 'WorkBench \u2014 Expansion Interest',
       options: []
     },
 
-    // ── Talk to Human ──
     talk_human: {
-      message: "No gatekeepers. Reach us directly:\n\n+1 (213) 943-3042\n\nOr drop your info and we'll reach out — usually same day.",
+      message: "Real people, no gatekeepers:\n\n\u260E +1 (213) 943-3042\n\nOr drop your details \u2014 we\u2019ll reach out, usually same day.",
       capture: true,
-      product: 'WorkBench — Direct Contact',
+      product: 'WorkBench \u2014 Contact Request',
       options: []
     },
 
-    // ── Close ──
+    // ── CLOSE ──
     close_thanks: {
-      message: "All good. You know where to find us — workbench.novaisystems.online. When you're ready, we'll be here.\n\nWorkBench by Novai Systems. Local services, done right.",
+      message: "All good. workbench.novaisystems.online \u2014 we\u2019re here when you\u2019re ready.\n\nWorkBench by Novai Systems.",
       options: [
         { label: 'Start over', next: 'greeting' }
       ]
     },
 
-    // ── After Lead Capture ──
     capture_success: {
-      message: "Got it. We'll be in touch fast — no automated drip campaigns, just a real response.\n\nAnything else?",
+      message: "Locked in. We\u2019ll be in touch fast \u2014 no drip campaigns, just a real reply.\n\nAnything else?",
       options: [
         { label: 'Browse services', next: 'link_services' },
-        { label: 'Learn more about WorkBench', next: 'what_is_wb' },
-        { label: 'That\'s all — thanks', next: 'close_thanks' }
+        { label: 'Learn more', next: 'how_it_works' },
+        { label: 'That\u2019s all \u2014 thanks', next: 'close_thanks' }
       ]
     }
   };
@@ -356,10 +460,9 @@
   var container = document.createElement('div');
   container.className = 'wb-sales-agent';
 
-  // Toggle button
   var toggleBtn = document.createElement('button');
   toggleBtn.className = 'wb-sa-toggle';
-  toggleBtn.setAttribute('aria-label', 'Open WorkBench assistant');
+  toggleBtn.setAttribute('aria-label', 'Chat with WorkBench');
   toggleBtn.innerHTML =
     '<svg class="wb-sa-icon-chat" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
       '<path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>' +
@@ -368,7 +471,6 @@
       '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' +
     '</svg>';
 
-  // Chat panel
   var panel = document.createElement('div');
   panel.className = 'wb-sa-panel';
   panel.innerHTML =
@@ -379,7 +481,7 @@
         '</div>' +
         '<div>' +
           '<strong class="wb-sa-title">WorkBench</strong>' +
-          '<span class="wb-sa-status">Online — here to help</span>' +
+          '<span class="wb-sa-status">\u2022 Online</span>' +
         '</div>' +
       '</div>' +
       '<button class="wb-sa-minimize" aria-label="Minimize">' +
@@ -392,60 +494,51 @@
   container.appendChild(panel);
   container.appendChild(toggleBtn);
 
-  // ─── Inject Styles ────────────────────────────────────────────────
+  // ─── Styles ─────────────────────────────────────────────────────
   var style = document.createElement('style');
   style.textContent =
-    ':root{--wb-accent:#0077ff;--wb-accent2:#00bbff;--wb-bg:#0d1117;--wb-panel:#161b22;--wb-surface:#1c2333;--wb-border:rgba(255,255,255,.08);--wb-text:#e6edf3;--wb-text-dim:rgba(255,255,255,.5);--wb-radius:16px}' +
+    ':root{--wb-accent:#0077ff;--wb-accent2:#00bbff;--wb-bg:#0d1117;--wb-surface:#1c2333;--wb-border:rgba(255,255,255,.08);--wb-text:#e6edf3;--wb-text-dim:rgba(255,255,255,.5);--wb-radius:16px}' +
 
-    '.wb-sales-agent{position:fixed;bottom:24px;right:24px;z-index:99999;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}' +
+    '.wb-sales-agent{position:fixed;bottom:24px;right:24px;z-index:2147483647;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}' +
 
-    /* Toggle button */
     '.wb-sa-toggle{width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--wb-accent),var(--wb-accent2));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,119,255,.4);transition:transform .2s,box-shadow .2s;position:relative}' +
     '.wb-sa-toggle:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(0,119,255,.5)}' +
     '.wb-sa-toggle .wb-sa-icon-close{display:none}' +
     '.wb-sales-agent.is-open .wb-sa-toggle .wb-sa-icon-chat{display:none}' +
     '.wb-sales-agent.is-open .wb-sa-toggle .wb-sa-icon-close{display:block}' +
 
-    /* Pulse */
     '.wb-sa-toggle::before{content:"";position:absolute;inset:-4px;border-radius:50%;background:linear-gradient(135deg,var(--wb-accent),var(--wb-accent2));opacity:.3;animation:wb-pulse 2s ease-in-out infinite}' +
     '.wb-sales-agent.is-open .wb-sa-toggle::before{display:none}' +
     '@keyframes wb-pulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.15);opacity:0}}' +
 
-    /* Panel */
     '.wb-sa-panel{position:absolute;bottom:68px;right:0;width:370px;max-height:540px;background:var(--wb-bg);border:1px solid var(--wb-border);border-radius:var(--wb-radius);box-shadow:0 16px 64px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;opacity:0;transform:translateY(16px) scale(.96);pointer-events:none;transition:opacity .25s,transform .25s}' +
     '.wb-sales-agent.is-open .wb-sa-panel{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}' +
 
-    /* Header */
     '.wb-sa-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#0a2540,#0f2f52);border-bottom:1px solid var(--wb-border)}' +
     '.wb-sa-header-info{display:flex;align-items:center;gap:10px}' +
     '.wb-sa-avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--wb-accent),var(--wb-accent2));display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}' +
     '.wb-sa-title{display:block;font-size:14px;font-weight:700;color:#fff}' +
-    '.wb-sa-status{display:block;font-size:11px;color:var(--wb-accent2);font-weight:500}' +
+    '.wb-sa-status{display:block;font-size:11px;color:#3fb950;font-weight:500}' +
     '.wb-sa-minimize{background:none;border:none;color:var(--wb-text-dim);cursor:pointer;padding:4px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background .15s}' +
     '.wb-sa-minimize:hover{background:rgba(255,255,255,.1)}' +
 
-    /* Messages */
     '.wb-sa-messages{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;min-height:180px;max-height:320px}' +
     '.wb-sa-messages::-webkit-scrollbar{width:4px}' +
     '.wb-sa-messages::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}' +
 
-    /* Bubbles */
     '.wb-sa-msg{padding:11px 15px;border-radius:14px;font-size:13px;line-height:1.55;color:var(--wb-text);max-width:92%;white-space:pre-wrap;animation:wb-fadeIn .3s ease}' +
     '.wb-sa-msg.agent{background:var(--wb-surface);border:1px solid var(--wb-border);align-self:flex-start;border-bottom-left-radius:4px}' +
     '.wb-sa-msg.user{background:linear-gradient(135deg,var(--wb-accent),#005ec4);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}' +
     '@keyframes wb-fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}' +
 
-    /* Link buttons inside messages */
     '.wb-sa-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:linear-gradient(135deg,var(--wb-accent),var(--wb-accent2));color:#fff;border-radius:10px;text-decoration:none;font-size:13px;font-weight:600;transition:opacity .15s}' +
     '.wb-sa-link:hover{opacity:.9}' +
 
-    /* Options */
     '.wb-sa-options{padding:10px 18px 14px;display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--wb-border);background:var(--wb-bg);max-height:220px;overflow-y:auto}' +
     '.wb-sa-opt{padding:9px 14px;background:var(--wb-surface);border:1px solid var(--wb-border);border-radius:11px;color:var(--wb-text);font-size:12.5px;font-weight:500;cursor:pointer;text-align:left;transition:background .15s,border-color .15s,transform .1s;font-family:inherit}' +
     '.wb-sa-opt:hover{background:rgba(0,119,255,.12);border-color:rgba(0,119,255,.3);transform:translateX(4px)}' +
     '.wb-sa-opt:active{transform:translateX(2px)}' +
 
-    /* Capture form */
     '.wb-sa-form{padding:10px 18px 14px;border-top:1px solid var(--wb-border);background:var(--wb-bg);display:flex;flex-direction:column;gap:7px}' +
     '.wb-sa-form input,.wb-sa-form textarea{width:100%;padding:9px 12px;background:var(--wb-surface);border:1px solid var(--wb-border);border-radius:10px;color:var(--wb-text);font-size:12.5px;font-family:inherit;outline:none;transition:border-color .15s;box-sizing:border-box}' +
     '.wb-sa-form input:focus,.wb-sa-form textarea:focus{border-color:var(--wb-accent)}' +
@@ -455,25 +548,16 @@
     '.wb-sa-form button:hover{opacity:.9}' +
     '.wb-sa-form button:disabled{opacity:.5;cursor:not-allowed}' +
 
-    /* Typing */
     '.wb-sa-typing{display:flex;gap:4px;padding:11px 15px;align-self:flex-start}' +
     '.wb-sa-typing span{width:5px;height:5px;border-radius:50%;background:var(--wb-text-dim);animation:wb-typing .6s ease-in-out infinite}' +
     '.wb-sa-typing span:nth-child(2){animation-delay:.15s}' +
     '.wb-sa-typing span:nth-child(3){animation-delay:.3s}' +
     '@keyframes wb-typing{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}' +
 
-    /* Badge */
     '.wb-sa-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#ff3b3b;border-radius:50%;border:2px solid var(--wb-bg);animation:wb-fadeIn .3s ease}' +
     '.wb-sales-agent.is-open .wb-sa-badge{display:none}' +
 
-    /* Mobile */
-    '@media(max-width:480px){' +
-      '.wb-sa-panel{width:calc(100vw - 32px);right:-8px;bottom:64px;max-height:70vh}' +
-      '.wb-sa-toggle{width:50px;height:50px}' +
-      '.wb-sales-agent{bottom:16px;right:16px}' +
-    '}' +
-
-    /* Shake */
+    '@media(max-width:480px){.wb-sa-panel{width:calc(100vw - 32px);right:-8px;bottom:64px;max-height:70vh}.wb-sa-toggle{width:50px;height:50px}.wb-sales-agent{bottom:16px;right:16px}}' +
     '@keyframes wb-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}';
 
   document.head.appendChild(style);
@@ -527,8 +611,8 @@
     if (existingForm) existingForm.remove();
 
     var typing = showTyping();
-    var delay = Math.min(35 * flow.message.length, 1000);
-    delay = Math.max(delay, 350);
+    var delay = Math.min(30 * flow.message.length, 800);
+    delay = Math.max(delay, 300);
 
     setTimeout(function() {
       typing.remove();
@@ -616,7 +700,7 @@
         localStorage.setItem('wb_leads', JSON.stringify(stored));
       } catch(e) {}
 
-      console.log('[WorkBench Sales Agent] Lead captured:', lead);
+      console.log('[WorkBench Agent] Lead captured:', lead);
 
       form.remove();
       addMessage('Name: ' + name + '\nEmail: ' + email + (phone ? '\nPhone: ' + phone : '') + (need ? '\nRe: ' + need : ''), 'user');
@@ -624,12 +708,12 @@
     });
   }
 
-  // ─── Toggle Chat ──────────────────────────────────────────────────
+  // ─── Toggle ───────────────────────────────────────────────────────
   function toggleChat() {
     state.isOpen = !state.isOpen;
     if (state.isOpen) {
       container.classList.add('is-open');
-      toggleBtn.setAttribute('aria-label', 'Close WorkBench assistant');
+      toggleBtn.setAttribute('aria-label', 'Close chat');
       var badge = toggleBtn.querySelector('.wb-sa-badge');
       if (badge) badge.remove();
       if (state.messages.length === 0) {
@@ -637,7 +721,7 @@
       }
     } else {
       container.classList.remove('is-open');
-      toggleBtn.setAttribute('aria-label', 'Open WorkBench assistant');
+      toggleBtn.setAttribute('aria-label', 'Chat with WorkBench');
     }
   }
 
@@ -653,7 +737,7 @@
     }
   }, 3000);
 
-  // ─── Auto-open after 10s (once per 24h) ───────────────────────────
+  // ─── Auto-open after 8s (once per 24h) ────────────────────────────
   setTimeout(function() {
     if (state.isOpen) return;
     try {
@@ -662,7 +746,14 @@
     } catch(e) {}
     toggleChat();
     try { localStorage.setItem('wb_sa_dismissed', Date.now().toString()); } catch(e) {}
-  }, 10000);
+  }, 8000);
+
+  // ─── Hide existing chat widgets to avoid conflict ─────────────────
+  try {
+    var hideCSS = document.createElement('style');
+    hideCSS.textContent = '#crisp-chatbox, .intercom-lightweight-app, .intercom-app, [data-testid="chat-widget"], iframe[title*="chat" i], iframe[title*="crisp" i], iframe[title*="intercom" i] { display: none !important; }';
+    document.head.appendChild(hideCSS);
+  } catch(e) {}
 
   // ─── Mount ────────────────────────────────────────────────────────
   document.body.appendChild(container);
