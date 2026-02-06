@@ -808,44 +808,245 @@
     setTimeout(wbFixAdminLink, 8000);
   } catch(e) {}
 
-  // ─── Inject GTM Dashboard into admin sidebar ─────────────────────
+  // ─── Inject GTM Dashboard as inline tab in admin panel ──────────
   try {
-    function wbInjectGTMLink() {
+    (function() {
       if (window.location.pathname !== '/admin') return;
-      if (document.getElementById('wb-gtm-link')) return;
-      // Find the sidebar nav — look for "Audit Log" or similar text to locate the nav
-      var navItems = document.querySelectorAll('a[href], [role="menuitem"], nav a, aside a');
-      var sidebar = null;
-      for (var i = 0; i < navItems.length; i++) {
-        var text = navItems[i].textContent.trim().toLowerCase();
-        if (text === 'audit log' || text === 'analytics' || text === 'leaderboard' || text === 'dashboard') {
-          sidebar = navItems[i].parentElement;
-          break;
-        }
-      }
-      if (!sidebar) {
-        // Try finding sidebar by structure — look for vertical nav
-        var asides = document.querySelectorAll('aside, nav, [class*="sidebar"], [class*="Sidebar"], [class*="nav"]');
-        for (var j = 0; j < asides.length; j++) {
-          if (asides[j].querySelectorAll('a').length >= 3) {
-            sidebar = asides[j];
-            break;
+      var KEY = 'novai2025wb';
+      var gtmActive = false;
+      var savedContent = null;
+      var contentEl = null;
+
+      function findSidebar() {
+        var links = document.querySelectorAll('a');
+        for (var i = 0; i < links.length; i++) {
+          var t = (links[i].textContent || '').trim().toLowerCase();
+          if (t === 'audit log' || t === 'worker ratings' || t === 'leaderboard') {
+            return links[i].parentElement;
           }
         }
+        var containers = document.querySelectorAll('aside, nav, [class*="sidebar"], [class*="Sidebar"]');
+        for (var j = 0; j < containers.length; j++) {
+          if (containers[j].querySelectorAll('a').length >= 5) return containers[j];
+        }
+        return null;
       }
-      if (!sidebar) return;
 
-      var link = document.createElement('a');
-      link.id = 'wb-gtm-link';
-      link.href = '/_wb-admin?key=novai2025wb';
-      link.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 16px;color:#e6edf3;text-decoration:none;font-size:14px;font-weight:500;border-radius:8px;margin:4px 8px;background:linear-gradient(135deg,rgba(0,119,255,0.15),rgba(0,187,255,0.1));border:1px solid rgba(0,119,255,0.2);transition:all 0.15s;';
-      link.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0077ff" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> GTM Dashboard';
-      link.onmouseover = function() { this.style.background = 'linear-gradient(135deg,rgba(0,119,255,0.25),rgba(0,187,255,0.15))'; };
-      link.onmouseout = function() { this.style.background = 'linear-gradient(135deg,rgba(0,119,255,0.15),rgba(0,187,255,0.1))'; };
-      sidebar.appendChild(link);
-    }
-    setTimeout(wbInjectGTMLink, 2000);
-    setTimeout(wbInjectGTMLink, 5000);
+      function findContent() {
+        var headings = document.querySelectorAll('h1, h2, h3');
+        for (var i = 0; i < headings.length; i++) {
+          var t = (headings[i].textContent || '').trim().toLowerCase();
+          if (t.indexOf('admin') !== -1 && t.indexOf('dashboard') !== -1) return headings[i].parentElement;
+        }
+        var m = document.querySelector('main, [class*="MainContent"], [class*="main-content"], [class*="content-area"]');
+        if (m) return m;
+        var sb = findSidebar();
+        if (sb && sb.parentElement) {
+          var kids = sb.parentElement.children;
+          for (var k = 0; k < kids.length; k++) {
+            if (kids[k] !== sb && kids[k].offsetWidth > sb.offsetWidth) return kids[k];
+          }
+        }
+        return null;
+      }
+
+      function escH(s) { if (!s) return '-'; var d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+      function fmtDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString() + ' ' + new Date(d).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); } catch(e) { return d; } }
+      function fmtDur(s) { s = Math.round(s || 0); if (s < 60) return s + 's'; return Math.floor(s/60) + 'm ' + (s%60) + 's'; }
+
+      function statBox(label, val, color) {
+        return '<div style="background:#161b22;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px 20px">' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;font-weight:600">' + escH(label) + '</div>' +
+          '<div style="font-size:26px;font-weight:700;margin-top:6px;color:' + color + '">' + val + '</div></div>';
+      }
+
+      function renderTable(headers, rows) {
+        if (!rows || rows.length === 0) return '<div style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);font-size:14px">No data yet. Make a call or capture a lead to see live data.</div>';
+        var h = '<table style="width:100%;border-collapse:collapse;background:#161b22;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden">';
+        h += '<thead style="background:#1c2333"><tr>';
+        for (var i = 0; i < headers.length; i++) h += '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px">' + headers[i] + '</th>';
+        h += '</tr></thead><tbody>';
+        for (var r = 0; r < rows.length; r++) {
+          h += '<tr>';
+          for (var c = 0; c < rows[r].length; c++) h += '<td style="padding:10px 14px;font-size:13px;border-top:1px solid rgba(255,255,255,0.05)">' + rows[r][c] + '</td>';
+          h += '</tr>';
+        }
+        return h + '</tbody></table>';
+      }
+
+      function badge(text, color) {
+        var colors = { blue: 'rgba(0,119,255,0.15);color:#58a6ff', green: 'rgba(63,185,80,0.15);color:#3fb950', amber: 'rgba(245,158,11,0.15);color:#f59e0b', red: 'rgba(239,68,68,0.15);color:#ef4444' };
+        return '<span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:' + (colors[color] || colors.blue) + '">' + escH(text) + '</span>';
+      }
+
+      function loadAndRender() {
+        contentEl = contentEl || findContent();
+        if (!contentEl) return;
+        if (!gtmActive) { savedContent = contentEl.innerHTML; gtmActive = true; }
+        contentEl.innerHTML = '<div style="padding:8px 0"><h2 style="font-size:22px;font-weight:700;margin-bottom:8px;color:#e6edf3">GTM Dashboard</h2><p style="color:rgba(255,255,255,0.4);font-size:14px">Loading live data...</p></div>';
+
+        Promise.all([
+          fetch('/_wb-leads?limit=100&key=' + KEY, {headers:{'Authorization':'Bearer ' + KEY}}).then(function(r){return r.json();}).catch(function(){return {};}),
+          fetch('/_wb-voice/calls?key=' + KEY, {headers:{'Authorization':'Bearer ' + KEY}}).then(function(r){return r.json();}).catch(function(){return {};}),
+          fetch('/_wb-voice/analytics?key=' + KEY, {headers:{'Authorization':'Bearer ' + KEY}}).then(function(r){return r.json();}).catch(function(){return {};})
+        ]).then(function(res) {
+          var leadsRes = res[0] || {};
+          var callsRes = res[1] || {};
+          var analyticsRes = res[2] || {};
+          var leads = leadsRes.leads || [];
+          var totalLeads = leadsRes.total || leads.length;
+          var calls = callsRes.calls || [];
+          var totalCalls = callsRes.total || calls.length;
+          var reports = analyticsRes.recent_reports || [];
+          var totals = analyticsRes.totals || {};
+          var kvOk = leadsRes.note !== 'KV not configured';
+
+          var webLeads = 0; var voiceLeads = 0;
+          for (var i = 0; i < leads.length; i++) {
+            if (leads[i].source && leads[i].source.indexOf('vapi') !== -1) voiceLeads++; else webLeads++;
+          }
+
+          var html = '<div style="padding:8px 0">';
+          // Header with refresh + back
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">';
+          html += '<div><h2 style="font-size:22px;font-weight:700;color:#e6edf3;margin:0">GTM Dashboard</h2>';
+          html += '<p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:4px">' + (kvOk ? '<span style="color:#3fb950">\u25CF</span> KV Online' : '<span style="color:#f59e0b">\u25CF</span> KV Offline') + ' \u00B7 ' + new Date().toLocaleTimeString() + '</p></div>';
+          html += '<div style="display:flex;gap:8px">';
+          html += '<button id="wb-gtm-refresh" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#e6edf3;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Refresh</button>';
+          html += '<button id="wb-gtm-back" style="background:none;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Back to Admin</button>';
+          html += '</div></div>';
+
+          // Stats
+          html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px">';
+          html += statBox('Total Leads', totalLeads, '#0077ff');
+          html += statBox('Web Leads', webLeads, '#3fb950');
+          html += statBox('Voice Leads', voiceLeads, '#f59e0b');
+          html += statBox('Voice Calls', totalCalls, '#58a6ff');
+          html += statBox('Call Reports', reports.length, '#3fb950');
+          html += statBox('Avg Score', totals.avg_success_score || '-', '#f59e0b');
+          html += '</div>';
+
+          // Leads table
+          html += '<h3 style="font-size:15px;font-weight:600;margin:20px 0 12px;color:#e6edf3">Recent Leads <span style="font-size:12px;background:rgba(0,119,255,0.15);color:#58a6ff;padding:2px 8px;border-radius:10px;margin-left:6px">' + totalLeads + '</span></h3>';
+          var leadRows = [];
+          for (var li = 0; li < Math.min(leads.length, 20); li++) {
+            var l = leads[li];
+            var src = (l.source || '').indexOf('vapi') !== -1 ? badge('Voice','amber') : badge('Web','blue');
+            leadRows.push([escH(l.name), escH(l.email), escH(l.phone), escH(l.need || l.product), src, fmtDate(l.timestamp || l.created)]);
+          }
+          html += renderTable(['Name','Email','Phone','Need','Source','Date'], leadRows);
+
+          // Call reports table
+          html += '<h3 style="font-size:15px;font-weight:600;margin:24px 0 12px;color:#e6edf3">Call Reports <span style="font-size:12px;background:rgba(63,185,80,0.15);color:#3fb950;padding:2px 8px;border-radius:10px;margin-left:6px">' + reports.length + '</span></h3>';
+          var reportRows = [];
+          for (var ri = 0; ri < reports.length; ri++) {
+            var rp = reports[ri];
+            var intent = rp.caller_intent || (rp.structured_data && rp.structured_data.caller_intent) || '-';
+            var outcome = rp.outcome || (rp.structured_data && rp.structured_data.outcome) || '-';
+            var sent = rp.sentiment || (rp.structured_data && rp.structured_data.sentiment) || '-';
+            var sentC = sent === 'positive' ? 'green' : sent === 'negative' ? 'red' : 'amber';
+            var sc = rp.success_score || '-';
+            var scC = sc >= 7 ? 'green' : sc >= 4 ? 'amber' : sc > 0 ? 'red' : 'blue';
+            var sum = (rp.summary || '').substring(0, 80); if (rp.summary && rp.summary.length > 80) sum += '...';
+            reportRows.push([escH(rp.customer_number), badge(intent,'blue'), escH(outcome), badge(sent,sentC), badge(String(sc),scC), fmtDur(rp.duration), escH(sum), fmtDate(rp.created)]);
+          }
+          html += renderTable(['Caller','Intent','Outcome','Sentiment','Score','Duration','Summary','Date'], reportRows);
+
+          // Voice calls status
+          if (calls.length > 0) {
+            html += '<h3 style="font-size:15px;font-weight:600;margin:24px 0 12px;color:#e6edf3">Call Status Log <span style="font-size:12px;background:rgba(0,119,255,0.15);color:#58a6ff;padding:2px 8px;border-radius:10px;margin-left:6px">' + totalCalls + '</span></h3>';
+            var callRows = [];
+            for (var ci = 0; ci < calls.length; ci++) {
+              var c = calls[ci];
+              var st = c.status === 'ended' ? badge('Ended','green') : badge(c.status || '-','amber');
+              callRows.push([escH(c.customer_number), st, fmtDur(c.duration), fmtDate(c.created)]);
+            }
+            html += renderTable(['Caller','Status','Duration','Date'], callRows);
+          }
+
+          // Analytics breakdown
+          if (totals.intents && Object.keys(totals.intents).length > 0) {
+            html += '<h3 style="font-size:15px;font-weight:600;margin:24px 0 12px;color:#e6edf3">Analytics Breakdown</h3>';
+            html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">';
+            var ik = Object.keys(totals.intents);
+            for (var ii = 0; ii < ik.length; ii++) html += statBox(ik[ii].replace(/_/g,' '), totals.intents[ik[ii]], '#58a6ff');
+            if (totals.outcomes) {
+              var ok = Object.keys(totals.outcomes);
+              for (var oi = 0; oi < ok.length; oi++) {
+                var oc = ok[oi].indexOf('lead') !== -1 ? '#3fb950' : ok[oi].indexOf('lost') !== -1 ? '#ef4444' : '#f59e0b';
+                html += statBox(ok[oi].replace(/_/g,' '), totals.outcomes[ok[oi]], oc);
+              }
+            }
+            html += '</div>';
+          }
+
+          html += '</div>';
+          contentEl.innerHTML = html;
+
+          // Bind buttons
+          var refreshBtn = document.getElementById('wb-gtm-refresh');
+          if (refreshBtn) refreshBtn.addEventListener('click', function() { loadAndRender(); });
+          var backBtn = document.getElementById('wb-gtm-back');
+          if (backBtn) backBtn.addEventListener('click', function() {
+            if (savedContent) contentEl.innerHTML = savedContent;
+            gtmActive = false;
+            var gtmLink = document.getElementById('wb-gtm-link');
+            if (gtmLink) gtmLink.style.background = '';
+          });
+        });
+      }
+
+      function inject() {
+        if (document.getElementById('wb-gtm-link')) return;
+        var sidebar = findSidebar();
+        if (!sidebar) return;
+
+        // Find a reference link to clone style from
+        var refLink = sidebar.querySelector('a');
+        var link = document.createElement('a');
+        link.id = 'wb-gtm-link';
+        link.href = '#gtm';
+
+        // Try to match existing sidebar link styles
+        if (refLink) {
+          var cs = window.getComputedStyle(refLink);
+          link.style.display = cs.display || 'flex';
+          link.style.alignItems = cs.alignItems || 'center';
+          link.style.gap = cs.gap || '8px';
+          link.style.padding = cs.padding || '10px 16px';
+          link.style.fontSize = cs.fontSize || '14px';
+          link.style.fontWeight = cs.fontWeight || '500';
+          link.style.fontFamily = cs.fontFamily;
+          link.style.color = cs.color || '#e6edf3';
+          link.style.textDecoration = 'none';
+          link.style.borderRadius = cs.borderRadius || '8px';
+          link.style.cursor = 'pointer';
+          link.style.margin = cs.margin || '0';
+          if (refLink.className) {
+            link.className = refLink.className;
+            // Remove any active-state classes
+            link.className = link.className.replace(/active|selected|current/gi, '').trim();
+          }
+        } else {
+          link.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 16px;color:#e6edf3;text-decoration:none;font-size:14px;font-weight:500;border-radius:8px;cursor:pointer;';
+        }
+
+        link.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>GTM Dashboard</span>';
+        sidebar.appendChild(link);
+
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          // Visual active state
+          link.style.background = 'linear-gradient(135deg,rgba(0,119,255,0.15),rgba(0,187,255,0.1))';
+          link.style.color = '#0077ff';
+          loadAndRender();
+        });
+      }
+
+      setTimeout(inject, 2000);
+      setTimeout(inject, 4000);
+      setTimeout(inject, 7000);
+    })();
   } catch(e) {}
 
   // ─── Voice Call Button ──────────────────────────────────────────
