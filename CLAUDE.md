@@ -42,7 +42,9 @@ Website and supporting infrastructure for **Novai Systems LLC**, an AI tools com
     ├── wrangler.toml       # Cloudflare Worker config (widget-injector)
     ├── widget-injector.js  # Injects call widget + sales-agent into HTML responses
     ├── gtm-wrangler.toml   # Cloudflare Worker config (GTM outbound)
-    └── gtm-outbound.js     # Receives leads, stores in KV, triggers Vapi outbound calls
+    ├── gtm-outbound.js     # Receives leads, stores in KV, triggers Vapi outbound calls
+    ├── vapi-wrangler.toml  # Cloudflare Worker config (Vapi server)
+    └── vapi-server.js      # Vapi webhook handler — assistant config, tools, knowledge base
 ```
 
 ## Architecture
@@ -128,27 +130,51 @@ Single-page structure with sections: Header, Hero, Proof Bar, Products (4-card g
 
 Uses [Vapi](https://vapi.ai) for AI-powered phone interactions.
 
-### Inbound
-- **+1 (213) 943-3042** — "Novai systems receptionist" (Vapi phone number ID: `cd5b0d0a-a2bd-4bad-afd4-b06d0de45a57`)
-- Server URL: `https://vapi-notifications.ajay-solomon.workers.dev/`
+### Vapi Server Worker (`worker/vapi-server.js`)
+Central webhook handler for ALL Vapi calls. Set as the server URL for both phone numbers.
+- **URL:** `https://novai-vapi-server.ajay-solomon.workers.dev`
+- Handles `assistant-request` — returns dynamic assistant with full WorkBench knowledge base
+- Handles `tool-calls` — captureLead, lookupService, scheduleCallback, transferCall
+- Handles `end-of-call-report` — logs call outcomes to KV
+- Contains full WorkBench service catalog (home, business, lifestyle categories)
+- Generates different system prompts for inbound (receptionist) vs outbound (GTM follow-up)
+
+### Inbound Receptionist
+- **+1 (213) 943-3042** — Vapi phone number ID: `cd5b0d0a-a2bd-4bad-afd4-b06d0de45a57`
+- Server URL → point to vapi-server worker
 - The "Let's Talk" widget dials this number via `tel:` link
+- AI answers with full WorkBench context, can look up services, capture leads, schedule callbacks, transfer calls
 
-### Outbound (GTM)
-- **+1 (943) 223 9707** — "WorkBench GTM Agent" (used for automated outbound calls)
-- When the sales agent captures a lead with a phone number, it POSTs to the GTM outbound worker
-- The worker stores the lead in KV and triggers a Vapi outbound call via `POST https://api.vapi.ai/call`
-- Lead context (name, product interest, need) is passed to the AI agent via `assistantOverrides.variableValues`
+### Outbound GTM Agent
+- **+1 (943) 223 9707** — Vapi phone number ID: `60998a63-1c59-4e4b-8628-a9545fafa692`
+- Server URL → point to vapi-server worker
+- When sales agent captures a lead with phone, GTM outbound worker triggers Vapi call
+- Lead context (name, product interest, need) passed via `assistantOverrides.variableValues`
+- AI calls lead back with personalized follow-up based on their website interaction
 
-### GTM Worker Setup
+### AI Agent Tools
+- `captureLead` — saves caller info (name, email, phone, need, product, isProvider flag) to KV
+- `lookupService` — searches WorkBench service catalog by keyword/category
+- `scheduleCallback` — logs callback request with preferred time
+- `transferCall` — routes to sales, support, provider-onboarding, or general
+
+### Deployment
 ```bash
 cd worker
-# Create KV namespace
+
+# 1. Deploy Vapi Server (webhook handler)
+npx wrangler kv namespace create LEADS --config vapi-wrangler.toml
+# Update vapi-wrangler.toml with KV binding ID
+npx wrangler deploy --config vapi-wrangler.toml
+
+# 2. Deploy GTM Outbound (lead capture + auto-call)
 npx wrangler kv namespace create LEADS --config gtm-wrangler.toml
-# Set the Vapi API key as a secret
 npx wrangler secret put VAPI_API_KEY --config gtm-wrangler.toml
-# Update gtm-wrangler.toml with KV binding ID, phone number ID, and assistant ID
-# Deploy
+# Update gtm-wrangler.toml with KV binding ID + assistant ID
 npx wrangler deploy --config gtm-wrangler.toml
+
+# 3. In Vapi Dashboard, set BOTH phone numbers' Server URL to:
+#    https://novai-vapi-server.ajay-solomon.workers.dev
 ```
 
 ### GTM Worker Endpoints
@@ -162,8 +188,9 @@ npx wrangler deploy --config gtm-wrangler.toml
 1. **Edit files directly** — no build/compile step needed.
 2. **Test locally** by opening `index.html` in a browser (sales agent and widget work standalone).
 3. **Deploy static files** by pushing to the appropriate branch; Netlify picks up changes automatically.
-4. **Widget injector changes:** `npx wrangler deploy` from `worker/` directory.
-5. **GTM outbound worker changes:** `npx wrangler deploy --config gtm-wrangler.toml` from `worker/` directory.
+4. **Widget injector:** `npx wrangler deploy` from `worker/` directory.
+5. **GTM outbound worker:** `npx wrangler deploy --config gtm-wrangler.toml` from `worker/`.
+6. **Vapi server worker:** `npx wrangler deploy --config vapi-wrangler.toml` from `worker/`.
 
 ## Important Notes
 

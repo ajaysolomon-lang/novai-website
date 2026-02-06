@@ -5,8 +5,9 @@ compatibility_date = "2024-01-01"
 [vars]
 # Set these to your Vapi WorkBench GTM Agent IDs
 # Find phone number ID in Vapi Dashboard > Phone Numbers > select number > copy ID
-VAPI_PHONE_NUMBER_ID = ""
+VAPI_PHONE_NUMBER_ID = "60998a63-1c59-4e4b-8628-a9545fafa692"
 # Find assistant ID in Vapi Dashboard > Assistants > select assistant > copy ID
+# (the assistant linked to the WorkBench GTM Agent number)
 VAPI_ASSISTANT_ID = ""
 
 # KV namespace for lead storage
