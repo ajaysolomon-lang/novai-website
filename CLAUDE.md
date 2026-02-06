@@ -30,7 +30,7 @@ Website and supporting infrastructure for **Novai Systems LLC**, an AI tools com
 ├── script.js               # Minimal init script (console log only)
 ├── sales-agent.js          # Interactive GTM sales chatbot (~676 lines, IIFE)
 ├── widget.js               # "Let's Talk" call widget — tel: link to +1(213)943-3042 (IIFE)
-├── admin.html              # Leads & analytics dashboard (noindex, localStorage-based)
+├── admin.html              # Leads/analytics/outbound dashboard (noindex)
 ├── _redirects              # Netlify SPA routing + static file rules
 ├── _headers                # Netlify response headers (CORS for widget.js)
 ├── robots.txt              # Allows search engines, blocks AI crawlers
@@ -39,8 +39,10 @@ Website and supporting infrastructure for **Novai Systems LLC**, an AI tools com
 ├── .well-known/
 │   └── security.txt        # Security contact info
 └── worker/
-    ├── wrangler.toml       # Cloudflare Worker config
-    └── widget-injector.js  # Injects widget + sales-agent into HTML responses
+    ├── wrangler.toml       # Cloudflare Worker config (widget-injector)
+    ├── widget-injector.js  # Injects call widget + sales-agent into HTML responses
+    ├── gtm-wrangler.toml   # Cloudflare Worker config (GTM outbound)
+    └── gtm-outbound.js     # Receives leads, stores in KV, triggers Vapi outbound calls
 ```
 
 ## Architecture
@@ -122,17 +124,51 @@ Single-page structure with sections: Header, Hero, Proof Bar, Products (4-card g
 - `robots.txt` blocks AI training crawlers (GPTBot, ClaudeBot, CCBot, etc.) while allowing search engines
 - Canonical URL: `https://novaisystems.online/`
 
+## Vapi Integration (AI Voice Agents)
+
+Uses [Vapi](https://vapi.ai) for AI-powered phone interactions.
+
+### Inbound
+- **+1 (213) 943-3042** — "Novai systems receptionist" (Vapi phone number ID: `cd5b0d0a-a2bd-4bad-afd4-b06d0de45a57`)
+- Server URL: `https://vapi-notifications.ajay-solomon.workers.dev/`
+- The "Let's Talk" widget dials this number via `tel:` link
+
+### Outbound (GTM)
+- **+1 (943) 223 9707** — "WorkBench GTM Agent" (used for automated outbound calls)
+- When the sales agent captures a lead with a phone number, it POSTs to the GTM outbound worker
+- The worker stores the lead in KV and triggers a Vapi outbound call via `POST https://api.vapi.ai/call`
+- Lead context (name, product interest, need) is passed to the AI agent via `assistantOverrides.variableValues`
+
+### GTM Worker Setup
+```bash
+cd worker
+# Create KV namespace
+npx wrangler kv namespace create LEADS --config gtm-wrangler.toml
+# Set the Vapi API key as a secret
+npx wrangler secret put VAPI_API_KEY --config gtm-wrangler.toml
+# Update gtm-wrangler.toml with KV binding ID, phone number ID, and assistant ID
+# Deploy
+npx wrangler deploy --config gtm-wrangler.toml
+```
+
+### GTM Worker Endpoints
+- `POST /lead` — Capture lead, trigger outbound call
+- `GET /leads` — List all leads (used by admin dashboard)
+- `GET /leads/stats` — Aggregate stats
+- `DELETE /leads` — Clear all leads
+
 ## Development Workflow
 
 1. **Edit files directly** — no build/compile step needed.
 2. **Test locally** by opening `index.html` in a browser (sales agent and widget work standalone).
-3. **Deploy** by pushing to the appropriate branch; Netlify picks up changes automatically.
-4. **Worker changes** require deployment via `wrangler deploy` from the `worker/` directory.
+3. **Deploy static files** by pushing to the appropriate branch; Netlify picks up changes automatically.
+4. **Widget injector changes:** `npx wrangler deploy` from `worker/` directory.
+5. **GTM outbound worker changes:** `npx wrangler deploy --config gtm-wrangler.toml` from `worker/` directory.
 
 ## Important Notes
 
 - There are **no tests, linters, or type checkers** in this project. Validate changes manually in-browser.
-- The sales agent phone number `+1 (213) 943-3042` appears in multiple places (HTML, JSON-LD schemas, sales-agent.js). Keep them in sync when changing.
-- `widget.js` is served with CORS headers (`Access-Control-Allow-Origin: *`) because it is loaded cross-origin by other Novai sites.
-- The `novai_website_bundle.zip` in the root is a static archive of the site — do not modify it directly; it may be outdated.
-- All product information and conversation flows in `sales-agent.js` are hardcoded. There is no CMS or external data source.
+- The phone number `+1 (213) 943-3042` appears in: `widget.js`, `worker/widget-injector.js`, `sales-agent.js`, `index.html`, JSON-LD schemas. Keep ALL in sync.
+- `widget.js` is served with CORS headers (`Access-Control-Allow-Origin: *`) for cross-origin embedding.
+- The GTM worker URL `https://novai-gtm-outbound.ajay-solomon.workers.dev` is referenced in `sales-agent.js` and `admin.html`.
+- All product knowledge and conversation flows in `sales-agent.js` are hardcoded — no CMS or external data source.

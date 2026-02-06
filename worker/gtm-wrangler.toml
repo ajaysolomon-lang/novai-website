@@ -1,0 +1,20 @@
+name = "novai-gtm-outbound"
+main = "gtm-outbound.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# Set these to your Vapi WorkBench GTM Agent IDs
+# Find phone number ID in Vapi Dashboard > Phone Numbers > select number > copy ID
+VAPI_PHONE_NUMBER_ID = ""
+# Find assistant ID in Vapi Dashboard > Assistants > select assistant > copy ID
+VAPI_ASSISTANT_ID = ""
+
+# KV namespace for lead storage
+# Create with: npx wrangler kv namespace create LEADS
+# Then paste the binding ID below
+# [[kv_namespaces]]
+# binding = "LEADS"
+# id = ""
+
+# Secret (set via CLI, not in this file):
+#   npx wrangler secret put VAPI_API_KEY --config gtm-wrangler.toml
