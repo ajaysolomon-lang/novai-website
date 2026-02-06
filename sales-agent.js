@@ -755,6 +755,50 @@
     document.head.appendChild(hideCSS);
   } catch(e) {}
 
+  // ─── Fix "Go to Admin" button on dashboard ─────────────────────────
+  try {
+    function wbFixAdminLink() {
+      if (window.location.pathname.indexOf('/dashboard') !== 0) return;
+      var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+      while (walker.nextNode()) {
+        var tNode = walker.currentNode;
+        if (tNode.textContent.trim() === 'Go to Admin') {
+          var el = tNode.parentElement;
+          // Walk up to the card container
+          var card = el;
+          for (var u = 0; u < 5; u++) {
+            if (!card.parentElement || card.parentElement === document.body) break;
+            card = card.parentElement;
+            if (card.offsetWidth > 150 && card.offsetHeight > 80) break;
+          }
+          if (card && !card.closest('a[href="/admin"]')) {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', function(e) {
+              if (e.target.tagName !== 'A') window.location.href = '/admin';
+            });
+            // Wrap any arrow character in a link
+            var allSpans = card.querySelectorAll('*');
+            for (var s = 0; s < allSpans.length; s++) {
+              var txt = allSpans[s].textContent.trim();
+              if ((txt === '\u2192' || txt === '\u203A' || txt === '\u2794') && allSpans[s].children.length === 0) {
+                var aLink = document.createElement('a');
+                aLink.href = '/admin';
+                aLink.style.cssText = 'color:inherit;text-decoration:none';
+                allSpans[s].parentNode.insertBefore(aLink, allSpans[s]);
+                aLink.appendChild(allSpans[s]);
+                break;
+              }
+            }
+          }
+          break;
+        }
+      }
+    }
+    // Run after SPA renders — retry a couple times
+    setTimeout(wbFixAdminLink, 1500);
+    setTimeout(wbFixAdminLink, 4000);
+  } catch(e) {}
+
   // ─── Mount ────────────────────────────────────────────────────────
   document.body.appendChild(container);
 })();
