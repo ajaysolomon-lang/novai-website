@@ -620,15 +620,46 @@ export default {
       return new Response(SALES_AGENT_CODE, {
         headers: {
           "Content-Type": "application/javascript; charset=utf-8",
-          "Cache-Control": "public, max-age=3600",
+          "Cache-Control": "no-cache",
           "Access-Control-Allow-Origin": "*"
         }
+      });
+    }
+
+    // Debug endpoint — shows what the worker sees
+    if (isWorkbench && url.pathname === "/_wb-debug") {
+      const testRes = await fetch(new Request(url.origin + "/", {
+        headers: request.headers,
+        redirect: "manual"
+      }));
+      const info = {
+        worker: "novai-widget-injector",
+        hostname: url.hostname,
+        isWorkbench,
+        originStatus: testRes.status,
+        originContentType: testRes.headers.get("content-type"),
+        originCSP: testRes.headers.get("content-security-policy"),
+        originHeaders: Object.fromEntries(testRes.headers.entries())
+      };
+      return new Response(JSON.stringify(info, null, 2), {
+        headers: { "Content-Type": "application/json" }
       });
     }
 
     const res = await fetch(request);
     const type = res.headers.get("content-type") || "";
     if (!type.includes("text/html")) return res;
+
+    // Remove CSP headers that might block our external script
+    const newHeaders = new Headers(res.headers);
+    newHeaders.delete("content-security-policy");
+    newHeaders.delete("content-security-policy-report-only");
+
+    const newRes = new Response(res.body, {
+      status: res.status,
+      statusText: res.statusText,
+      headers: newHeaders
+    });
 
     return new HTMLRewriter()
       .on("body", {
@@ -643,6 +674,6 @@ export default {
           }
         }
       })
-      .transform(res);
+      .transform(newRes);
   }
 };
