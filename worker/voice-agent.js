@@ -3,6 +3,8 @@
 // Endpoints:
 //   POST /_wb-voice/webhook   — Vapi server URL (receives all call events)
 //   GET  /_wb-voice/calls     — Admin call log viewer
+
+import { verifyAdmin } from './admin-dashboard.js';
 //   GET  /_wb-voice/analytics — Aggregated analytics dashboard
 
 const WEBHOOK_SECRET = "wb-vapi-2025";
@@ -257,11 +259,10 @@ function handleHang(event, env) {
 
 // ─── Call log viewer: GET /_wb-voice/calls?key=ADMIN_KEY ─────────────
 export async function handleCallLog(request, env) {
-  const url = new URL(request.url);
-  const key = url.searchParams.get("key");
-  if (key !== "novai2025wb") {
+  if (!verifyAdmin(request)) {
     return corsResponse({ error: "unauthorized" }, 401);
   }
+  const url = new URL(request.url);
 
   if (!env.WB_LEADS) {
     return corsResponse({ calls: [], note: "KV not configured" });
@@ -284,11 +285,10 @@ export async function handleCallLog(request, env) {
 
 // ─── Analytics dashboard: GET /_wb-voice/analytics?key=ADMIN_KEY ─────
 export async function handleAnalytics(request, env) {
-  const url = new URL(request.url);
-  const key = url.searchParams.get("key");
-  if (key !== "novai2025wb") {
+  if (!verifyAdmin(request)) {
     return corsResponse({ error: "unauthorized" }, 401);
   }
+  const url = new URL(request.url);
 
   if (!env.WB_LEADS) {
     return corsResponse({ analytics: null, note: "KV not configured" });

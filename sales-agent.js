@@ -808,18 +808,21 @@
     setTimeout(wbFixAdminLink, 8000);
   } catch(e) {}
 
-  // ─── Vapi Voice Call Button ──────────────────────────────────────
-  // Adds a phone button above the chat toggle for browser-based voice calls
+  // ─── Voice Call Button ──────────────────────────────────────────
+  // Mobile: dials +1 (943) 223-9707 directly
+  // Desktop: browser-based Vapi call via WebRTC
   (function initVoiceButton() {
+    var PHONE_NUMBER = '+19432239707';
     var VAPI_PUBLIC_KEY = '6c4b7bf5-65ba-4855-aebb-1778f7c8994c';
     var VAPI_ASSISTANT_ID = '66890f6b-a091-4922-83ed-46328ecfecd1';
     var vapiInstance = null;
     var callActive = false;
+    var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
     // Phone button
     var phoneBtn = document.createElement('button');
     phoneBtn.className = 'wb-voice-btn';
-    phoneBtn.setAttribute('aria-label', 'Call WorkBench AI');
+    phoneBtn.setAttribute('aria-label', 'Call WorkBench');
     phoneBtn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>';
 
     // Status indicator
@@ -830,30 +833,32 @@
     // Tooltip
     var tooltip = document.createElement('span');
     tooltip.className = 'wb-voice-tooltip';
-    tooltip.textContent = 'Talk to AI';
+    tooltip.textContent = isMobile ? 'Call us' : 'Call AI agent';
     phoneBtn.appendChild(tooltip);
 
     function loadVapiSDK(cb) {
       if (window.Vapi) return cb();
       var s = document.createElement('script');
       s.src = 'https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js';
-      s.onload = function() {
-        // Vapi SDK attaches to window
-        setTimeout(cb, 100);
-      };
+      s.onload = function() { setTimeout(cb, 100); };
       s.onerror = function() {
-        console.error('[WorkBench Voice] Failed to load Vapi SDK');
+        console.error('[WorkBench Voice] SDK failed, falling back to tel:');
         phoneBtn.classList.remove('wb-voice-connecting');
+        window.location.href = 'tel:' + PHONE_NUMBER;
       };
       document.head.appendChild(s);
     }
 
     function startCall() {
+      // Mobile: always dial directly
+      if (isMobile) {
+        window.location.href = 'tel:' + PHONE_NUMBER;
+        return;
+      }
+
+      // Desktop: Vapi browser call
       if (callActive) {
-        // End call
-        if (vapiInstance) {
-          vapiInstance.stop();
-        }
+        if (vapiInstance) vapiInstance.stop();
         return;
       }
 
@@ -869,30 +874,31 @@
             phoneBtn.classList.remove('wb-voice-connecting');
             phoneBtn.classList.add('wb-voice-active');
             tooltip.textContent = 'End call';
-            console.log('[WorkBench Voice] Call started');
           });
 
           vapiInstance.on('call-end', function() {
             callActive = false;
             phoneBtn.classList.remove('wb-voice-active', 'wb-voice-connecting');
-            tooltip.textContent = 'Talk to AI';
+            tooltip.textContent = 'Call AI agent';
             vapiInstance = null;
-            console.log('[WorkBench Voice] Call ended');
           });
 
           vapiInstance.on('error', function(e) {
             console.error('[WorkBench Voice] Error:', e);
             callActive = false;
             phoneBtn.classList.remove('wb-voice-active', 'wb-voice-connecting');
-            tooltip.textContent = 'Talk to AI';
+            tooltip.textContent = 'Call AI agent';
             vapiInstance = null;
+            // Fallback to tel: on error
+            window.location.href = 'tel:' + PHONE_NUMBER;
           });
 
           vapiInstance.start(VAPI_ASSISTANT_ID);
         } catch(e) {
           console.error('[WorkBench Voice] Init error:', e);
           phoneBtn.classList.remove('wb-voice-connecting');
-          tooltip.textContent = 'Talk to AI';
+          tooltip.textContent = 'Call AI agent';
+          window.location.href = 'tel:' + PHONE_NUMBER;
         }
       });
     }
