@@ -9,3 +9,7 @@
 
 /.well-known/security.txt
   Content-Type: text/plain; charset=utf-8
+
+/widget.js
+  Content-Type: application/javascript; charset=utf-8
+  Access-Control-Allow-Origin: *
