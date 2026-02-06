@@ -932,6 +932,8 @@ const SALES_AGENT_CODE = `(function() {
           html += '<div><h2 style="font-size:22px;font-weight:700;color:#e6edf3;margin:0">GTM Dashboard</h2>';
           html += '<p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:4px">' + (kvOk ? '<span style="color:#3fb950">\\u25CF</span> KV Online' : '<span style="color:#f59e0b">\\u25CF</span> KV Offline') + ' \\u00B7 ' + new Date().toLocaleTimeString() + '</p></div>';
           html += '<div style="display:flex;gap:8px">';
+          html += '<button id="wb-gtm-seed" style="background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.3);color:#3fb950;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Seed Test Data</button>';
+          html += '<button id="wb-gtm-diag" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Diagnostics</button>';
           html += '<button id="wb-gtm-refresh" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#e6edf3;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Refresh</button>';
           html += '<button id="wb-gtm-back" style="background:none;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Back to Admin</button>';
           html += '</div></div>';
@@ -1012,6 +1014,68 @@ const SALES_AGENT_CODE = `(function() {
             gtmActive = false;
             var gtmLink = document.getElementById('wb-gtm-link');
             if (gtmLink) gtmLink.style.background = '';
+          });
+
+          // Seed test data button
+          var seedBtn = document.getElementById('wb-gtm-seed');
+          if (seedBtn) seedBtn.addEventListener('click', function() {
+            seedBtn.textContent = 'Seeding...';
+            seedBtn.disabled = true;
+            fetch('/_wb-voice/test?key=' + KEY, {method:'POST',headers:{'Authorization':'Bearer '+KEY}})
+              .then(function(r){return r.json();})
+              .then(function(d){
+                if (d.ok) { seedBtn.textContent = 'Done!'; seedBtn.style.color = '#3fb950'; setTimeout(function(){ loadAndRender(); }, 500); }
+                else { seedBtn.textContent = 'Failed: ' + (d.error || 'unknown'); seedBtn.style.color = '#ef4444'; }
+              })
+              .catch(function(e){ seedBtn.textContent = 'Error: ' + e.message; seedBtn.style.color = '#ef4444'; });
+          });
+
+          // Diagnostics button
+          var diagBtn = document.getElementById('wb-gtm-diag');
+          if (diagBtn) diagBtn.addEventListener('click', function() {
+            diagBtn.textContent = 'Running...';
+            fetch('/_wb-voice/health?key=' + KEY, {headers:{'Authorization':'Bearer '+KEY}})
+              .then(function(r){return r.json();})
+              .then(function(d){
+                var diagHtml = '<div style="padding:8px 0">';
+                diagHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:22px;font-weight:700;color:#e6edf3;margin:0">Diagnostics</h2>';
+                diagHtml += '<button id="wb-diag-close" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#e6edf3;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Back to Dashboard</button></div>';
+
+                // KV status
+                diagHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px">';
+                diagHtml += statBox('KV Bound', d.kv_bound ? 'Yes' : 'NO', d.kv_bound ? '#3fb950' : '#ef4444');
+                diagHtml += statBox('KV Readable', d.kv_readable ? 'Yes' : 'NO', d.kv_readable ? '#3fb950' : '#ef4444');
+                diagHtml += statBox('KV Writable', d.kv_writable ? 'Yes' : 'NO', d.kv_writable ? '#3fb950' : '#ef4444');
+                diagHtml += statBox('Lead Index', (d.indexes && d.indexes.leads) || 0, '#58a6ff');
+                diagHtml += statBox('Call Index', (d.indexes && d.indexes.calls) || 0, '#58a6ff');
+                diagHtml += statBox('Report Index', (d.indexes && d.indexes.reports) || 0, '#58a6ff');
+                diagHtml += '</div>';
+
+                if (d.kv_read_error) diagHtml += '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);padding:12px;border-radius:8px;margin-bottom:12px;color:#ef4444;font-size:13px">KV Read Error: ' + escH(d.kv_read_error) + '</div>';
+                if (d.kv_write_error) diagHtml += '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);padding:12px;border-radius:8px;margin-bottom:12px;color:#ef4444;font-size:13px">KV Write Error: ' + escH(d.kv_write_error) + '</div>';
+
+                // Event log
+                diagHtml += '<h3 style="font-size:15px;font-weight:600;margin:16px 0 12px;color:#e6edf3">Webhook Event Log <span style="font-size:12px;background:rgba(245,158,11,0.15);color:#f59e0b;padding:2px 8px;border-radius:10px;margin-left:6px">' + (d.event_log ? d.event_log.length : 0) + '</span></h3>';
+                if (d.event_log && d.event_log.length > 0) {
+                  var evRows = [];
+                  for (var ei = 0; ei < d.event_log.length; ei++) {
+                    var ev = d.event_log[ei];
+                    evRows.push([badge(ev.type, ev.type === 'end-of-call-report' ? 'green' : ev.type === 'status-update' ? 'blue' : 'amber'), escH(ev.call_id), escH(ev.details), fmtDate(ev.time)]);
+                  }
+                  diagHtml += renderTable(['Event','Call ID','Details','Time'], evRows);
+                } else {
+                  diagHtml += '<div style="text-align:center;padding:32px;color:rgba(255,255,255,0.3);font-size:14px">No webhook events received yet. This means Vapi has not sent any events to your webhook URL.</div>';
+                }
+
+                diagHtml += '</div>';
+                contentEl.innerHTML = diagHtml;
+                var closeBtn = document.getElementById('wb-diag-close');
+                if (closeBtn) closeBtn.addEventListener('click', function() { loadAndRender(); });
+              })
+              .catch(function(e){
+                diagBtn.textContent = 'Error: ' + e.message;
+                diagBtn.style.color = '#ef4444';
+              });
           });
         });
       }
@@ -1173,7 +1237,7 @@ const SALES_AGENT_CODE = `(function() {
 })();
 `;
 
-import { handleVoiceWebhook, handleCallLog, handleAnalytics } from './voice-agent.js';
+import { handleVoiceWebhook, handleCallLog, handleAnalytics, handleHealth, handleTestSeed } from './voice-agent.js';
 import { handleAdminDashboard, verifyAdmin } from './admin-dashboard.js';
 
 export default {
@@ -1206,6 +1270,12 @@ export default {
       }
       if (url.pathname === "/_wb-voice/analytics" && request.method === "GET") {
         return handleAnalytics(request, env);
+      }
+      if (url.pathname === "/_wb-voice/health" && request.method === "GET") {
+        return handleHealth(request, env);
+      }
+      if (url.pathname === "/_wb-voice/test" && request.method === "POST") {
+        return handleTestSeed(request, env);
       }
       return new Response(JSON.stringify({ error: "not found" }), {
         status: 404,
