@@ -20,7 +20,8 @@ const SALES_AGENT_TAG = `<script src="/_wb-sales-agent.js" defer><\/script>`;
 // ─── Sales Agent JS (served as external file at /_wb-sales-agent.js) ───
 const SALES_AGENT_CODE = `(function() {
   'use strict';
-  if (document.querySelector('.wb-sales-agent')) return;
+  console.log('[WB-Sales-Agent] Script loaded at ' + new Date().toISOString());
+  if (document.querySelector('.wb-sales-agent')) { console.log('[WB-Sales-Agent] Already exists, skipping'); return; }
 
   // ─── Conversation Flows ───────────────────────────────────────────
   var FLOWS = {
@@ -402,7 +403,7 @@ const SALES_AGENT_CODE = `(function() {
   var style = document.createElement('style');
   style.textContent =
     ':root{--wb-accent:#0077ff;--wb-accent2:#00bbff;--wb-bg:#0d1117;--wb-panel:#161b22;--wb-surface:#1c2333;--wb-border:rgba(255,255,255,.08);--wb-text:#e6edf3;--wb-text-dim:rgba(255,255,255,.5);--wb-radius:16px}' +
-    '.wb-sales-agent{position:fixed;bottom:24px;right:24px;z-index:99999;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}' +
+    '.wb-sales-agent{position:fixed;bottom:24px;left:24px;z-index:2147483647;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}' +
     '.wb-sa-toggle{width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--wb-accent),var(--wb-accent2));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,119,255,.4);transition:transform .2s,box-shadow .2s;position:relative}' +
     '.wb-sa-toggle:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(0,119,255,.5)}' +
     '.wb-sa-toggle .wb-sa-icon-close{display:none}' +
@@ -411,7 +412,7 @@ const SALES_AGENT_CODE = `(function() {
     '.wb-sa-toggle::before{content:"";position:absolute;inset:-4px;border-radius:50%;background:linear-gradient(135deg,var(--wb-accent),var(--wb-accent2));opacity:.3;animation:wb-pulse 2s ease-in-out infinite}' +
     '.wb-sales-agent.is-open .wb-sa-toggle::before{display:none}' +
     '@keyframes wb-pulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.15);opacity:0}}' +
-    '.wb-sa-panel{position:absolute;bottom:68px;right:0;width:370px;max-height:540px;background:var(--wb-bg);border:1px solid var(--wb-border);border-radius:var(--wb-radius);box-shadow:0 16px 64px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;opacity:0;transform:translateY(16px) scale(.96);pointer-events:none;transition:opacity .25s,transform .25s}' +
+    '.wb-sa-panel{position:absolute;bottom:68px;left:0;width:370px;max-height:540px;background:var(--wb-bg);border:1px solid var(--wb-border);border-radius:var(--wb-radius);box-shadow:0 16px 64px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;opacity:0;transform:translateY(16px) scale(.96);pointer-events:none;transition:opacity .25s,transform .25s}' +
     '.wb-sales-agent.is-open .wb-sa-panel{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}' +
     '.wb-sa-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#0a2540,#0f2f52);border-bottom:1px solid var(--wb-border)}' +
     '.wb-sa-header-info{display:flex;align-items:center;gap:10px}' +
@@ -448,7 +449,7 @@ const SALES_AGENT_CODE = `(function() {
     '@keyframes wb-typing{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}' +
     '.wb-sa-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#ff3b3b;border-radius:50%;border:2px solid var(--wb-bg);animation:wb-fadeIn .3s ease}' +
     '.wb-sales-agent.is-open .wb-sa-badge{display:none}' +
-    '@media(max-width:480px){.wb-sa-panel{width:calc(100vw - 32px);right:-8px;bottom:64px;max-height:70vh}.wb-sa-toggle{width:50px;height:50px}.wb-sales-agent{bottom:16px;right:16px}}' +
+    '@media(max-width:480px){.wb-sa-panel{width:calc(100vw - 32px);left:-8px;bottom:64px;max-height:70vh}.wb-sa-toggle{width:50px;height:50px}.wb-sales-agent{bottom:16px;left:16px}}' +
     '@keyframes wb-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}';
 
   document.head.appendChild(style);
