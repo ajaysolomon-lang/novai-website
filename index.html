@@ -1,28 +1,144 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WorkBench by Novai Systems | Local Services Marketplace in Los Angeles</title>
-  <meta name="description" content="WorkBench by Novai Systems — a local services marketplace connecting providers and customers in Los Angeles.">
+  <meta name="description" content="WorkBench by Novai Systems — a local services marketplace connecting providers and customers in Los Angeles. Find trusted local pros for home, business, and lifestyle services.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://workbench.novaisystems.online/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="style.css">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="WorkBench by Novai Systems | Local Services Marketplace">
+  <meta property="og:description" content="Find trusted local service providers in Los Angeles. WorkBench connects you with vetted professionals for home, business, and lifestyle needs.">
+  <meta property="og:url" content="https://workbench.novaisystems.online/">
+  <meta property="og:site_name" content="WorkBench by Novai Systems">
+  <meta property="og:image" content="https://workbench.novaisystems.online/og-image.svg">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="WorkBench by Novai Systems | Local Services Marketplace">
+  <meta name="twitter:description" content="Find trusted local service providers in Los Angeles. WorkBench connects you with vetted professionals.">
+  <meta name="twitter:image" content="https://workbench.novaisystems.online/og-image.svg">
+
+  <!-- Schema: WebSite -->
   <script type="application/ld+json">
   {
-    "@context":"https://schema.org",
-    "@type":"WebSite",
-    "name":"WorkBench by Novai Systems",
-    "url":"https://workbench.novaisystems.online/"
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "WorkBench by Novai Systems",
+    "url": "https://workbench.novaisystems.online/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://workbench.novaisystems.online/services?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
   }
   </script>
+
+  <!-- Schema: Organization -->
   <script type="application/ld+json">
   {
-    "@context":"https://schema.org",
-    "@type":"Organization",
-    "name":"Novai Systems LLC",
-    "url":"https://workbench.novaisystems.online/",
-    "telephone":"+1-213-943-3042"
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Novai Systems LLC",
+    "url": "https://novaisystems.online/",
+    "telephone": "+1-213-943-3042",
+    "sameAs": [
+      "https://workbench.novaisystems.online/"
+    ]
+  }
+  </script>
+
+  <!-- Schema: LocalBusiness (GEO) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "WorkBench by Novai Systems",
+    "description": "Local services marketplace connecting providers and customers in Los Angeles.",
+    "url": "https://workbench.novaisystems.online/",
+    "telephone": "+1-213-943-3042",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Los Angeles",
+      "addressRegion": "CA",
+      "addressCountry": "US"
+    },
+    "areaServed": {
+      "@type": "City",
+      "name": "Los Angeles",
+      "sameAs": "https://en.wikipedia.org/wiki/Los_Angeles"
+    },
+    "priceRange": "$$"
+  }
+  </script>
+
+  <!-- Schema: SoftwareApplication (AEO) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "WorkBench",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "url": "https://workbench.novaisystems.online/",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Novai Systems LLC"
+    },
+    "description": "A local services marketplace connecting providers and customers in Los Angeles for home, business, and lifestyle services."
+  }
+  </script>
+
+  <!-- Schema: FAQPage (AEO) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is WorkBench by Novai Systems?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "WorkBench is a local services marketplace by Novai Systems LLC that connects customers with trusted service providers in Los Angeles for home, business, and lifestyle needs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I sign up for WorkBench?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Visit workbench.novaisystems.online/signup to create a free account as a customer or service provider."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What areas does WorkBench serve?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "WorkBench currently serves the greater Los Angeles, California area as its launch market."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is WorkBench free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, signing up and browsing services on WorkBench is free for customers. Service providers can list their services on the platform."
+        }
+      }
+    ]
   }
   </script>
 </head>
