@@ -1,0 +1,17 @@
+name = "novai-vapi-server"
+main = "vapi-server.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+VAPI_SERVER_URL = "https://novai-vapi-server.ajay-solomon.workers.dev"
+
+# Secrets (set via CLI, not in this file):
+#   npx wrangler secret put VAPI_SERVER_SECRET --config vapi-wrangler.toml
+#   (Set the SAME value in Vapi Dashboard > Server URL > Secret for each phone number)
+
+# KV namespace for leads + call reports
+# Create with: npx wrangler kv namespace create LEADS --config vapi-wrangler.toml
+# Then uncomment and paste the binding ID below
+# [[kv_namespaces]]
+# binding = "LEADS"
+# id = ""

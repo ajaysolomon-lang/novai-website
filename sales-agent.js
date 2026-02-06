@@ -590,6 +590,9 @@
       // Also submit to intake form if it exists on the page
       submitToIntakeForm(lead);
 
+      // Send to GTM outbound worker (triggers Vapi outbound call if phone provided)
+      submitToGTMWorker(lead);
+
       // Log for analytics
       console.log('[Novai Sales Agent] Lead captured:', lead);
 
@@ -610,6 +613,43 @@
       if (nameInput) nameInput.value = lead.name;
       if (emailInput) emailInput.value = lead.email;
       if (needInput) needInput.value = '[' + lead.product + '] ' + (lead.need || 'Interested - contacted via sales agent');
+    }
+  }
+
+  // ─── GTM Outbound Worker Integration ───────────────────────────
+  var GTM_WORKER_URL = 'https://novai-gtm-outbound.ajay-solomon.workers.dev';
+
+  function submitToGTMWorker(lead) {
+    try {
+      var payload = {
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone || '',
+        need: lead.need || '',
+        product: lead.product || 'General',
+        source: 'sales-agent',
+        page: lead.page || window.location.href,
+        timestamp: lead.timestamp
+      };
+
+      fetch(GTM_WORKER_URL + '/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function(res) {
+        return res.json();
+      }).then(function(data) {
+        if (data.success) {
+          console.log('[Novai GTM] Lead synced. ID:', data.leadId);
+          if (data.outboundCall && data.outboundCall.success) {
+            console.log('[Novai GTM] Outbound call initiated. Call ID:', data.outboundCall.callId);
+          }
+        }
+      }).catch(function(err) {
+        console.warn('[Novai GTM] Worker sync failed (lead saved locally):', err.message);
+      });
+    } catch(e) {
+      // Fail silently — localStorage is the fallback
     }
   }
 
