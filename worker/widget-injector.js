@@ -30,7 +30,7 @@ const SALES_AGENT_CODE = `(function() {
 
     // ── GREETING ──
     greeting: {
-      message: "What's up! I'm your WorkBench guide \u2014 whether you need a local pro, want to grow your business, or have questions. How can I help?",
+      message: "What's up! I'm your WorkBench guide \\u2014 whether you need a local pro, want to grow your business, or have questions. How can I help?",
       options: [
         { label: 'I need a service provider', next: 'customer_start' },
         { label: 'I want to list my services', next: 'provider_start' },
@@ -43,7 +43,7 @@ const SALES_AGENT_CODE = `(function() {
 
     // ── HOW IT WORKS ──
     how_it_works: {
-      message: "WorkBench connects you with vetted local service providers in LA. Think of it as your neighborhood marketplace \u2014 minus the sketchy Craigslist vibes.\n\nFor customers: Browse, compare, book directly. No fees on your end.\n\nFor providers: List your services, set your rates, get discovered by people who actually need what you offer.\n\nSimple as that.",
+      message: "WorkBench connects you with vetted local service providers in LA. Think of it as your neighborhood marketplace \\u2014 minus the sketchy Craigslist vibes.\\n\\nFor customers: Browse, compare, book directly. No fees on your end.\\n\\nFor providers: List your services, set your rates, get discovered by people who actually need what you offer.\\n\\nSimple as that.",
       options: [
         { label: 'Find a service', next: 'customer_start' },
         { label: 'Get listed as a provider', next: 'provider_start' },
@@ -53,7 +53,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     differentiator: {
-      message: "Real talk? Most platforms charge insane fees, bury small providers, or have zero quality control.\n\nWorkBench is different:\n\n\u2022 Vetted providers only \u2014 no random listings\n\u2022 Fair pricing \u2014 providers keep more\n\u2022 Zero fees for customers\n\u2022 Built for LA first \u2014 we know this market\n\u2022 Real support from real people\n\nWe\u2019re not trying to be everything everywhere. We\u2019re building the best local services marketplace in LA.",
+      message: "Real talk? Most platforms charge insane fees, bury small providers, or have zero quality control.\\n\\nWorkBench is different:\\n\\n\\u2022 Vetted providers only \\u2014 no random listings\\n\\u2022 Fair pricing \\u2014 providers keep more\\n\\u2022 Zero fees for customers\\n\\u2022 Built for LA first \\u2014 we know this market\\n\\u2022 Real support from real people\\n\\nWe\\u2019re not trying to be everything everywhere. We\\u2019re building the best local services marketplace in LA.",
       options: [
         { label: 'Sign me up', next: 'signup_choice' },
         { label: 'Browse services', next: 'link_services' },
@@ -64,7 +64,7 @@ const SALES_AGENT_CODE = `(function() {
 
     // ── CUSTOMER FLOWS (acquisition) ──
     customer_start: {
-      message: "Let\u2019s find your person. What kind of service do you need?",
+      message: "Let\\u2019s find your person. What kind of service do you need?",
       options: [
         { label: 'Home (repairs, cleaning, landscaping)', next: 'cat_home' },
         { label: 'Business (consulting, accounting, IT)', next: 'cat_business' },
@@ -74,7 +74,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     cat_home: {
-      message: "Home services \u2014 plumbing, electrical, HVAC, cleaning, landscaping, handyman, painting, moving. All vetted, all on WorkBench.\n\nNo more calling 5 people and hoping one shows up.",
+      message: "Home services \\u2014 plumbing, electrical, HVAC, cleaning, landscaping, handyman, painting, moving. All vetted, all on WorkBench.\\n\\nNo more calling 5 people and hoping one shows up.",
       options: [
         { label: 'Browse home services', next: 'link_services' },
         { label: 'How much does it cost?', next: 'pricing_customer' },
@@ -84,7 +84,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     cat_business: {
-      message: "Business services \u2014 accounting, legal, marketing, design, IT, consulting, web dev. Local pros who get the LA market.\n\nSkip the agency markup. Work directly with the people doing the work.",
+      message: "Business services \\u2014 accounting, legal, marketing, design, IT, consulting, web dev. Local pros who get the LA market.\\n\\nSkip the agency markup. Work directly with the people doing the work.",
       options: [
         { label: 'Browse business services', next: 'link_services' },
         { label: 'Pricing?', next: 'pricing_customer' },
@@ -94,7 +94,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     cat_lifestyle: {
-      message: "Lifestyle services \u2014 personal trainers, beauty pros, wellness coaches, photographers, tutors, event planners. LA at its finest.\n\nAll on one platform. Browse, book, done.",
+      message: "Lifestyle services \\u2014 personal trainers, beauty pros, wellness coaches, photographers, tutors, event planners. LA at its finest.\\n\\nAll on one platform. Browse, book, done.",
       options: [
         { label: 'Browse lifestyle services', next: 'link_services' },
         { label: 'Pricing?', next: 'pricing_customer' },
@@ -104,7 +104,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     cat_other: {
-      message: "If it\u2019s a service in LA, we probably have it or we\u2019re adding it fast. Browse the full directory or tell me what you need \u2014 I\u2019ll point you right.",
+      message: "If it\\u2019s a service in LA, we probably have it or we\\u2019re adding it fast. Browse the full directory or tell me what you need \\u2014 I\\u2019ll point you right.",
       options: [
         { label: 'Browse all services', next: 'link_services' },
         { label: 'Tell you what I need', next: 'capture_customer' },
@@ -114,7 +114,7 @@ const SALES_AGENT_CODE = `(function() {
 
     // ── PROVIDER FLOWS (supply-side acquisition) ──
     provider_start: {
-      message: "Smart. If you\u2019re a service pro in LA, this is your platform. What do you do?",
+      message: "Smart. If you\\u2019re a service pro in LA, this is your platform. What do you do?",
       options: [
         { label: 'Home services', next: 'provider_home' },
         { label: 'Business services', next: 'provider_biz' },
@@ -125,17 +125,17 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     provider_home: {
-      message: "Home services are in demand \u2014 cleaning, repairs, plumbing, electrical, HVAC, landscaping, painting, moving. LA homeowners are actively looking.\n\nSet your rates. Control your schedule. Get booked.",
+      message: "Home services are in demand \\u2014 cleaning, repairs, plumbing, electrical, HVAC, landscaping, painting, moving. LA homeowners are actively looking.\\n\\nSet your rates. Control your schedule. Get booked.",
       options: [
         { label: 'Sign up as a provider', next: 'link_signup_provider' },
-        { label: 'What\u2019s the cost?', next: 'pricing_provider' },
+        { label: 'What\\u2019s the cost?', next: 'pricing_provider' },
         { label: 'How will customers find me?', next: 'discovery' },
         { label: 'Back', next: 'greeting' }
       ]
     },
 
     provider_biz: {
-      message: "Business services \u2014 consulting, accounting, legal, marketing, design, IT, dev. Local businesses want local experts, not faceless agencies.\n\nShow your work. Set your terms. Let clients come to you.",
+      message: "Business services \\u2014 consulting, accounting, legal, marketing, design, IT, dev. Local businesses want local experts, not faceless agencies.\\n\\nShow your work. Set your terms. Let clients come to you.",
       options: [
         { label: 'Sign up', next: 'link_signup_provider' },
         { label: 'Cost?', next: 'pricing_provider' },
@@ -145,7 +145,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     provider_life: {
-      message: "Lifestyle is booming in LA \u2014 trainers, beauty, wellness, photography, events, tutoring. People are ready to book.\n\nNo competing with corporate chains. This is the local marketplace.",
+      message: "Lifestyle is booming in LA \\u2014 trainers, beauty, wellness, photography, events, tutoring. People are ready to book.\\n\\nNo competing with corporate chains. This is the local marketplace.",
       options: [
         { label: 'Sign up', next: 'link_signup_provider' },
         { label: 'Cost?', next: 'pricing_provider' },
@@ -155,9 +155,9 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     why_list: {
-      message: "Most platforms treat providers like inventory. High fees, buried in search, competing against companies with infinite ad budgets.\n\nWorkBench flips that:\n\n\u2022 Set your own rates\n\u2022 Keep more of what you earn\n\u2022 Get discovered by locals ready to book\n\u2022 No ad spend required\n\u2022 Built for LA \u2014 not a generic nationwide platform\n\nYour skills, your business, your marketplace.",
+      message: "Most platforms treat providers like inventory. High fees, buried in search, competing against companies with infinite ad budgets.\\n\\nWorkBench flips that:\\n\\n\\u2022 Set your own rates\\n\\u2022 Keep more of what you earn\\n\\u2022 Get discovered by locals ready to book\\n\\u2022 No ad spend required\\n\\u2022 Built for LA \\u2014 not a generic nationwide platform\\n\\nYour skills, your business, your marketplace.",
       options: [
-        { label: 'I\u2019m in \u2014 sign me up', next: 'link_signup_provider' },
+        { label: 'I\\u2019m in \\u2014 sign me up', next: 'link_signup_provider' },
         { label: 'How do customers find me?', next: 'discovery' },
         { label: 'Still thinking...', next: 'objection_think' },
         { label: 'Back', next: 'greeting' }
@@ -165,26 +165,26 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     discovery: {
-      message: "Customers find you through:\n\n\u2022 Search by service type and location\n\u2022 Browsing the directory\n\u2022 Our matching recommendations\n\u2022 SEO \u2014 we rank for LA service searches\n\nNo ads needed. The platform brings customers to you.",
+      message: "Customers find you through:\\n\\n\\u2022 Search by service type and location\\n\\u2022 Browsing the directory\\n\\u2022 Our matching recommendations\\n\\u2022 SEO \\u2014 we rank for LA service searches\\n\\nNo ads needed. The platform brings customers to you.",
       options: [
-        { label: 'Let\u2019s go', next: 'link_signup_provider' },
+        { label: 'Let\\u2019s go', next: 'link_signup_provider' },
         { label: 'Back to provider info', next: 'provider_start' },
         { label: 'Back to start', next: 'greeting' }
       ]
     },
 
     objection_think: {
-      message: "Take your time. But every day you\u2019re not listed, someone in LA is finding a different provider.\n\nFree to sign up. No lock-in. See how it works before committing.\n\nWhen you\u2019re ready \u2014 we\u2019re here.",
+      message: "Take your time. But every day you\\u2019re not listed, someone in LA is finding a different provider.\\n\\nFree to sign up. No lock-in. See how it works before committing.\\n\\nWhen you\\u2019re ready \\u2014 we\\u2019re here.",
       options: [
         { label: 'Alright, let me try', next: 'link_signup_provider' },
         { label: 'More about WorkBench', next: 'how_it_works' },
-        { label: 'I\u2019ll come back', next: 'close_thanks' }
+        { label: 'I\\u2019ll come back', next: 'close_thanks' }
       ]
     },
 
     // ── PRICING ──
     pricing_overview: {
-      message: "Quick breakdown:\n\nCustomers: Completely free. Browse, book, done. You pay the provider directly. No platform fees.\n\nProviders: Fair and transparent. No massive percentage cuts. Sign up to see details for your service category.",
+      message: "Quick breakdown:\\n\\nCustomers: Completely free. Browse, book, done. You pay the provider directly. No platform fees.\\n\\nProviders: Fair and transparent. No massive percentage cuts. Sign up to see details for your service category.",
       options: [
         { label: 'Sign up as a customer', next: 'link_signup_customer' },
         { label: 'Sign up as a provider', next: 'link_signup_provider' },
@@ -194,7 +194,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     pricing_customer: {
-      message: "Free. No subscription, no hidden fees, no \"premium tier\" BS.\n\nYou browse, you book, you pay the provider directly. WorkBench doesn\u2019t touch your wallet.",
+      message: "Free. No subscription, no hidden fees, no \\"premium tier\\" BS.\\n\\nYou browse, you book, you pay the provider directly. WorkBench doesn\\u2019t touch your wallet.",
       options: [
         { label: 'Sign me up', next: 'link_signup_customer' },
         { label: 'Browse services', next: 'link_services' },
@@ -203,18 +203,18 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     pricing_provider: {
-      message: "We keep it fair. No 30-40% cuts like the big platforms. WorkBench is built for providers to actually earn.\n\nThe exact rate depends on your service category and volume. Sign up and we\u2019ll walk you through it \u2014 no surprises, no lock-in.",
+      message: "We keep it fair. No 30-40% cuts like the big platforms. WorkBench is built for providers to actually earn.\\n\\nThe exact rate depends on your service category and volume. Sign up and we\\u2019ll walk you through it \\u2014 no surprises, no lock-in.",
       options: [
-        { label: 'Fair enough \u2014 sign me up', next: 'link_signup_provider' },
+        { label: 'Fair enough \\u2014 sign me up', next: 'link_signup_provider' },
         { label: 'Why is this better?', next: 'why_list' },
         { label: 'Back', next: 'greeting' }
       ]
     },
 
     sustainable: {
-      message: "Fair question. We take a small service fee from providers \u2014 way less than what other platforms charge.\n\nOur model works because we focus on quality over quantity, and we\u2019re growing sustainably in LA first. No VC burn-rate race. Just building something that works.",
+      message: "Fair question. We take a small service fee from providers \\u2014 way less than what other platforms charge.\\n\\nOur model works because we focus on quality over quantity, and we\\u2019re growing sustainably in LA first. No VC burn-rate race. Just building something that works.",
       options: [
-        { label: 'Makes sense \u2014 sign me up', next: 'signup_choice' },
+        { label: 'Makes sense \\u2014 sign me up', next: 'signup_choice' },
         { label: 'Tell me about the company', next: 'about_novai' },
         { label: 'Back', next: 'greeting' }
       ]
@@ -222,7 +222,7 @@ const SALES_AGENT_CODE = `(function() {
 
     // ── TRUST & VETTING ──
     vetting: {
-      message: "Every provider goes through verification. We check credentials, reviews, and legitimacy before anyone goes live.\n\nThis isn\u2019t a free-for-all listing site. Quality is the whole point. That\u2019s why people trust WorkBench over random Google results.",
+      message: "Every provider goes through verification. We check credentials, reviews, and legitimacy before anyone goes live.\\n\\nThis isn\\u2019t a free-for-all listing site. Quality is the whole point. That\\u2019s why people trust WorkBench over random Google results.",
       options: [
         { label: 'Show me services', next: 'link_services' },
         { label: 'What if I have a bad experience?', next: 'bad_experience' },
@@ -231,7 +231,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     bad_experience: {
-      message: "Contact us directly. We take quality seriously. If a provider doesn\u2019t deliver, we handle it \u2014 resolution, refund assistance, and if needed, removal.\n\nWe stand behind every listing on this platform.",
+      message: "Contact us directly. We take quality seriously. If a provider doesn\\u2019t deliver, we handle it \\u2014 resolution, refund assistance, and if needed, removal.\\n\\nWe stand behind every listing on this platform.",
       options: [
         { label: 'Browse services', next: 'link_services' },
         { label: 'Contact support', next: 'talk_human' },
@@ -241,7 +241,7 @@ const SALES_AGENT_CODE = `(function() {
 
     // ── SUPPORT FLOWS ──
     support_menu: {
-      message: "I\u2019ve got you. What do you need help with?",
+      message: "I\\u2019ve got you. What do you need help with?",
       options: [
         { label: 'How to book a service', next: 'help_booking' },
         { label: 'My account or profile', next: 'help_account' },
@@ -253,7 +253,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     help_booking: {
-      message: "Find a provider on the Services page, check their profile and rates, and book directly. You deal with them directly \u2014 WorkBench makes the connection.\n\nNeed help finding the right service?",
+      message: "Find a provider on the Services page, check their profile and rates, and book directly. You deal with them directly \\u2014 WorkBench makes the connection.\\n\\nNeed help finding the right service?",
       options: [
         { label: 'Browse services', next: 'link_services' },
         { label: 'Other help', next: 'support_menu' },
@@ -262,7 +262,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     help_account: {
-      message: "Head to your Profile page to update your info, change settings, or manage your account.\n\nIf something\u2019s broken, reach out \u2014 we\u2019ll fix it.",
+      message: "Head to your Profile page to update your info, change settings, or manage your account.\\n\\nIf something\\u2019s broken, reach out \\u2014 we\\u2019ll fix it.",
       options: [
         { label: 'Go to Profile', next: 'link_profile' },
         { label: 'Contact support', next: 'talk_human' },
@@ -271,7 +271,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     help_payments: {
-      message: "Customers: You pay providers directly. No surprise charges from WorkBench.\n\nProviders: Payouts are processed through your dashboard. Check the Payouts section for status and history.\n\nStill stuck?",
+      message: "Customers: You pay providers directly. No surprise charges from WorkBench.\\n\\nProviders: Payouts are processed through your dashboard. Check the Payouts section for status and history.\\n\\nStill stuck?",
       options: [
         { label: 'Contact support', next: 'talk_human' },
         { label: 'Go to Dashboard', next: 'link_dashboard' },
@@ -280,7 +280,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     help_jobs: {
-      message: "Check your Dashboard for job status, active bookings, and updates. Everything\u2019s tracked there.\n\nIf something\u2019s off with a job, reach out directly.",
+      message: "Check your Dashboard for job status, active bookings, and updates. Everything\\u2019s tracked there.\\n\\nIf something\\u2019s off with a job, reach out directly.",
       options: [
         { label: 'Go to Dashboard', next: 'link_dashboard' },
         { label: 'Contact support', next: 'talk_human' },
@@ -289,7 +289,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     help_verification: {
-      message: "ID verification is part of our provider vetting process. Typically takes a few business days. We need to make sure every provider is legit.\n\nSubmitted docs and haven\u2019t heard back? Reach out \u2014 we\u2019ll check on it.",
+      message: "ID verification is part of our provider vetting process. Typically takes a few business days. We need to make sure every provider is legit.\\n\\nSubmitted docs and haven\\u2019t heard back? Reach out \\u2014 we\\u2019ll check on it.",
       options: [
         { label: 'Contact support', next: 'talk_human' },
         { label: 'Back', next: 'support_menu' }
@@ -298,7 +298,7 @@ const SALES_AGENT_CODE = `(function() {
 
     // ── ABOUT NOVAI ──
     about_novai: {
-      message: "WorkBench is by Novai Systems \u2014 an AI and tech company based in LA.\n\nWe build intelligent systems: multi-agent architectures, predictive engines, and platforms built for real impact. WorkBench brings that engineering DNA to local services.",
+      message: "WorkBench is by Novai Systems \\u2014 an AI and tech company based in LA.\\n\\nWe build intelligent systems: multi-agent architectures, predictive engines, and platforms built for real impact. WorkBench brings that engineering DNA to local services.",
       options: [
         { label: 'What else does Novai build?', next: 'novai_products' },
         { label: 'Visit Novai Systems', next: 'link_novai' },
@@ -307,7 +307,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     novai_products: {
-      message: "Novai Systems builds:\n\n\u2022 AIREC Smart Ads Optimizer \u2014 self-correcting ad intelligence\n\u2022 Industry Diagnostic Intelligence \u2014 competitive analysis\n\u2022 Life & Business Command Console \u2014 unified operations\n\u2022 WorkBench \u2014 the marketplace you\u2019re on now\n\nAll powered by AIREC technology: self-correcting loops and predictive intelligence.",
+      message: "Novai Systems builds:\\n\\n\\u2022 AIREC Smart Ads Optimizer \\u2014 self-correcting ad intelligence\\n\\u2022 Industry Diagnostic Intelligence \\u2014 competitive analysis\\n\\u2022 Life & Business Command Console \\u2014 unified operations\\n\\u2022 WorkBench \\u2014 the marketplace you\\u2019re on now\\n\\nAll powered by AIREC technology: self-correcting loops and predictive intelligence.",
       options: [
         { label: 'Visit novaisystems.online', next: 'link_novai' },
         { label: 'Contact Novai', next: 'talk_human' },
@@ -319,13 +319,13 @@ const SALES_AGENT_CODE = `(function() {
     signup_choice: {
       message: "Who are you signing up as?",
       options: [
-        { label: 'Customer \u2014 I need services', next: 'link_signup_customer' },
-        { label: 'Provider \u2014 I offer services', next: 'link_signup_provider' }
+        { label: 'Customer \\u2014 I need services', next: 'link_signup_customer' },
+        { label: 'Provider \\u2014 I offer services', next: 'link_signup_provider' }
       ]
     },
 
     link_services: {
-      message: "Here\u2019s the services directory:",
+      message: "Here\\u2019s the services directory:",
       link: '/services',
       linkText: 'Browse Services',
       options: [
@@ -335,7 +335,7 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     link_signup_customer: {
-      message: "Quick and free \u2014 30 seconds to get started:",
+      message: "Quick and free \\u2014 30 seconds to get started:",
       link: '/signup',
       linkText: 'Create Free Account',
       options: [
@@ -349,7 +349,7 @@ const SALES_AGENT_CODE = `(function() {
       link: '/signup',
       linkText: 'Get Listed on WorkBench',
       options: [
-        { label: 'What\u2019s the process?', next: 'after_signup_provider' },
+        { label: 'What\\u2019s the process?', next: 'after_signup_provider' },
         { label: 'Back', next: 'greeting' }
       ]
     },
@@ -385,7 +385,7 @@ const SALES_AGENT_CODE = `(function() {
 
     // ── POST-SIGNUP INFO ──
     after_signup_customer: {
-      message: "You\u2019re in immediately. Browse the full directory, check provider profiles and reviews, book directly. No approval wait.\n\nSave favorites, get notified when new pros join categories you care about.",
+      message: "You\\u2019re in immediately. Browse the full directory, check provider profiles and reviews, book directly. No approval wait.\\n\\nSave favorites, get notified when new pros join categories you care about.",
       options: [
         { label: 'Sign me up', next: 'link_signup_customer' },
         { label: 'More questions', next: 'greeting' }
@@ -393,16 +393,16 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     after_signup_provider: {
-      message: "Create your profile, add services with descriptions and pricing, go through our quick verification. Once approved, you\u2019re live.\n\nCustomers find you through search, categories, and our matching. You manage bookings from your dashboard.",
+      message: "Create your profile, add services with descriptions and pricing, go through our quick verification. Once approved, you\\u2019re live.\\n\\nCustomers find you through search, categories, and our matching. You manage bookings from your dashboard.",
       options: [
-        { label: 'Let\u2019s do it', next: 'link_signup_provider' },
+        { label: 'Let\\u2019s do it', next: 'link_signup_provider' },
         { label: 'How long is verification?', next: 'verification_time' },
         { label: 'Back', next: 'greeting' }
       ]
     },
 
     verification_time: {
-      message: "Few business days, max. We move fast \u2014 just need to make sure everything checks out. Once verified, you\u2019re live immediately.",
+      message: "Few business days, max. We move fast \\u2014 just need to make sure everything checks out. Once verified, you\\u2019re live immediately.",
       options: [
         { label: 'Sign me up', next: 'link_signup_provider' },
         { label: 'Back', next: 'greeting' }
@@ -411,7 +411,7 @@ const SALES_AGENT_CODE = `(function() {
 
     // ── AREAS ──
     areas_served: {
-      message: "WorkBench currently serves the greater Los Angeles area \u2014 our launch market. We\u2019re expanding, but LA is where we deliver the best experience right now.\n\nIf you\u2019re in LA, you\u2019re covered.",
+      message: "WorkBench currently serves the greater Los Angeles area \\u2014 our launch market. We\\u2019re expanding, but LA is where we deliver the best experience right now.\\n\\nIf you\\u2019re in LA, you\\u2019re covered.",
       options: [
         { label: 'Find services in LA', next: 'link_services' },
         { label: 'When are you expanding?', next: 'expansion' },
@@ -420,50 +420,50 @@ const SALES_AGENT_CODE = `(function() {
     },
 
     expansion: {
-      message: "Soon. Building the foundation right in LA first \u2014 quality, providers, experience locked in. Then we scale.\n\nWant to know when we hit your area? Drop your info.",
+      message: "Soon. Building the foundation right in LA first \\u2014 quality, providers, experience locked in. Then we scale.\\n\\nWant to know when we hit your area? Drop your info.",
       options: [
         { label: 'Notify me', next: 'capture_expansion' },
-        { label: 'I\u2019m in LA \u2014 let\u2019s go', next: 'link_services' },
+        { label: 'I\\u2019m in LA \\u2014 let\\u2019s go', next: 'link_services' },
         { label: 'Back', next: 'greeting' }
       ]
     },
 
     // ── LEAD CAPTURE ──
     capture_customer: {
-      message: "Tell us what you need \u2014 we\u2019ll match you with the right provider. Quick details:",
+      message: "Tell us what you need \\u2014 we\\u2019ll match you with the right provider. Quick details:",
       capture: true,
-      product: 'WorkBench \u2014 Service Request',
+      product: 'WorkBench \\u2014 Service Request',
       options: []
     },
 
     capture_expansion: {
-      message: "Drop your email and we\u2019ll notify you when WorkBench launches in your area. No spam \u2014 just the heads-up.",
+      message: "Drop your email and we\\u2019ll notify you when WorkBench launches in your area. No spam \\u2014 just the heads-up.",
       capture: true,
-      product: 'WorkBench \u2014 Expansion Interest',
+      product: 'WorkBench \\u2014 Expansion Interest',
       options: []
     },
 
     talk_human: {
-      message: "Real people, no gatekeepers:\n\n\u260E +1 (213) 943-3042 \u2014 Human team\n\u{1F916} +1 (943) 223-9707 \u2014 AI Voice Agent (24/7)\n\nOr drop your details \u2014 we\u2019ll reach out, usually same day.",
+      message: "Real people, no gatekeepers:\\n\\n\\u260E +1 (213) 943-3042 \\u2014 Human team\\n\\u{1F916} +1 (943) 223-9707 \\u2014 AI Voice Agent (24/7)\\n\\nOr drop your details \\u2014 we\\u2019ll reach out, usually same day.",
       capture: true,
-      product: 'WorkBench \u2014 Contact Request',
+      product: 'WorkBench \\u2014 Contact Request',
       options: []
     },
 
     // ── CLOSE ──
     close_thanks: {
-      message: "All good. workbench.novaisystems.online \u2014 we\u2019re here when you\u2019re ready.\n\nWorkBench by Novai Systems.",
+      message: "All good. workbench.novaisystems.online \\u2014 we\\u2019re here when you\\u2019re ready.\\n\\nWorkBench by Novai Systems.",
       options: [
         { label: 'Start over', next: 'greeting' }
       ]
     },
 
     capture_success: {
-      message: "Locked in. We\u2019ll be in touch fast \u2014 no drip campaigns, just a real reply.\n\nAnything else?",
+      message: "Locked in. We\\u2019ll be in touch fast \\u2014 no drip campaigns, just a real reply.\\n\\nAnything else?",
       options: [
         { label: 'Browse services', next: 'link_services' },
         { label: 'Learn more', next: 'how_it_works' },
-        { label: 'That\u2019s all \u2014 thanks', next: 'close_thanks' }
+        { label: 'That\\u2019s all \\u2014 thanks', next: 'close_thanks' }
       ]
     }
   };
@@ -501,7 +501,7 @@ const SALES_AGENT_CODE = `(function() {
         '</div>' +
         '<div>' +
           '<strong class="wb-sa-title">WorkBench</strong>' +
-          '<span class="wb-sa-status">\u2022 Online</span>' +
+          '<span class="wb-sa-status">\\u2022 Online</span>' +
         '</div>' +
       '</div>' +
       '<button class="wb-sa-minimize" aria-label="Minimize">' +
@@ -609,7 +609,7 @@ const SALES_AGENT_CODE = `(function() {
     if (linkData && sender === 'agent') {
       var link = document.createElement('a');
       link.className = 'wb-sa-link';
-      link.textContent = linkData.text + ' \u2192';
+      link.textContent = linkData.text + ' \\u2192';
       link.href = linkData.url;
       if (linkData.external) {
         link.target = '_blank';
@@ -747,7 +747,7 @@ const SALES_AGENT_CODE = `(function() {
       console.log('[WorkBench Agent] Lead captured:', lead);
 
       form.remove();
-      addMessage('Name: ' + name + '\nEmail: ' + email + (phone ? '\nPhone: ' + phone : '') + (need ? '\nRe: ' + need : ''), 'user');
+      addMessage('Name: ' + name + '\\nEmail: ' + email + (phone ? '\\nPhone: ' + phone : '') + (need ? '\\nRe: ' + need : ''), 'user');
       renderFlow('capture_success');
     });
   }
@@ -932,7 +932,7 @@ const SALES_AGENT_CODE = `(function() {
           // Header with refresh + back
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">';
           html += '<div><h2 style="font-size:22px;font-weight:700;color:#e6edf3;margin:0">GTM Dashboard</h2>';
-          html += '<p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:4px"><span style="color:#3fb950">\u25CF</span> Live from Vapi API \u00B7 ' + new Date().toLocaleTimeString() + '</p></div>';
+          html += '<p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:4px"><span style="color:#3fb950">\\u25CF</span> Live from Vapi API \\u00B7 ' + new Date().toLocaleTimeString() + '</p></div>';
           html += '<div style="display:flex;gap:8px">';
           html += '<button id="wb-gtm-diag" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Diagnostics</button>';
           html += '<button id="wb-gtm-refresh" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#e6edf3;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Refresh</button>';
