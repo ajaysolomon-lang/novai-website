@@ -627,6 +627,109 @@ export async function handleAnalytics(request, env) {
   }
 }
 
+// ─── Vapi API Proxy: GET /_wb-voice/vapi-data?key=ADMIN_KEY ──────────
+// Pulls call data directly from Vapi API (bypasses broken webhook delivery)
+const VAPI_PRIVATE_KEY = "63a966f6-cbf5-4915-827c-5f82b6cdf0b6";
+
+export async function handleVapiData(request, env) {
+  if (!verifyAdmin(request)) {
+    return corsResponse({ error: "unauthorized" }, 401);
+  }
+
+  const url = new URL(request.url);
+  const limit = parseInt(url.searchParams.get("limit") || "50");
+
+  try {
+    // Fetch calls from Vapi API
+    const callsRes = await fetch(`https://api.vapi.ai/call?limit=${limit}`, {
+      headers: { "Authorization": `Bearer ${VAPI_PRIVATE_KEY}` }
+    });
+    if (!callsRes.ok) {
+      return corsResponse({ error: "Vapi API error: " + callsRes.status }, 502);
+    }
+    const vapiCalls = await callsRes.json();
+
+    // Transform into our format
+    const calls = [];
+    const leads = [];
+    const reports = [];
+    let totalDuration = 0;
+
+    for (const c of vapiCalls) {
+      // Only include calls for our GTM assistant
+      if (c.assistantId !== "66890f6b-a091-4922-83ed-46328ecfecd1") continue;
+
+      const duration = c.endedAt && c.startedAt
+        ? Math.round((new Date(c.endedAt) - new Date(c.startedAt)) / 1000)
+        : 0;
+      totalDuration += duration;
+
+      calls.push({
+        id: c.id,
+        status: c.status || "unknown",
+        customer_number: c.customer?.number || "",
+        duration: duration,
+        cost: c.cost || 0,
+        created: c.startedAt || c.createdAt,
+        ended: c.endedAt,
+        ended_reason: c.endedReason || ""
+      });
+
+      // Extract report data from analysis
+      const analysis = c.analysis || {};
+      const structuredData = analysis.structuredData || {};
+      if (c.status === "ended") {
+        reports.push({
+          id: c.id,
+          customer_number: c.customer?.number || "",
+          duration: duration,
+          cost: c.cost || 0,
+          created: c.startedAt || c.createdAt,
+          summary: analysis.summary || "",
+          success_score: analysis.successEvaluation || "-",
+          caller_intent: structuredData.caller_intent || "unknown",
+          outcome: structuredData.outcome || "unknown",
+          sentiment: structuredData.sentiment || "neutral",
+          service_category: structuredData.service_category || "",
+          specific_service: structuredData.specific_service || "",
+          lead_name: structuredData.lead_name || "",
+          lead_email: structuredData.lead_email || "",
+          lead_phone: structuredData.lead_phone || c.customer?.number || ""
+        });
+      }
+
+      // Create lead entries from calls with customer info
+      if (c.customer?.number) {
+        leads.push({
+          name: structuredData.lead_name || "",
+          email: structuredData.lead_email || "",
+          phone: c.customer.number,
+          need: structuredData.specific_service || structuredData.service_category || "",
+          product: "WorkBench — Voice Agent",
+          timestamp: c.startedAt || c.createdAt,
+          source: "vapi_voice",
+          call_id: c.id,
+          intent: structuredData.caller_intent || "",
+          sentiment: structuredData.sentiment || "",
+          outcome: structuredData.outcome || ""
+        });
+      }
+    }
+
+    return corsResponse({
+      source: "vapi_api",
+      total_calls: calls.length,
+      total_duration: totalDuration,
+      calls,
+      reports,
+      leads
+    });
+  } catch (e) {
+    console.error("[Vapi Proxy] Error:", e.message);
+    return corsResponse({ error: e.message }, 500);
+  }
+}
+
 // ─── CORS helper ─────────────────────────────────────────────────────
 function corsResponse(data, status = 200) {
   return new Response(data ? JSON.stringify(data) : null, {

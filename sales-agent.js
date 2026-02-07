@@ -885,34 +885,35 @@
         if (!gtmActive) { savedContent = contentEl.innerHTML; gtmActive = true; }
         contentEl.innerHTML = '<div style="padding:8px 0"><h2 style="font-size:22px;font-weight:700;margin-bottom:8px;color:#e6edf3">GTM Dashboard</h2><p style="color:rgba(255,255,255,0.4);font-size:14px">Loading live data...</p></div>';
 
+        // Fetch from Vapi API proxy (real data) + KV leads
         Promise.all([
-          fetch('/_wb-leads?limit=100&key=' + KEY, {headers:{'Authorization':'Bearer ' + KEY}}).then(function(r){return r.json();}).catch(function(){return {};}),
-          fetch('/_wb-voice/calls?key=' + KEY, {headers:{'Authorization':'Bearer ' + KEY}}).then(function(r){return r.json();}).catch(function(){return {};}),
-          fetch('/_wb-voice/analytics?key=' + KEY, {headers:{'Authorization':'Bearer ' + KEY}}).then(function(r){return r.json();}).catch(function(){return {};})
+          fetch('/_wb-voice/vapi-data?key=' + KEY, {headers:{'Authorization':'Bearer ' + KEY}}).then(function(r){return r.json();}).catch(function(){return {};}),
+          fetch('/_wb-leads?limit=100&key=' + KEY, {headers:{'Authorization':'Bearer ' + KEY}}).then(function(r){return r.json();}).catch(function(){return {};})
         ]).then(function(res) {
-          var leadsRes = res[0] || {};
-          var callsRes = res[1] || {};
-          var analyticsRes = res[2] || {};
-          var leads = leadsRes.leads || [];
-          var totalLeads = leadsRes.total || leads.length;
-          var calls = callsRes.calls || [];
-          var totalCalls = callsRes.total || calls.length;
-          var reports = analyticsRes.recent_reports || [];
-          var totals = analyticsRes.totals || {};
-          var kvOk = leadsRes.note !== 'KV not configured';
+          var vapiData = res[0] || {};
+          var kvLeads = res[1] || {};
 
-          var webLeads = 0; var voiceLeads = 0;
-          for (var i = 0; i < leads.length; i++) {
-            if (leads[i].source && leads[i].source.indexOf('vapi') !== -1) voiceLeads++; else webLeads++;
-          }
+          // Vapi API is the source of truth for calls and reports
+          var calls = vapiData.calls || [];
+          var totalCalls = vapiData.total_calls || calls.length;
+          var reports = vapiData.reports || [];
+
+          // Merge leads: Vapi voice leads + KV web leads
+          var vapiLeads = vapiData.leads || [];
+          var webLeadsArr = (kvLeads.leads || []).filter(function(l) { return !l.source || l.source.indexOf('vapi') === -1; });
+          var leads = vapiLeads.concat(webLeadsArr);
+          var totalLeads = leads.length;
+          var voiceLeads = vapiLeads.length;
+          var webLeads = webLeadsArr.length;
+
+          var totalDuration = vapiData.total_duration || 0;
 
           var html = '<div style="padding:8px 0">';
           // Header with refresh + back
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">';
           html += '<div><h2 style="font-size:22px;font-weight:700;color:#e6edf3;margin:0">GTM Dashboard</h2>';
-          html += '<p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:4px">' + (kvOk ? '<span style="color:#3fb950">\u25CF</span> KV Online' : '<span style="color:#f59e0b">\u25CF</span> KV Offline') + ' \u00B7 ' + new Date().toLocaleTimeString() + '</p></div>';
+          html += '<p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:4px"><span style="color:#3fb950">\u25CF</span> Live from Vapi API \u00B7 ' + new Date().toLocaleTimeString() + '</p></div>';
           html += '<div style="display:flex;gap:8px">';
-          html += '<button id="wb-gtm-clear" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Clear Data</button>';
           html += '<button id="wb-gtm-diag" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Diagnostics</button>';
           html += '<button id="wb-gtm-refresh" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#e6edf3;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Refresh</button>';
           html += '<button id="wb-gtm-back" style="background:none;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Back to Admin</button>';
@@ -925,7 +926,7 @@
           html += statBox('Voice Leads', voiceLeads, '#f59e0b');
           html += statBox('Voice Calls', totalCalls, '#58a6ff');
           html += statBox('Call Reports', reports.length, '#3fb950');
-          html += statBox('Avg Score', totals.avg_success_score || '-', '#f59e0b');
+          html += statBox('Total Duration', fmtDur(totalDuration), '#f59e0b');
           html += '</div>';
 
           // Leads table
@@ -966,22 +967,6 @@
             html += renderTable(['Caller','Status','Duration','Date'], callRows);
           }
 
-          // Analytics breakdown
-          if (totals.intents && Object.keys(totals.intents).length > 0) {
-            html += '<h3 style="font-size:15px;font-weight:600;margin:24px 0 12px;color:#e6edf3">Analytics Breakdown</h3>';
-            html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">';
-            var ik = Object.keys(totals.intents);
-            for (var ii = 0; ii < ik.length; ii++) html += statBox(ik[ii].replace(/_/g,' '), totals.intents[ik[ii]], '#58a6ff');
-            if (totals.outcomes) {
-              var ok = Object.keys(totals.outcomes);
-              for (var oi = 0; oi < ok.length; oi++) {
-                var oc = ok[oi].indexOf('lead') !== -1 ? '#3fb950' : ok[oi].indexOf('lost') !== -1 ? '#ef4444' : '#f59e0b';
-                html += statBox(ok[oi].replace(/_/g,' '), totals.outcomes[ok[oi]], oc);
-              }
-            }
-            html += '</div>';
-          }
-
           html += '</div>';
           contentEl.innerHTML = html;
 
@@ -994,21 +979,6 @@
             gtmActive = false;
             var gtmLink = document.getElementById('wb-gtm-link');
             if (gtmLink) gtmLink.style.background = '';
-          });
-
-          // Clear data button
-          var clearBtn = document.getElementById('wb-gtm-clear');
-          if (clearBtn) clearBtn.addEventListener('click', function() {
-            if (!confirm('Clear all GTM dashboard data? This removes test data and real data.')) return;
-            clearBtn.textContent = 'Clearing...';
-            clearBtn.disabled = true;
-            fetch('/_wb-voice/test?key=' + KEY, {method:'DELETE',headers:{'Authorization':'Bearer '+KEY}})
-              .then(function(r){return r.json();})
-              .then(function(d){
-                if (d.ok) { clearBtn.textContent = 'Cleared!'; setTimeout(function(){ loadAndRender(); }, 500); }
-                else { clearBtn.textContent = 'Failed'; clearBtn.style.color = '#ef4444'; }
-              })
-              .catch(function(e){ clearBtn.textContent = 'Error'; clearBtn.style.color = '#ef4444'; });
           });
 
           // Diagnostics button
