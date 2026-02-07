@@ -98,9 +98,12 @@ export async function handleVoiceWebhook(request, env) {
   }
 }
 
-// ─── Assistant request — dynamic config override ─────────────────────
+// ─── Assistant request — tell Vapi which assistant to use ────────────
 function handleAssistantRequest(event, env) {
-  return corsResponse({ ok: true });
+  console.log("[Voice Agent] Assistant request — returning assistant ID");
+  return corsResponse({
+    assistantId: "66890f6b-a091-4922-83ed-46328ecfecd1"
+  });
 }
 
 // ─── Function calls — custom tool handling ───────────────────────────
@@ -488,6 +491,44 @@ export async function handleTestSeed(request, env) {
     message: "Test data seeded. Refresh the GTM Dashboard to see it.",
     results
   });
+}
+
+// ─── Clear all data: DELETE /_wb-voice/test?key=ADMIN_KEY ─────────────
+export async function handleClearData(request, env) {
+  if (!verifyAdmin(request)) {
+    return corsResponse({ error: "unauthorized" }, 401);
+  }
+  if (!env.WB_LEADS) {
+    return corsResponse({ error: "KV not bound" }, 500);
+  }
+
+  // Clear all indexes and their referenced data
+  const indexes = ["_index", "_call_index", "_report_index", "_event_log"];
+  for (const idx of indexes) {
+    try {
+      const raw = await env.WB_LEADS.get(idx);
+      if (raw) {
+        const keys = JSON.parse(raw);
+        if (Array.isArray(keys)) {
+          for (const key of keys) {
+            await env.WB_LEADS.delete(key);
+          }
+        }
+      }
+      await env.WB_LEADS.delete(idx);
+    } catch (e) {
+      console.error("[Clear] Error clearing", idx, e.message);
+    }
+  }
+
+  // Clear analytics for last 30 days
+  const now = new Date();
+  for (let d = 0; d < 30; d++) {
+    const date = new Date(now - d * 86400000).toISOString().slice(0, 10);
+    try { await env.WB_LEADS.delete("analytics_" + date); } catch(e) {}
+  }
+
+  return corsResponse({ ok: true, message: "All data cleared." });
 }
 
 // ─── Call log viewer: GET /_wb-voice/calls?key=ADMIN_KEY ─────────────

@@ -912,7 +912,7 @@
           html += '<div><h2 style="font-size:22px;font-weight:700;color:#e6edf3;margin:0">GTM Dashboard</h2>';
           html += '<p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:4px">' + (kvOk ? '<span style="color:#3fb950">\u25CF</span> KV Online' : '<span style="color:#f59e0b">\u25CF</span> KV Offline') + ' \u00B7 ' + new Date().toLocaleTimeString() + '</p></div>';
           html += '<div style="display:flex;gap:8px">';
-          html += '<button id="wb-gtm-seed" style="background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.3);color:#3fb950;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Seed Test Data</button>';
+          html += '<button id="wb-gtm-clear" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Clear Data</button>';
           html += '<button id="wb-gtm-diag" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Diagnostics</button>';
           html += '<button id="wb-gtm-refresh" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#e6edf3;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Refresh</button>';
           html += '<button id="wb-gtm-back" style="background:none;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px">Back to Admin</button>';
@@ -996,18 +996,19 @@
             if (gtmLink) gtmLink.style.background = '';
           });
 
-          // Seed test data button
-          var seedBtn = document.getElementById('wb-gtm-seed');
-          if (seedBtn) seedBtn.addEventListener('click', function() {
-            seedBtn.textContent = 'Seeding...';
-            seedBtn.disabled = true;
-            fetch('/_wb-voice/test?key=' + KEY, {method:'POST',headers:{'Authorization':'Bearer '+KEY}})
+          // Clear data button
+          var clearBtn = document.getElementById('wb-gtm-clear');
+          if (clearBtn) clearBtn.addEventListener('click', function() {
+            if (!confirm('Clear all GTM dashboard data? This removes test data and real data.')) return;
+            clearBtn.textContent = 'Clearing...';
+            clearBtn.disabled = true;
+            fetch('/_wb-voice/test?key=' + KEY, {method:'DELETE',headers:{'Authorization':'Bearer '+KEY}})
               .then(function(r){return r.json();})
               .then(function(d){
-                if (d.ok) { seedBtn.textContent = 'Done!'; seedBtn.style.color = '#3fb950'; setTimeout(function(){ loadAndRender(); }, 500); }
-                else { seedBtn.textContent = 'Failed: ' + (d.error || 'unknown'); seedBtn.style.color = '#ef4444'; }
+                if (d.ok) { clearBtn.textContent = 'Cleared!'; setTimeout(function(){ loadAndRender(); }, 500); }
+                else { clearBtn.textContent = 'Failed'; clearBtn.style.color = '#ef4444'; }
               })
-              .catch(function(e){ seedBtn.textContent = 'Error: ' + e.message; seedBtn.style.color = '#ef4444'; });
+              .catch(function(e){ clearBtn.textContent = 'Error'; clearBtn.style.color = '#ef4444'; });
           });
 
           // Diagnostics button
