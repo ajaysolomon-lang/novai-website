@@ -15,15 +15,31 @@
     .admin-header{padding:20px 32px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
     .admin-header h1{font-size:18px;font-weight:700}
     .admin-header h1 span{color:var(--accent)}
-    .admin-header .source-badge{font-size:11px;padding:4px 10px;border-radius:20px;background:rgba(0,119,255,.1);color:var(--accent2);border:1px solid rgba(0,119,255,.2)}
-    .admin-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .admin-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .admin-actions button{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer;transition:all .15s;font-family:inherit}
     .admin-actions button:hover{border-color:var(--accent);background:rgba(0,119,255,.1)}
     .admin-actions button.danger{border-color:rgba(255,59,59,.3)}
     .admin-actions button.danger:hover{border-color:var(--red);background:rgba(255,59,59,.1)}
 
+    /* Status bar */
+    .status-bar{padding:10px 32px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:12px}
+    .status-item{display:flex;align-items:center;gap:6px}
+    .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .status-dot.green{background:var(--green);box-shadow:0 0 6px rgba(0,200,83,.5)}
+    .status-dot.red{background:var(--red);box-shadow:0 0 6px rgba(255,59,59,.5)}
+    .status-dot.orange{background:var(--orange);box-shadow:0 0 6px rgba(255,152,0,.5)}
+    .status-dot.blue{background:var(--accent);box-shadow:0 0 6px rgba(0,119,255,.5)}
+    .status-dot.pulsing{animation:statusPulse 1.5s ease-in-out infinite}
+    @keyframes statusPulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .status-label{color:var(--dim)}
+    .status-value{color:var(--text);font-weight:600}
+    .source-badge{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(0,119,255,.1);color:var(--accent2);border:1px solid rgba(0,119,255,.2)}
+    .auto-refresh-toggle{display:flex;align-items:center;gap:6px;margin-left:auto;cursor:pointer;color:var(--dim);user-select:none}
+    .auto-refresh-toggle input{accent-color:var(--accent)}
+    .auto-refresh-toggle:hover{color:var(--text)}
+
     /* Stats bar */
-    .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;padding:24px 32px}
+    .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;padding:24px 32px}
     .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px}
     .stat-card .label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
     .stat-card .value{font-size:28px;font-weight:700}
@@ -37,6 +53,7 @@
     .tab{padding:12px 24px;font-size:14px;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
     .tab:hover{color:var(--text)}
     .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .tab .tab-count{font-size:11px;font-weight:700;margin-left:6px;padding:1px 6px;border-radius:10px;background:rgba(0,119,255,.15);color:var(--accent2)}
 
     /* Content */
     .content{padding:24px 32px}
@@ -63,19 +80,40 @@
     .log-entry .timestamp{color:var(--dim);margin-right:12px}
     .log-entry .event{color:var(--green)}
     .log-entry .event-call{color:var(--orange)}
+    .log-entry .event-report{color:var(--accent2)}
+    .log-entry .event-callback{color:#bb86fc}
     .log-entry .data{color:var(--accent2)}
 
     /* Export area */
     .export-area{margin-top:16px}
     .export-area textarea{width:100%;height:200px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:16px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-size:12px;resize:vertical}
 
+    /* Diagnostics */
+    .diag-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:24px}
+    .diag-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+    .diag-card h4{font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+    .diag-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+    .diag-row:last-child{border-bottom:none}
+    .diag-row .diag-label{color:var(--dim)}
+    .diag-row .diag-value{font-weight:600;font-family:'SF Mono',SFMono-Regular,Consolas,monospace}
+    .diag-row .diag-value.ok{color:var(--green)}
+    .diag-row .diag-value.warn{color:var(--orange)}
+    .diag-row .diag-value.error{color:var(--red)}
+    .kv-keys-list{margin-top:12px;max-height:200px;overflow-y:auto;background:var(--surface2);border-radius:8px;padding:12px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-size:11px;color:var(--dim);line-height:1.8}
+    .kv-keys-list .key{color:var(--accent2)}
+
+    /* Call report detail */
+    .report-summary{font-size:12px;color:var(--dim);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .report-expand{font-size:11px;color:var(--accent);cursor:pointer;text-decoration:underline}
+
     /* Responsive */
     @media(max-width:768px){
       .stats-bar{grid-template-columns:repeat(2,1fr);padding:16px}
       .content,.tabs{padding-left:16px;padding-right:16px}
-      .admin-header{padding:16px}
+      .admin-header,.status-bar{padding-left:16px;padding-right:16px}
       .data-table{font-size:12px}
       .data-table th,.data-table td{padding:8px 10px}
+      .diag-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -84,7 +122,6 @@
   <div class="admin-header">
     <div style="display:flex;align-items:center;gap:12px">
       <h1>NOVAI <span>ADMIN</span></h1>
-      <span class="source-badge" id="data-source">localStorage</span>
     </div>
     <div class="admin-actions">
       <button onclick="refreshData()">Refresh</button>
@@ -94,13 +131,40 @@
     </div>
   </div>
 
+  <div class="status-bar" id="status-bar">
+    <div class="status-item">
+      <span class="status-dot orange" id="api-status-dot"></span>
+      <span class="status-label">API:</span>
+      <span class="status-value" id="api-status-text">Connecting...</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Source:</span>
+      <span class="source-badge" id="data-source">—</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Last refresh:</span>
+      <span class="status-value" id="last-refresh">—</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Records:</span>
+      <span class="status-value" id="record-count">—</span>
+    </div>
+    <label class="auto-refresh-toggle">
+      <input type="checkbox" id="auto-refresh-check" checked>
+      <span>Auto-refresh (30s)</span>
+    </label>
+  </div>
+
   <div class="stats-bar" id="stats-bar"></div>
 
   <div class="tabs">
-    <div class="tab active" data-tab="leads">Leads</div>
+    <div class="tab active" data-tab="leads">Leads <span class="tab-count" id="count-leads">0</span></div>
     <div class="tab" data-tab="analytics">Analytics</div>
-    <div class="tab" data-tab="outbound">Outbound Calls</div>
+    <div class="tab" data-tab="outbound">Outbound Calls <span class="tab-count" id="count-outbound">0</span></div>
+    <div class="tab" data-tab="reports">Call Reports <span class="tab-count" id="count-reports">0</span></div>
+    <div class="tab" data-tab="callbacks">Callbacks <span class="tab-count" id="count-callbacks">0</span></div>
     <div class="tab" data-tab="logs">Activity Log</div>
+    <div class="tab" data-tab="diagnostics">Diagnostics</div>
     <div class="tab" data-tab="export">Export</div>
   </div>
 
@@ -115,6 +179,7 @@
             <th>Email</th>
             <th>Phone</th>
             <th>Product</th>
+            <th>Source</th>
             <th>Need</th>
             <th>Outbound</th>
             <th>Date</th>
@@ -152,18 +217,62 @@
       </table>
     </div>
 
+    <!-- Call Reports (from Vapi end-of-call) -->
+    <div class="tab-panel" id="panel-reports">
+      <p style="margin-bottom:16px;color:var(--dim);font-size:13px">End-of-call reports from Vapi AI phone agents. Includes call duration, cost, summaries, and transcripts.</p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Customer</th>
+            <th>Duration</th>
+            <th>Cost</th>
+            <th>Ended</th>
+            <th>Summary</th>
+            <th>Call ID</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="reports-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Callbacks -->
+    <div class="tab-panel" id="panel-callbacks">
+      <p style="margin-bottom:16px;color:var(--dim);font-size:13px">Callback requests scheduled through the Vapi AI phone agents.</p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Preferred Time</th>
+            <th>Reason</th>
+            <th>Scheduled At</th>
+          </tr>
+        </thead>
+        <tbody id="callbacks-body"></tbody>
+      </table>
+    </div>
+
     <!-- Activity Log -->
     <div class="tab-panel" id="panel-logs">
       <div id="activity-log"></div>
     </div>
 
+    <!-- Diagnostics -->
+    <div class="tab-panel" id="panel-diagnostics">
+      <div id="diagnostics-content">
+        <p style="color:var(--dim)">Loading diagnostics...</p>
+      </div>
+    </div>
+
     <!-- Export -->
     <div class="tab-panel" id="panel-export">
-      <h3 style="font-size:14px;margin-bottom:12px">Raw JSON Data</h3>
+      <h3 style="font-size:14px;margin-bottom:12px">Raw JSON Data (All: Leads + Call Reports + Callbacks)</h3>
       <div class="export-area">
         <textarea id="export-json" readonly></textarea>
       </div>
-      <h3 style="font-size:14px;margin:24px 0 12px">CSV Data</h3>
+      <h3 style="font-size:14px;margin:24px 0 12px">CSV Data (Leads)</h3>
       <div class="export-area">
         <textarea id="export-csv" readonly></textarea>
       </div>
@@ -175,7 +284,6 @@
       'use strict';
 
       // ─── Auth Gate ────────────────────────────────────────
-      // Prompt for admin API key. Stored in sessionStorage so it persists per tab.
       var ADMIN_KEY = sessionStorage.getItem('novai_admin_key');
       if (!ADMIN_KEY) {
         ADMIN_KEY = prompt('Enter admin API key:');
@@ -189,37 +297,55 @@
       var GTM_WORKER_URL = 'https://novai-gtm-outbound.ajay-solomon.workers.dev';
       var AUTH_HEADERS = { 'Authorization': 'Bearer ' + ADMIN_KEY };
       var allLeads = [];
-      var dataSource = 'localStorage';
+      var allCallReports = [];
+      var allCallbacks = [];
+      var dataSource = 'initializing';
+      var autoRefreshTimer = null;
+      var lastRefreshTime = null;
 
-      // ─── Data Access ───
+      // ─── Data Access ───────────────────────────────────────
       function getLocalLeads() {
         try {
           return JSON.parse(localStorage.getItem('novai_leads') || '[]');
         } catch(e) { return []; }
       }
 
-      function fetchWorkerLeads() {
-        return fetch(GTM_WORKER_URL + '/leads', { headers: AUTH_HEADERS })
+      function fetchWorkerFull() {
+        return fetch(GTM_WORKER_URL + '/leads/full', { headers: AUTH_HEADERS })
           .then(function(res) {
             if (res.status === 401 || res.status === 403) {
               sessionStorage.removeItem('novai_admin_key');
               document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#ff3b3b;font-size:18px;font-family:monospace">Invalid API key — <a href="" style="color:#0077ff;margin-left:8px">retry</a></div>';
               return null;
             }
+            if (res.status === 404) {
+              // /leads/full not deployed yet — fallback to /leads
+              return fetchWorkerLeadsFallback();
+            }
             return res.json();
           })
           .catch(function() { return null; });
       }
 
+      function fetchWorkerLeadsFallback() {
+        return fetch(GTM_WORKER_URL + '/leads', { headers: AUTH_HEADERS })
+          .then(function(res) {
+            if (res.status === 401 || res.status === 403) return null;
+            return res.json().then(function(leads) {
+              return { leads: leads, callReports: [], callbacks: [] };
+            });
+          })
+          .catch(function() { return null; });
+      }
+
       function mergeLeads(local, remote) {
-        // Merge by email+timestamp dedup, prefer remote (has outbound call data)
         var seen = {};
         var merged = [];
 
-        // Add remote leads first (they have richer data)
+        // Remote first — richer data (has outbound call info)
         if (remote && remote.length) {
           remote.forEach(function(l) {
-            var key = (l.email || '') + '|' + (l.timestamp || '');
+            var key = (l.email || '') + '|' + (l.timestamp || l.id || '');
             if (!seen[key]) {
               seen[key] = true;
               merged.push(l);
@@ -227,7 +353,7 @@
           });
         }
 
-        // Add local leads that aren't in remote
+        // Add local leads not in remote
         local.forEach(function(l) {
           var key = (l.email || '') + '|' + (l.timestamp || '');
           if (!seen[key]) {
@@ -239,22 +365,61 @@
         return merged;
       }
 
-      async function loadAllLeads() {
+      async function loadAllData() {
         var local = getLocalLeads();
-        var remote = await fetchWorkerLeads();
+        var remote = await fetchWorkerFull();
 
-        if (remote && remote.length > 0) {
-          allLeads = mergeLeads(local, remote);
+        if (remote && remote.leads && remote.leads.length > 0) {
+          allLeads = mergeLeads(local, remote.leads);
+          allCallReports = remote.callReports || [];
+          allCallbacks = remote.callbacks || [];
           dataSource = 'API + localStorage';
+          setAPIStatus('connected', 'Connected');
         } else if (remote !== null) {
-          allLeads = local;
-          dataSource = 'localStorage (API empty)';
+          allLeads = mergeLeads(local, remote ? remote.leads : []);
+          allCallReports = remote ? (remote.callReports || []) : [];
+          allCallbacks = remote ? (remote.callbacks || []) : [];
+          if (allLeads.length > 0) {
+            dataSource = 'localStorage (API empty)';
+          } else {
+            dataSource = 'No data yet';
+          }
+          setAPIStatus('connected', 'Connected (empty)');
         } else {
           allLeads = local;
-          dataSource = 'localStorage (API offline)';
+          allCallReports = [];
+          allCallbacks = [];
+          dataSource = 'localStorage only (API offline)';
+          setAPIStatus('offline', 'Offline');
         }
 
+        lastRefreshTime = new Date();
         document.getElementById('data-source').textContent = dataSource;
+        document.getElementById('last-refresh').textContent = lastRefreshTime.toLocaleTimeString();
+        document.getElementById('record-count').textContent =
+          allLeads.length + ' leads, ' + allCallReports.length + ' reports, ' + allCallbacks.length + ' callbacks';
+
+        // Update tab counts
+        document.getElementById('count-leads').textContent = allLeads.length;
+        document.getElementById('count-outbound').textContent = allLeads.filter(function(l) { return l.phone; }).length;
+        document.getElementById('count-reports').textContent = allCallReports.length;
+        document.getElementById('count-callbacks').textContent = allCallbacks.length;
+      }
+
+      function setAPIStatus(status, text) {
+        var dot = document.getElementById('api-status-dot');
+        var label = document.getElementById('api-status-text');
+        dot.className = 'status-dot';
+        if (status === 'connected') {
+          dot.classList.add('green');
+        } else if (status === 'offline') {
+          dot.classList.add('red');
+        } else if (status === 'loading') {
+          dot.classList.add('blue', 'pulsing');
+        } else {
+          dot.classList.add('orange');
+        }
+        label.textContent = text;
       }
 
       // ─── Render Stats Bar ───
@@ -274,12 +439,14 @@
 
         var withPhone = leads.filter(function(l) { return l.phone; }).length;
         var outboundCalls = leads.filter(function(l) { return l.outboundCallStatus === 'initiated'; }).length;
+        var totalCalls = allCallReports.length;
 
         document.getElementById('stats-bar').innerHTML =
           '<div class="stat-card"><div class="label">Total Leads</div><div class="value blue">' + leads.length + '</div></div>' +
           '<div class="stat-card"><div class="label">Today</div><div class="value green">' + todayLeads.length + '</div></div>' +
           '<div class="stat-card"><div class="label">With Phone #</div><div class="value orange">' + withPhone + '</div></div>' +
           '<div class="stat-card"><div class="label">Outbound Calls</div><div class="value green">' + outboundCalls + '</div></div>' +
+          '<div class="stat-card"><div class="label">Call Reports</div><div class="value blue">' + totalCalls + '</div></div>' +
           '<div class="stat-card"><div class="label">Top Product</div><div class="value" style="font-size:16px">' + esc(topProduct) + '</div></div>';
       }
 
@@ -289,7 +456,7 @@
         var tbody = document.getElementById('leads-body');
 
         if (leads.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" class="empty">No leads captured yet. Leads from the sales agent will appear here.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="9" class="empty">No leads captured yet. Leads from the sales agent will appear here.</td></tr>';
           return;
         }
 
@@ -314,12 +481,15 @@
             callBadge = '<span style="color:var(--dim)">—</span>';
           }
 
+          var sourceBadge = '<span class="badge badge-dim">' + esc(lead.source || 'website') + '</span>';
+
           return '<tr>' +
             '<td>' + (i + 1) + '</td>' +
             '<td><strong>' + esc(lead.name || '') + '</strong></td>' +
             '<td>' + esc(lead.email || '') + '</td>' +
             '<td>' + (lead.phone ? '<a href="tel:' + esc(lead.phone) + '">' + esc(lead.phone) + '</a>' : '<span style="color:var(--dim)">—</span>') + '</td>' +
             '<td><span class="badge badge-' + productClass + '">' + esc(lead.product || 'N/A') + '</span></td>' +
+            '<td>' + sourceBadge + '</td>' +
             '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(lead.need || '—') + '</td>' +
             '<td>' + callBadge + '</td>' +
             '<td style="white-space:nowrap">' + date + '</td>' +
@@ -333,7 +503,7 @@
         var tbody = document.getElementById('outbound-body');
 
         if (leads.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" class="empty">No leads with phone numbers yet. When leads provide a phone number, outbound calls will be triggered automatically.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" class="empty">No leads with phone numbers yet.</td></tr>';
           return;
         }
 
@@ -358,6 +528,68 @@
             '<td>' + esc(lead.product || 'N/A') + '</td>' +
             '<td>' + statusBadge + '</td>' +
             '<td style="font-family:monospace;font-size:11px;color:var(--dim)">' + esc(lead.outboundCallId || '—') + '</td>' +
+            '<td style="white-space:nowrap">' + date + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      // ─── Render Call Reports ───
+      function renderReports() {
+        var reports = allCallReports;
+        var tbody = document.getElementById('reports-body');
+
+        if (reports.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="empty">No call reports yet. Reports appear after Vapi AI calls complete.</td></tr>';
+          return;
+        }
+
+        var sorted = reports.slice().sort(function(a,b) {
+          return (b.timestamp || '').localeCompare(a.timestamp || '');
+        });
+        tbody.innerHTML = sorted.map(function(r) {
+          var date = r.timestamp ? new Date(r.timestamp).toLocaleString() : 'N/A';
+          var typeBadge = r.type === 'outboundPhoneCall'
+            ? '<span class="badge badge-orange">Outbound</span>'
+            : '<span class="badge badge-blue">Inbound</span>';
+          var duration = r.duration ? r.duration + 's' : '—';
+          var cost = r.cost ? '$' + parseFloat(r.cost).toFixed(4) : '—';
+          var endedClass = r.endedReason === 'customer-ended-call' ? 'badge-green' : 'badge-dim';
+          var summary = r.summary || '—';
+          var summaryShort = summary.length > 60 ? summary.substring(0, 60) + '...' : summary;
+
+          return '<tr>' +
+            '<td>' + typeBadge + '</td>' +
+            '<td>' + esc(r.customerNumber || '—') + '</td>' +
+            '<td><strong>' + esc(duration) + '</strong></td>' +
+            '<td>' + esc(cost) + '</td>' +
+            '<td><span class="badge ' + endedClass + '">' + esc(r.endedReason || '—') + '</span></td>' +
+            '<td class="report-summary" title="' + esc(summary) + '">' + esc(summaryShort) + '</td>' +
+            '<td style="font-family:monospace;font-size:11px;color:var(--dim)">' + esc(r.callId || '—') + '</td>' +
+            '<td style="white-space:nowrap">' + date + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      // ─── Render Callbacks ───
+      function renderCallbacks() {
+        var callbacks = allCallbacks;
+        var tbody = document.getElementById('callbacks-body');
+
+        if (callbacks.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty">No callbacks scheduled yet.</td></tr>';
+          return;
+        }
+
+        var sorted = callbacks.slice().sort(function(a,b) {
+          return (b.timestamp || '').localeCompare(a.timestamp || '');
+        });
+        tbody.innerHTML = sorted.map(function(cb) {
+          var date = cb.timestamp ? new Date(cb.timestamp).toLocaleString() : 'N/A';
+          return '<tr>' +
+            '<td><strong>' + esc(cb.name || '') + '</strong></td>' +
+            '<td><a href="tel:' + esc(cb.phone || '') + '">' + esc(cb.phone || '—') + '</a></td>' +
+            '<td>' + esc(cb.preferredTime || '—') + '</td>' +
+            '<td>' + esc(cb.reason || '—') + '</td>' +
             '<td style="white-space:nowrap">' + date + '</td>' +
           '</tr>';
         }).join('');
@@ -417,62 +649,210 @@
 
       // ─── Render Activity Log ───
       function renderLog() {
-        var leads = allLeads;
         var logEl = document.getElementById('activity-log');
-
-        if (leads.length === 0) {
-          logEl.innerHTML = '<div class="log-entry" style="color:var(--dim)">No activity recorded yet.</div>';
-          return;
-        }
-
-        var sorted = leads.slice().sort(function(a,b) {
-          return (b.timestamp || '').localeCompare(a.timestamp || '');
-        });
-
         var entries = [];
-        sorted.forEach(function(lead) {
+
+        // Leads
+        allLeads.forEach(function(lead) {
           var ts = lead.timestamp ? new Date(lead.timestamp).toLocaleString() : 'unknown time';
-          entries.push(
-            '<div class="log-entry">' +
+          entries.push({
+            time: lead.timestamp || '',
+            html: '<div class="log-entry">' +
               '<span class="timestamp">[' + ts + ']</span>' +
               '<span class="event">LEAD_CAPTURED</span> ' +
-              '<span class="data">' + esc(lead.name) + ' &lt;' + esc(lead.email) + '&gt; — ' + esc(lead.product || 'N/A') + '</span>' +
+              '<span class="data">' + esc(lead.name) + ' &lt;' + esc(lead.email) + '&gt; — ' + esc(lead.product || 'N/A') + ' [' + esc(lead.source || 'web') + ']</span>' +
             '</div>'
-          );
+          });
           if (lead.outboundCallStatus === 'initiated') {
-            entries.push(
-              '<div class="log-entry">' +
+            entries.push({
+              time: lead.timestamp || '',
+              html: '<div class="log-entry">' +
                 '<span class="timestamp">[' + ts + ']</span>' +
                 '<span class="event-call">OUTBOUND_CALL</span> ' +
                 '<span class="data">Called ' + esc(lead.phone) + ' — Call ID: ' + esc(lead.outboundCallId || 'N/A') + '</span>' +
               '</div>'
-            );
+            });
           } else if (lead.outboundCallStatus === 'failed') {
-            entries.push(
-              '<div class="log-entry">' +
+            entries.push({
+              time: lead.timestamp || '',
+              html: '<div class="log-entry">' +
                 '<span class="timestamp">[' + ts + ']</span>' +
                 '<span class="event-call" style="color:var(--red)">CALL_FAILED</span> ' +
                 '<span class="data">' + esc(lead.phone) + ' — ' + esc(lead.outboundCallError || 'Unknown error') + '</span>' +
               '</div>'
-            );
+            });
           }
         });
-        logEl.innerHTML = entries.join('');
+
+        // Call reports
+        allCallReports.forEach(function(r) {
+          var ts = r.timestamp ? new Date(r.timestamp).toLocaleString() : 'unknown time';
+          var callType = r.type === 'outboundPhoneCall' ? 'OUTBOUND' : 'INBOUND';
+          entries.push({
+            time: r.timestamp || '',
+            html: '<div class="log-entry">' +
+              '<span class="timestamp">[' + ts + ']</span>' +
+              '<span class="event-report">CALL_REPORT</span> ' +
+              '<span class="data">' + callType + ' ' + esc(r.customerNumber || 'unknown') + ' — ' + (r.duration || 0) + 's — ' + esc(r.endedReason || 'unknown') + '</span>' +
+            '</div>'
+          });
+        });
+
+        // Callbacks
+        allCallbacks.forEach(function(cb) {
+          var ts = cb.timestamp ? new Date(cb.timestamp).toLocaleString() : 'unknown time';
+          entries.push({
+            time: cb.timestamp || '',
+            html: '<div class="log-entry">' +
+              '<span class="timestamp">[' + ts + ']</span>' +
+              '<span class="event-callback">CALLBACK_SCHEDULED</span> ' +
+              '<span class="data">' + esc(cb.name) + ' ' + esc(cb.phone) + ' — ' + esc(cb.preferredTime || 'N/A') + '</span>' +
+            '</div>'
+          });
+        });
+
+        if (entries.length === 0) {
+          logEl.innerHTML = '<div class="log-entry" style="color:var(--dim)">No activity recorded yet.</div>';
+          return;
+        }
+
+        // Sort all entries by time descending
+        entries.sort(function(a, b) { return (b.time || '').localeCompare(a.time || ''); });
+        logEl.innerHTML = entries.map(function(e) { return e.html; }).join('');
+      }
+
+      // ─── Render Diagnostics ───
+      async function renderDiagnostics() {
+        var container = document.getElementById('diagnostics-content');
+        container.innerHTML = '<p style="color:var(--dim)">Running diagnostics...</p>';
+
+        var diag = null;
+        try {
+          var res = await fetch(GTM_WORKER_URL + '/diagnostics', { headers: AUTH_HEADERS });
+          if (res.ok) {
+            diag = await res.json();
+          } else if (res.status === 404) {
+            diag = { status: 'not_deployed', message: 'Diagnostics endpoint not deployed yet. Deploy the updated GTM worker to enable.' };
+          } else {
+            diag = { status: 'error', message: 'HTTP ' + res.status };
+          }
+        } catch(e) {
+          diag = { status: 'error', message: 'Network error: ' + e.message };
+        }
+
+        if (diag.status === 'not_deployed') {
+          // Render a helpful fallback using local data
+          container.innerHTML =
+            '<div class="diag-grid">' +
+              '<div class="diag-card">' +
+                '<h4>Worker Status</h4>' +
+                '<div class="diag-row"><span class="diag-label">Diagnostics endpoint</span><span class="diag-value warn">Not deployed</span></div>' +
+                '<div class="diag-row"><span class="diag-label">Note</span><span class="diag-value" style="font-size:11px;white-space:normal">Deploy the updated gtm-outbound.js worker to enable full diagnostics</span></div>' +
+              '</div>' +
+              '<div class="diag-card">' +
+                '<h4>Local Data</h4>' +
+                '<div class="diag-row"><span class="diag-label">Leads in memory</span><span class="diag-value ok">' + allLeads.length + '</span></div>' +
+                '<div class="diag-row"><span class="diag-label">Call reports in memory</span><span class="diag-value ok">' + allCallReports.length + '</span></div>' +
+                '<div class="diag-row"><span class="diag-label">Callbacks in memory</span><span class="diag-value ok">' + allCallbacks.length + '</span></div>' +
+                '<div class="diag-row"><span class="diag-label">localStorage leads</span><span class="diag-value">' + getLocalLeads().length + '</span></div>' +
+                '<div class="diag-row"><span class="diag-label">Data source</span><span class="diag-value">' + esc(dataSource) + '</span></div>' +
+              '</div>' +
+            '</div>';
+          return;
+        }
+
+        if (diag.status === 'error') {
+          container.innerHTML =
+            '<div class="diag-grid">' +
+              '<div class="diag-card">' +
+                '<h4>Worker Status</h4>' +
+                '<div class="diag-row"><span class="diag-label">Status</span><span class="diag-value error">Error</span></div>' +
+                '<div class="diag-row"><span class="diag-label">Detail</span><span class="diag-value" style="white-space:normal">' + esc(diag.message) + '</span></div>' +
+              '</div>' +
+              '<div class="diag-card">' +
+                '<h4>Local Data</h4>' +
+                '<div class="diag-row"><span class="diag-label">Leads in memory</span><span class="diag-value">' + allLeads.length + '</span></div>' +
+                '<div class="diag-row"><span class="diag-label">localStorage leads</span><span class="diag-value">' + getLocalLeads().length + '</span></div>' +
+                '<div class="diag-row"><span class="diag-label">Data source</span><span class="diag-value">' + esc(dataSource) + '</span></div>' +
+              '</div>' +
+            '</div>';
+          return;
+        }
+
+        // Full diagnostics from worker
+        var c = diag.counts || {};
+        var ts = diag.latestTimestamps || {};
+        var kvBound = diag.kvBound ? 'Yes' : 'No';
+        var kvBoundClass = diag.kvBound ? 'ok' : 'error';
+
+        var html = '<div class="diag-grid">';
+
+        // Worker health card
+        html += '<div class="diag-card">' +
+          '<h4>Worker Health</h4>' +
+          '<div class="diag-row"><span class="diag-label">Status</span><span class="diag-value ok">' + esc(diag.status) + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">KV Bound</span><span class="diag-value ' + kvBoundClass + '">' + kvBound + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Server Time</span><span class="diag-value">' + (diag.serverTime ? new Date(diag.serverTime).toLocaleString() : '—') + '</span></div>' +
+        '</div>';
+
+        // KV counts card
+        html += '<div class="diag-card">' +
+          '<h4>KV Record Counts</h4>' +
+          '<div class="diag-row"><span class="diag-label">Leads (all_leads)</span><span class="diag-value ' + (c.leads > 0 ? 'ok' : 'warn') + '">' + (c.leads || 0) + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Call Reports (call_reports)</span><span class="diag-value ' + (c.callReports > 0 ? 'ok' : 'warn') + '">' + (c.callReports || 0) + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Callbacks (callbacks)</span><span class="diag-value">' + (c.callbacks || 0) + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Total KV Keys</span><span class="diag-value">' + (c.kvKeys || 0) + '</span></div>' +
+        '</div>';
+
+        // Timestamps card
+        html += '<div class="diag-card">' +
+          '<h4>Latest Activity</h4>' +
+          '<div class="diag-row"><span class="diag-label">Latest Lead</span><span class="diag-value">' + (ts.lead ? new Date(ts.lead).toLocaleString() : 'None') + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Latest Call Report</span><span class="diag-value">' + (ts.callReport ? new Date(ts.callReport).toLocaleString() : 'None') + '</span></div>' +
+        '</div>';
+
+        // Dashboard vs API card
+        html += '<div class="diag-card">' +
+          '<h4>Dashboard State</h4>' +
+          '<div class="diag-row"><span class="diag-label">Leads in dashboard</span><span class="diag-value">' + allLeads.length + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Leads in KV</span><span class="diag-value">' + (c.leads || 0) + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Leads in localStorage</span><span class="diag-value">' + getLocalLeads().length + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Data source</span><span class="diag-value">' + esc(dataSource) + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Last refresh</span><span class="diag-value">' + (lastRefreshTime ? lastRefreshTime.toLocaleString() : '—') + '</span></div>' +
+        '</div>';
+
+        html += '</div>';
+
+        // KV keys list
+        if (diag.kvKeys && diag.kvKeys.length > 0) {
+          html += '<div class="diag-card" style="margin-top:20px">' +
+            '<h4>KV Keys (' + diag.kvKeys.length + ')</h4>' +
+            '<div class="kv-keys-list">' +
+            diag.kvKeys.map(function(k) { return '<span class="key">' + esc(k) + '</span>'; }).join('<br>') +
+            '</div></div>';
+        }
+
+        container.innerHTML = html;
       }
 
       // ─── Render Export ───
       function renderExport() {
-        var leads = allLeads;
-        document.getElementById('export-json').value = JSON.stringify(leads, null, 2);
+        var allData = {
+          leads: allLeads,
+          callReports: allCallReports,
+          callbacks: allCallbacks,
+          exportedAt: new Date().toISOString()
+        };
+        document.getElementById('export-json').value = JSON.stringify(allData, null, 2);
 
-        if (leads.length === 0) {
+        if (allLeads.length === 0) {
           document.getElementById('export-csv').value = 'No data to export.';
           return;
         }
 
         var headers = ['name', 'email', 'phone', 'product', 'need', 'source', 'outboundCallStatus', 'outboundCallId', 'page', 'timestamp'];
         var csv = headers.join(',') + '\n';
-        leads.forEach(function(l) {
+        allLeads.forEach(function(l) {
           csv += headers.map(function(h) {
             var val = (l[h] || '').toString().replace(/"/g, '""');
             return '"' + val + '"';
@@ -495,15 +875,45 @@
           document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
           tab.classList.add('active');
           document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+          // Load diagnostics on demand
+          if (tab.dataset.tab === 'diagnostics') {
+            renderDiagnostics();
+          }
         });
+      });
+
+      // ─── Auto-refresh ───
+      function startAutoRefresh() {
+        stopAutoRefresh();
+        autoRefreshTimer = setInterval(function() {
+          refreshData();
+        }, 30000);
+      }
+
+      function stopAutoRefresh() {
+        if (autoRefreshTimer) {
+          clearInterval(autoRefreshTimer);
+          autoRefreshTimer = null;
+        }
+      }
+
+      document.getElementById('auto-refresh-check').addEventListener('change', function() {
+        if (this.checked) {
+          startAutoRefresh();
+        } else {
+          stopAutoRefresh();
+        }
       });
 
       // ─── Global Functions ───
       window.refreshData = async function() {
-        await loadAllLeads();
+        setAPIStatus('loading', 'Refreshing...');
+        await loadAllData();
         renderStats();
         renderLeads();
         renderOutbound();
+        renderReports();
+        renderCallbacks();
         renderAnalytics();
         renderLog();
         renderExport();
@@ -523,19 +933,22 @@
         var blob = new Blob([json], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'novai-leads-' + new Date().toISOString().split('T')[0] + '.json';
+        a.download = 'novai-data-' + new Date().toISOString().split('T')[0] + '.json';
         a.click();
       };
 
       window.clearData = function() {
         if (confirm('Are you sure? This will permanently delete all captured leads from localStorage AND the API.')) {
           localStorage.removeItem('novai_leads');
-          // Also clear worker KV
           fetch(GTM_WORKER_URL + '/leads', { method: 'DELETE', headers: AUTH_HEADERS }).catch(function(){});
           allLeads = [];
+          allCallReports = [];
+          allCallbacks = [];
           renderStats();
           renderLeads();
           renderOutbound();
+          renderReports();
+          renderCallbacks();
           renderAnalytics();
           renderLog();
           renderExport();
@@ -544,6 +957,7 @@
 
       // ─── Init ───
       refreshData();
+      startAutoRefresh();
     })();
   </script>
 </body>

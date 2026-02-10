@@ -163,6 +163,61 @@ export default {
       return json(stats);
     }
 
+    // ─── GET /leads/full ──────────────────────────────────
+    // Returns leads + call reports + callbacks for the full picture
+    if (request.method === 'GET' && path === '/leads/full') {
+      const authErr = requireAuth(request, env);
+      if (authErr) return authErr;
+      if (!env.LEADS) {
+        return json({ leads: [], callReports: [], callbacks: [] });
+      }
+      const [leads, callReports, callbacks] = await Promise.all([
+        env.LEADS.get('all_leads').then(v => JSON.parse(v || '[]')),
+        env.LEADS.get('call_reports').then(v => JSON.parse(v || '[]')),
+        env.LEADS.get('callbacks').then(v => JSON.parse(v || '[]')),
+      ]);
+      return json({ leads, callReports, callbacks });
+    }
+
+    // ─── GET /diagnostics ──────────────────────────────────
+    if (request.method === 'GET' && path === '/diagnostics') {
+      const authErr = requireAuth(request, env);
+      if (authErr) return authErr;
+      if (!env.LEADS) {
+        return json({ status: 'error', message: 'KV namespace not bound', kvBound: false });
+      }
+      const [leadsRaw, reportsRaw, callbacksRaw, keysList] = await Promise.all([
+        env.LEADS.get('all_leads'),
+        env.LEADS.get('call_reports'),
+        env.LEADS.get('callbacks'),
+        env.LEADS.list({ limit: 100 }),
+      ]);
+      const leads = JSON.parse(leadsRaw || '[]');
+      const reports = JSON.parse(reportsRaw || '[]');
+      const callbacks = JSON.parse(callbacksRaw || '[]');
+
+      // Find latest timestamps
+      const latestLead = leads.length > 0 ? leads.reduce((a, b) => (a.timestamp > b.timestamp ? a : b)).timestamp : null;
+      const latestReport = reports.length > 0 ? reports.reduce((a, b) => (a.timestamp > b.timestamp ? a : b)).timestamp : null;
+
+      return json({
+        status: 'ok',
+        kvBound: true,
+        counts: {
+          leads: leads.length,
+          callReports: reports.length,
+          callbacks: callbacks.length,
+          kvKeys: keysList.keys.length,
+        },
+        latestTimestamps: {
+          lead: latestLead,
+          callReport: latestReport,
+        },
+        kvKeys: keysList.keys.map(k => k.name),
+        serverTime: new Date().toISOString(),
+      });
+    }
+
     // ─── DELETE /leads ────────────────────────────────────
     if (request.method === 'DELETE' && path === '/leads') {
       const authErr = requireAuth(request, env);
