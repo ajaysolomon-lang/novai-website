@@ -218,6 +218,40 @@ export default {
       });
     }
 
+    // ─── GET /calls/vapi ──────────────────────────────────
+    // Proxy to Vapi API for live call history — bypasses KV entirely
+    if (request.method === 'GET' && path === '/calls/vapi') {
+      const authErr = requireAuth(request, env);
+      if (authErr) return authErr;
+      if (!env.VAPI_API_KEY) {
+        return json({ error: 'VAPI_API_KEY not configured' }, 500);
+      }
+      try {
+        const vapiUrl = new URL('https://api.vapi.ai/call');
+        // Pass through query params for filtering (limit, createdAtGe, createdAtLe, etc.)
+        const limit = url.searchParams.get('limit') || '100';
+        vapiUrl.searchParams.set('limit', limit);
+        const createdAtGe = url.searchParams.get('createdAtGe');
+        if (createdAtGe) vapiUrl.searchParams.set('createdAtGe', createdAtGe);
+        const createdAtLe = url.searchParams.get('createdAtLe');
+        if (createdAtLe) vapiUrl.searchParams.set('createdAtLe', createdAtLe);
+
+        const vapiRes = await fetch(vapiUrl.toString(), {
+          headers: {
+            'Authorization': 'Bearer ' + env.VAPI_API_KEY,
+          },
+        });
+        if (!vapiRes.ok) {
+          const errBody = await vapiRes.text();
+          return json({ error: 'Vapi API error', status: vapiRes.status, detail: errBody }, vapiRes.status);
+        }
+        const calls = await vapiRes.json();
+        return json(calls);
+      } catch (e) {
+        return json({ error: 'Failed to fetch from Vapi API', detail: e.message }, 500);
+      }
+    }
+
     // ─── DELETE /leads ────────────────────────────────────
     if (request.method === 'DELETE' && path === '/leads') {
       const authErr = requireAuth(request, env);

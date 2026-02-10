@@ -219,7 +219,7 @@
 
     <!-- Call Reports (from Vapi end-of-call) -->
     <div class="tab-panel" id="panel-reports">
-      <p style="margin-bottom:16px;color:var(--dim);font-size:13px">End-of-call reports from Vapi AI phone agents. Includes call duration, cost, summaries, and transcripts.</p>
+      <p style="margin-bottom:16px;color:var(--dim);font-size:13px">Call data from Vapi AI phone agents. Merges KV webhook reports with live Vapi API data — today's calls always show.</p>
       <table class="data-table">
         <thead>
           <tr>
@@ -229,6 +229,7 @@
             <th>Cost</th>
             <th>Ended</th>
             <th>Summary</th>
+            <th>Source</th>
             <th>Call ID</th>
             <th>Date</th>
           </tr>
@@ -299,6 +300,7 @@
       var allLeads = [];
       var allCallReports = [];
       var allCallbacks = [];
+      var allVapiCalls = [];
       var dataSource = 'initializing';
       var autoRefreshTimer = null;
       var lastRefreshTime = null;
@@ -338,6 +340,101 @@
           .catch(function() { return null; });
       }
 
+      function fetchVapiCalls() {
+        return fetch(GTM_WORKER_URL + '/calls/vapi?limit=100', { headers: AUTH_HEADERS })
+          .then(function(res) {
+            if (!res.ok) return [];
+            return res.json();
+          })
+          .then(function(data) {
+            // Vapi returns an array of call objects
+            if (Array.isArray(data)) return data;
+            return [];
+          })
+          .catch(function() { return []; });
+      }
+
+      // Convert Vapi API call objects to our call report format
+      function vapiCallToReport(call) {
+        return {
+          callId: call.id,
+          type: call.type,
+          phoneNumberId: call.phoneNumberId,
+          customerNumber: call.customer ? call.customer.number : '',
+          duration: call.endedAt && call.startedAt
+            ? Math.round((new Date(call.endedAt) - new Date(call.startedAt)) / 1000)
+            : call.costs ? Math.round(call.costs.reduce(function(s, c) { return s + (c.minutes || 0); }, 0) * 60) : null,
+          cost: call.cost || (call.costs ? call.costs.reduce(function(s, c) { return s + (c.cost || 0); }, 0) : null),
+          endedReason: call.endedReason,
+          summary: call.analysis ? call.analysis.summary : (call.summary || ''),
+          transcript: call.transcript || call.messages || '',
+          timestamp: call.createdAt || call.startedAt || '',
+          status: call.status,
+          _fromVapi: true,
+        };
+      }
+
+      // Merge KV reports with Vapi API reports (dedup by callId)
+      function mergeCallReports(kvReports, vapiCalls) {
+        var seen = {};
+        var merged = [];
+
+        // KV reports first (they may have more context from webhook)
+        kvReports.forEach(function(r) {
+          if (r.callId) seen[r.callId] = true;
+          merged.push(r);
+        });
+
+        // Add Vapi API calls not already in KV
+        vapiCalls.forEach(function(call) {
+          var report = vapiCallToReport(call);
+          if (!seen[report.callId]) {
+            seen[report.callId] = true;
+            merged.push(report);
+          }
+        });
+
+        return merged;
+      }
+
+      // Extract leads from Vapi calls that had captureLead tool calls
+      function extractLeadsFromVapiCalls(vapiCalls) {
+        var leads = [];
+        vapiCalls.forEach(function(call) {
+          // Check messages for tool calls that captured leads
+          if (call.messages && Array.isArray(call.messages)) {
+            call.messages.forEach(function(msg) {
+              if (msg.role === 'tool_calls' || msg.toolCalls) {
+                var toolCalls = msg.toolCalls || [];
+                toolCalls.forEach(function(tc) {
+                  if (tc.function && tc.function.name === 'captureLead') {
+                    try {
+                      var args = typeof tc.function.arguments === 'string'
+                        ? JSON.parse(tc.function.arguments)
+                        : tc.function.arguments;
+                      if (args && args.name) {
+                        leads.push({
+                          name: args.name,
+                          email: args.email || '',
+                          phone: args.phone || (call.customer ? call.customer.number : ''),
+                          need: args.need || '',
+                          product: args.product || 'WorkBench',
+                          source: call.type === 'outboundPhoneCall' ? 'gtm-outbound-call' : 'inbound-call',
+                          timestamp: call.createdAt || call.startedAt || '',
+                          callId: call.id,
+                          _fromVapi: true,
+                        });
+                      }
+                    } catch(e) {}
+                  }
+                });
+              }
+            });
+          }
+        });
+        return leads;
+      }
+
       function mergeLeads(local, remote) {
         var seen = {};
         var merged = [];
@@ -367,28 +464,57 @@
 
       async function loadAllData() {
         var local = getLocalLeads();
-        var remote = await fetchWorkerFull();
 
-        if (remote && remote.leads && remote.leads.length > 0) {
-          allLeads = mergeLeads(local, remote.leads);
-          allCallReports = remote.callReports || [];
-          allCallbacks = remote.callbacks || [];
-          dataSource = 'API + localStorage';
+        // Fetch KV data and live Vapi API data in parallel
+        var results = await Promise.all([
+          fetchWorkerFull(),
+          fetchVapiCalls(),
+        ]);
+        var remote = results[0];
+        var vapiCalls = results[1];
+        allVapiCalls = vapiCalls;
+
+        var kvReports = [];
+        var kvCallbacks = [];
+        var kvLeads = [];
+        var vapiOnline = vapiCalls.length > 0;
+
+        if (remote && remote.leads) {
+          kvLeads = remote.leads;
+          kvReports = remote.callReports || [];
+          kvCallbacks = remote.callbacks || [];
+        }
+
+        // Merge KV call reports with live Vapi API call data
+        allCallReports = mergeCallReports(kvReports, vapiCalls);
+        allCallbacks = kvCallbacks;
+
+        // Extract leads from Vapi call tool-calls and merge with KV + local leads
+        var vapiLeads = extractLeadsFromVapiCalls(vapiCalls);
+        var combinedRemoteLeads = mergeLeads([], kvLeads);
+        // Add Vapi-extracted leads (dedup by callId)
+        var seenCallIds = {};
+        combinedRemoteLeads.forEach(function(l) { if (l.callId) seenCallIds[l.callId] = true; });
+        vapiLeads.forEach(function(l) {
+          if (l.callId && !seenCallIds[l.callId]) {
+            seenCallIds[l.callId] = true;
+            combinedRemoteLeads.push(l);
+          }
+        });
+        allLeads = mergeLeads(local, combinedRemoteLeads);
+
+        // Determine data source label
+        if (remote !== null && vapiOnline) {
+          dataSource = 'Live from Vapi API + KV';
           setAPIStatus('connected', 'Connected');
         } else if (remote !== null) {
-          allLeads = mergeLeads(local, remote ? remote.leads : []);
-          allCallReports = remote ? (remote.callReports || []) : [];
-          allCallbacks = remote ? (remote.callbacks || []) : [];
-          if (allLeads.length > 0) {
-            dataSource = 'localStorage (API empty)';
-          } else {
-            dataSource = 'No data yet';
-          }
-          setAPIStatus('connected', 'Connected (empty)');
+          dataSource = 'KV API' + (allLeads.length === 0 ? ' (empty)' : '');
+          setAPIStatus('connected', vapiOnline ? 'Connected' : 'Connected (Vapi proxy unavailable)');
+        } else if (vapiOnline) {
+          dataSource = 'Live from Vapi API (KV offline)';
+          setAPIStatus('connected', 'Vapi API only');
         } else {
           allLeads = local;
-          allCallReports = [];
-          allCallbacks = [];
           dataSource = 'localStorage only (API offline)';
           setAPIStatus('offline', 'Offline');
         }
@@ -397,7 +523,7 @@
         document.getElementById('data-source').textContent = dataSource;
         document.getElementById('last-refresh').textContent = lastRefreshTime.toLocaleTimeString();
         document.getElementById('record-count').textContent =
-          allLeads.length + ' leads, ' + allCallReports.length + ' reports, ' + allCallbacks.length + ' callbacks';
+          allLeads.length + ' leads, ' + allCallReports.length + ' calls, ' + allCallbacks.length + ' callbacks';
 
         // Update tab counts
         document.getElementById('count-leads').textContent = allLeads.length;
@@ -441,12 +567,35 @@
         var outboundCalls = leads.filter(function(l) { return l.outboundCallStatus === 'initiated'; }).length;
         var totalCalls = allCallReports.length;
 
+        // Compute total call duration
+        var totalDuration = 0;
+        allCallReports.forEach(function(r) {
+          if (r.duration) totalDuration += parseInt(r.duration) || 0;
+        });
+        var durationStr = totalDuration >= 60
+          ? Math.floor(totalDuration / 60) + 'm ' + (totalDuration % 60) + 's'
+          : totalDuration + 's';
+
+        // Count today's calls
+        var todayCalls = allCallReports.filter(function(r) {
+          return r.timestamp && r.timestamp.split('T')[0] === today;
+        });
+
+        // Inbound vs outbound
+        var inboundCalls = allCallReports.filter(function(r) {
+          return r.type === 'inboundPhoneCall';
+        }).length;
+        var outboundCallReports = allCallReports.filter(function(r) {
+          return r.type === 'outboundPhoneCall';
+        }).length;
+
         document.getElementById('stats-bar').innerHTML =
           '<div class="stat-card"><div class="label">Total Leads</div><div class="value blue">' + leads.length + '</div></div>' +
-          '<div class="stat-card"><div class="label">Today</div><div class="value green">' + todayLeads.length + '</div></div>' +
-          '<div class="stat-card"><div class="label">With Phone #</div><div class="value orange">' + withPhone + '</div></div>' +
-          '<div class="stat-card"><div class="label">Outbound Calls</div><div class="value green">' + outboundCalls + '</div></div>' +
-          '<div class="stat-card"><div class="label">Call Reports</div><div class="value blue">' + totalCalls + '</div></div>' +
+          '<div class="stat-card"><div class="label">Today\'s Leads</div><div class="value green">' + todayLeads.length + '</div></div>' +
+          '<div class="stat-card"><div class="label">Total Calls</div><div class="value orange">' + totalCalls + '</div></div>' +
+          '<div class="stat-card"><div class="label">Today\'s Calls</div><div class="value green">' + todayCalls.length + '</div></div>' +
+          '<div class="stat-card"><div class="label">Inbound / Outbound</div><div class="value" style="font-size:20px">' + inboundCalls + ' / ' + outboundCallReports + '</div></div>' +
+          '<div class="stat-card"><div class="label">Total Duration</div><div class="value blue">' + durationStr + '</div></div>' +
           '<div class="stat-card"><div class="label">Top Product</div><div class="value" style="font-size:16px">' + esc(topProduct) + '</div></div>';
       }
 
@@ -539,7 +688,7 @@
         var tbody = document.getElementById('reports-body');
 
         if (reports.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" class="empty">No call reports yet. Reports appear after Vapi AI calls complete.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="9" class="empty">No call reports yet. Reports appear after Vapi AI calls complete.</td></tr>';
           return;
         }
 
@@ -557,14 +706,26 @@
           var summary = r.summary || '—';
           var summaryShort = summary.length > 60 ? summary.substring(0, 60) + '...' : summary;
 
+          // Source indicator — from KV webhook or live Vapi API
+          var sourceBadge = r._fromVapi
+            ? '<span class="badge badge-green">Vapi API</span>'
+            : '<span class="badge badge-dim">KV</span>';
+
+          // Status badge for active/queued calls
+          var statusInfo = '';
+          if (r.status && r.status !== 'ended') {
+            statusInfo = ' <span class="badge badge-orange">' + esc(r.status) + '</span>';
+          }
+
           return '<tr>' +
-            '<td>' + typeBadge + '</td>' +
+            '<td>' + typeBadge + statusInfo + '</td>' +
             '<td>' + esc(r.customerNumber || '—') + '</td>' +
             '<td><strong>' + esc(duration) + '</strong></td>' +
             '<td>' + esc(cost) + '</td>' +
             '<td><span class="badge ' + endedClass + '">' + esc(r.endedReason || '—') + '</span></td>' +
             '<td class="report-summary" title="' + esc(summary) + '">' + esc(summaryShort) + '</td>' +
-            '<td style="font-family:monospace;font-size:11px;color:var(--dim)">' + esc(r.callId || '—') + '</td>' +
+            '<td>' + sourceBadge + '</td>' +
+            '<td style="font-family:monospace;font-size:11px;color:var(--dim)">' + esc(r.callId || '—').substring(0, 12) + '</td>' +
             '<td style="white-space:nowrap">' + date + '</td>' +
           '</tr>';
         }).join('');
@@ -688,12 +849,13 @@
         allCallReports.forEach(function(r) {
           var ts = r.timestamp ? new Date(r.timestamp).toLocaleString() : 'unknown time';
           var callType = r.type === 'outboundPhoneCall' ? 'OUTBOUND' : 'INBOUND';
+          var src = r._fromVapi ? ' [Vapi API]' : ' [KV]';
           entries.push({
             time: r.timestamp || '',
             html: '<div class="log-entry">' +
               '<span class="timestamp">[' + ts + ']</span>' +
               '<span class="event-report">CALL_REPORT</span> ' +
-              '<span class="data">' + callType + ' ' + esc(r.customerNumber || 'unknown') + ' — ' + (r.duration || 0) + 's — ' + esc(r.endedReason || 'unknown') + '</span>' +
+              '<span class="data">' + callType + ' ' + esc(r.customerNumber || 'unknown') + ' — ' + (r.duration || 0) + 's — ' + esc(r.endedReason || r.status || 'unknown') + src + '</span>' +
             '</div>'
           });
         });
@@ -821,6 +983,16 @@
           '<div class="diag-row"><span class="diag-label">Last refresh</span><span class="diag-value">' + (lastRefreshTime ? lastRefreshTime.toLocaleString() : '—') + '</span></div>' +
         '</div>';
 
+        // Vapi API card
+        html += '<div class="diag-card">' +
+          '<h4>Vapi API (Live)</h4>' +
+          '<div class="diag-row"><span class="diag-label">Calls from Vapi API</span><span class="diag-value ' + (allVapiCalls.length > 0 ? 'ok' : 'warn') + '">' + allVapiCalls.length + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Calls from KV</span><span class="diag-value">' + (c.callReports || 0) + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Merged total</span><span class="diag-value ok">' + allCallReports.length + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">KV-only (missing from Vapi)</span><span class="diag-value">' + Math.max(0, (c.callReports || 0) - allVapiCalls.length) + '</span></div>' +
+          '<div class="diag-row"><span class="diag-label">Vapi-only (missing from KV)</span><span class="diag-value ' + (allCallReports.filter(function(r){return r._fromVapi;}).length > 0 ? 'warn' : 'ok') + '">' + allCallReports.filter(function(r){return r._fromVapi;}).length + '</span></div>' +
+        '</div>';
+
         html += '</div>';
 
         // KV keys list
@@ -938,11 +1110,12 @@
       };
 
       window.clearData = function() {
-        if (confirm('Are you sure? This will permanently delete all captured leads from localStorage AND the API.')) {
+        if (confirm('Are you sure? This will delete leads from localStorage and KV. Call reports from Vapi API will remain visible.')) {
           localStorage.removeItem('novai_leads');
           fetch(GTM_WORKER_URL + '/leads', { method: 'DELETE', headers: AUTH_HEADERS }).catch(function(){});
           allLeads = [];
-          allCallReports = [];
+          // Keep Vapi API call reports (they can't be deleted from here)
+          allCallReports = allCallReports.filter(function(r) { return r._fromVapi; });
           allCallbacks = [];
           renderStats();
           renderLeads();
