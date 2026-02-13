@@ -1,0 +1,838 @@
+{
+  "schema_version": "1.0",
+  "description": "Next Best Action (NBA) rules engine configuration for AliveTrust living trust management",
+  "engine_version": "1.0.0",
+  "last_updated": "2025-01-15",
+
+  "rules": [
+    {
+      "rule_id": "NBA-001",
+      "name": "Fund unfunded real estate via deed recording",
+      "description": "Real property held in the grantor's individual name must be transferred into the trust via a new grant deed to avoid probate. This is typically the highest-value gap in a trust plan.",
+      "trigger_conditions": {
+        "type": "gap",
+        "field": "assets[].funding_status",
+        "operator": "equals",
+        "value": "unfunded",
+        "additional_filters": {
+          "asset_type": "real_estate"
+        }
+      },
+      "category": "funding",
+      "priority_weights": {
+        "risk_reduction": 0.95,
+        "equity_protected": 0.90,
+        "time_score": 0.40,
+        "dependency_unlock": 0.60
+      },
+      "steps": [
+        "Obtain current preliminary title report or property profile to confirm current ownership",
+        "Prepare a new grant deed transferring property from grantor(s) individually to grantor(s) as trustees of the trust",
+        "Have the grant deed notarized by all current owners",
+        "File a Preliminary Change of Ownership Report (PCOR) claiming the trust transfer exemption from reassessment",
+        "Record the deed with the county recorder's office in the county where the property is located",
+        "Obtain a certified copy of the recorded deed for trust records",
+        "Notify the mortgage lender of the trust transfer (if applicable)",
+        "Update title insurance policy to reflect trust ownership",
+        "Upload recording confirmation as evidence in AliveTrust"
+      ],
+      "evidence_required": [
+        "Recorded grant deed (certified copy)",
+        "County recorder confirmation with document number",
+        "Filed PCOR form",
+        "Updated title insurance policy or endorsement"
+      ],
+      "done_definition": "Property deed has been recorded with the county, confirmed by recording number, and title reflects trust ownership.",
+      "escalation_conditions": [
+        "Property has an active mortgage with a lender that claims due-on-sale clause applies",
+        "Property is held in joint tenancy with a non-trust party",
+        "Property is located outside the trust's state of formation",
+        "Property has liens, judgments, or encumbrances requiring resolution",
+        "Property is in a community property state with complex ownership history"
+      ],
+      "estimated_complexity": "moderate",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": true,
+      "jurisdictions": ["CA"]
+    },
+    {
+      "rule_id": "NBA-002",
+      "name": "Fix beneficiary mismatch on life insurance policy",
+      "description": "A life insurance policy names an individual as beneficiary instead of the trust. This can cause proceeds to bypass the trust, defeating estate plan intentions and potentially creating probate or unintended distribution issues.",
+      "trigger_conditions": {
+        "type": "conflict",
+        "field": "assets[].beneficiary_designation",
+        "operator": "equals",
+        "value": "beneficiary_mismatch",
+        "additional_filters": {
+          "asset_type": "insurance"
+        }
+      },
+      "category": "beneficiary",
+      "priority_weights": {
+        "risk_reduction": 0.85,
+        "equity_protected": 0.80,
+        "time_score": 0.70,
+        "dependency_unlock": 0.30
+      },
+      "steps": [
+        "Review the trust document for specific life insurance distribution provisions",
+        "Contact the insurance company to request a beneficiary change form",
+        "Determine the correct designation: trust as primary beneficiary, individuals as contingent (or vice versa per attorney guidance)",
+        "Complete the beneficiary change form with the exact trust name and date: '[Trust Name] dated [Date]'",
+        "Submit the completed form to the insurance company",
+        "Obtain written confirmation from the insurer that the beneficiary change has been processed",
+        "Upload the confirmation letter or updated beneficiary designation form as evidence"
+      ],
+      "evidence_required": [
+        "Completed beneficiary change form (copy)",
+        "Insurance company confirmation letter showing updated beneficiary",
+        "Updated policy declaration page reflecting new beneficiary"
+      ],
+      "done_definition": "Insurance company has confirmed in writing that the beneficiary designation has been updated to match the trust plan.",
+      "escalation_conditions": [
+        "Policy is an irrevocable life insurance trust (ILIT) situation requiring separate trust",
+        "Policy has been assigned or collaterally assigned to a lender",
+        "Community property state implications for beneficiary changes without spouse consent",
+        "Policy value exceeds estate tax exemption threshold and may need ILIT planning",
+        "Multiple policies with conflicting beneficiary designations"
+      ],
+      "estimated_complexity": "simple",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": false,
+      "jurisdictions": []
+    },
+    {
+      "rule_id": "NBA-003",
+      "name": "Execute missing durable financial power of attorney",
+      "description": "No durable financial power of attorney (POA) is on file. Without a financial POA, incapacity leaves non-trust assets unmanageable and may require costly court-supervised conservatorship proceedings.",
+      "trigger_conditions": {
+        "type": "missing",
+        "field": "documents[].doc_type",
+        "operator": "missing",
+        "value": "financial_poa"
+      },
+      "category": "incapacity",
+      "priority_weights": {
+        "risk_reduction": 0.90,
+        "equity_protected": 0.50,
+        "time_score": 0.85,
+        "dependency_unlock": 0.70
+      },
+      "steps": [
+        "Consult with estate planning attorney about scope of powers to include",
+        "Determine who should serve as agent (typically spouse, then adult child)",
+        "Draft the durable financial power of attorney with appropriate powers and limitations",
+        "Include 'springing' vs 'immediate' effectiveness decision based on grantor preference",
+        "Execute the document with proper notarization (California requires notarization for financial POA)",
+        "Provide copies to the named agent(s) and successor agent(s)",
+        "Consider registering the POA with financial institutions proactively",
+        "Store the original in a secure but accessible location",
+        "Upload signed and notarized POA scan as evidence"
+      ],
+      "evidence_required": [
+        "Signed and notarized financial POA document (scan)",
+        "Confirmation of delivery to named agent(s)"
+      ],
+      "done_definition": "A durable financial power of attorney has been properly executed, notarized, and copies provided to all named agents.",
+      "escalation_conditions": [
+        "Grantor has diminished capacity and may not be able to execute a new POA",
+        "Complex financial situation requiring specialized POA powers (business management, real estate transactions, tax filings)",
+        "Blended family situation where agent selection is contentious",
+        "Grantor owns property or accounts in multiple states"
+      ],
+      "estimated_complexity": "moderate",
+      "owner_suggestion": "attorney",
+      "jurisdiction_specific": true,
+      "jurisdictions": ["CA"]
+    },
+    {
+      "rule_id": "NBA-004",
+      "name": "Review business operating agreement for trust transfer",
+      "description": "A business interest (LLC, partnership, or corporation) has unknown transfer status. The operating agreement or bylaws may restrict or prohibit transfer to a trust without member/shareholder consent.",
+      "trigger_conditions": {
+        "type": "risk",
+        "field": "assets[].funding_status",
+        "operator": "equals",
+        "value": "unknown",
+        "additional_filters": {
+          "asset_type": "business"
+        }
+      },
+      "category": "funding",
+      "priority_weights": {
+        "risk_reduction": 0.75,
+        "equity_protected": 0.70,
+        "time_score": 0.35,
+        "dependency_unlock": 0.80
+      },
+      "steps": [
+        "Obtain the current operating agreement (LLC), partnership agreement, or bylaws (corporation)",
+        "Review for transfer restriction clauses, anti-assignment provisions, and right-of-first-refusal provisions",
+        "Identify consent requirements: do other members/partners need to approve the transfer?",
+        "Consult with business attorney on whether trust transfer is permitted or requires amendment",
+        "If permitted, prepare an assignment of membership interest (LLC) or stock transfer (corporation) to the trust",
+        "If amendment needed, draft and obtain member/partner consent to amend the operating agreement",
+        "Execute the transfer document and update the company's records",
+        "File any required amendments with the Secretary of State",
+        "Obtain a new Schedule K-1 or other documentation reflecting trust ownership",
+        "Upload the amended operating agreement and assignment as evidence"
+      ],
+      "evidence_required": [
+        "Current operating agreement or bylaws (reviewed and annotated)",
+        "Member/partner consent to trust transfer (if required)",
+        "Assignment of membership interest or stock transfer document",
+        "Amended operating agreement (if applicable)",
+        "Secretary of State filing confirmation (if required)"
+      ],
+      "done_definition": "Business interest has been formally assigned to the trust per the operating agreement, with all required consents obtained and records updated.",
+      "escalation_conditions": [
+        "Operating agreement prohibits trust transfers entirely",
+        "Other members refuse to consent to the transfer",
+        "Business has buy-sell agreement that conflicts with trust transfer",
+        "Transfer could trigger adverse tax consequences (e.g., S-Corp eligibility issues)",
+        "Business operates in a regulated industry requiring ownership change approval"
+      ],
+      "estimated_complexity": "complex",
+      "owner_suggestion": "attorney",
+      "jurisdiction_specific": true,
+      "jurisdictions": ["CA"]
+    },
+    {
+      "rule_id": "NBA-005",
+      "name": "Record deed for real property transfer",
+      "description": "A deed has been prepared but not yet recorded, or a property has been identified for transfer and needs a deed prepared and recorded. This is the mechanical step of getting the deed filed with the county recorder.",
+      "trigger_conditions": {
+        "type": "gap",
+        "field": "documents[].status",
+        "operator": "equals",
+        "value": "missing",
+        "additional_filters": {
+          "doc_type": "property_deed"
+        }
+      },
+      "category": "funding",
+      "priority_weights": {
+        "risk_reduction": 0.90,
+        "equity_protected": 0.85,
+        "time_score": 0.50,
+        "dependency_unlock": 0.55
+      },
+      "steps": [
+        "Prepare the grant deed (or quitclaim deed, depending on situation) with correct legal description",
+        "Verify the legal description matches the county assessor's records exactly",
+        "Include the trust's full legal name: '[Grantor Name(s)], Trustee(s) of the [Trust Name] dated [Date]'",
+        "Have all current titleholders sign and notarize the deed",
+        "Prepare and attach the Preliminary Change of Ownership Report (PCOR)",
+        "Submit the deed and PCOR to the county recorder with applicable recording fees",
+        "Receive the recorded deed with document number and recording date",
+        "Order a certified copy of the recorded deed for trust records",
+        "Update the trust's asset schedule to reflect the transfer"
+      ],
+      "evidence_required": [
+        "Recorded grant deed with county document number",
+        "PCOR filing confirmation",
+        "Certified copy of recorded deed"
+      ],
+      "done_definition": "Deed has been recorded with the county recorder and a certified copy with recording number has been obtained and filed in trust records.",
+      "escalation_conditions": [
+        "Legal description discrepancy between deed and county records",
+        "Title defects discovered during preparation",
+        "Property is in another county or state requiring different procedures",
+        "Existing liens must be addressed before transfer"
+      ],
+      "estimated_complexity": "moderate",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": true,
+      "jurisdictions": ["CA"]
+    },
+    {
+      "rule_id": "NBA-006",
+      "name": "Update bank or brokerage account titling to trust",
+      "description": "A financial account (checking, savings, brokerage, or CD) is held in individual name and should be retitled to the trust to avoid probate and ensure the account passes per trust terms.",
+      "trigger_conditions": {
+        "type": "gap",
+        "field": "assets[].funding_status",
+        "operator": "equals",
+        "value": "unfunded",
+        "additional_filters": {
+          "asset_type": "financial"
+        }
+      },
+      "category": "funding",
+      "priority_weights": {
+        "risk_reduction": 0.70,
+        "equity_protected": 0.60,
+        "time_score": 0.80,
+        "dependency_unlock": 0.25
+      },
+      "steps": [
+        "Contact the financial institution and request their trust account retitling process and forms",
+        "Provide a Certificate of Trust (Probate Code 18100.5) — the institution cannot require the full trust document",
+        "Complete the institution's trust account application or retitling form",
+        "Update the account title to: '[Grantor Name(s)], Trustee(s) of [Trust Name] dated [Date]'",
+        "Verify new account statements reflect trust titling",
+        "Update or add beneficiary/TOD designations if applicable",
+        "Obtain and upload confirmation letter as evidence"
+      ],
+      "evidence_required": [
+        "Account retitling confirmation letter from institution",
+        "Updated account statement showing trust name",
+        "Updated beneficiary designation form (if applicable)"
+      ],
+      "done_definition": "Financial institution has confirmed account retitling in writing and the next statement reflects the trust name as account owner.",
+      "escalation_conditions": [
+        "Institution refuses to accept Certificate of Trust and demands full trust document",
+        "Account has UTMA/UGMA provisions that complicate trust transfer",
+        "Account is a joint account with a non-trust party",
+        "CDs have early termination penalties that may be triggered"
+      ],
+      "estimated_complexity": "simple",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": false,
+      "jurisdictions": []
+    },
+    {
+      "rule_id": "NBA-007",
+      "name": "Get Certificate of Trust notarized and distributed",
+      "description": "A notarized Certificate of Trust allows the trustee to prove their authority to third parties without revealing the full trust document. Essential for funding accounts, recording deeds, and managing trust assets.",
+      "trigger_conditions": {
+        "type": "missing",
+        "field": "documents[].doc_type",
+        "operator": "missing",
+        "value": "certificate_of_trust"
+      },
+      "category": "documentation",
+      "priority_weights": {
+        "risk_reduction": 0.30,
+        "equity_protected": 0.20,
+        "time_score": 0.90,
+        "dependency_unlock": 0.85
+      },
+      "steps": [
+        "Draft the Certificate of Trust per California Probate Code 18100.5 requirements",
+        "Include: trust name, date, trustee names, trust powers, trust TIN/SSN, whether trust is revocable, and relevant trust provisions (without detailed distribution terms)",
+        "Have all current trustees sign the certificate",
+        "Notarize the certificate",
+        "Make multiple certified copies for use with financial institutions, title companies, and other third parties",
+        "Store the original with the trust document",
+        "Upload the notarized certificate as evidence"
+      ],
+      "evidence_required": [
+        "Signed and notarized Certificate of Trust (scan)",
+        "Confirmation of distribution to relevant parties"
+      ],
+      "done_definition": "A notarized Certificate of Trust has been executed and multiple certified copies are available for third-party use.",
+      "escalation_conditions": [
+        "Trust has been amended and certificate needs to reflect amendments",
+        "Trustee has changed since last certificate was prepared",
+        "Out-of-state institution requires additional documentation beyond the certificate"
+      ],
+      "estimated_complexity": "simple",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": true,
+      "jurisdictions": ["CA"]
+    },
+    {
+      "rule_id": "NBA-008",
+      "name": "Conduct annual trust review",
+      "description": "An annual review ensures the trust remains current with life changes, asset changes, law changes, and beneficiary circumstances. Recommended at least once per year or after any major life event.",
+      "trigger_conditions": {
+        "type": "threshold",
+        "field": "trust_profile.date_last_amended",
+        "operator": "greater_than",
+        "value": "365_days_ago"
+      },
+      "category": "review",
+      "priority_weights": {
+        "risk_reduction": 0.50,
+        "equity_protected": 0.40,
+        "time_score": 0.60,
+        "dependency_unlock": 0.45
+      },
+      "steps": [
+        "Review trust document for alignment with current wishes and family situation",
+        "Verify all assets are still properly titled/funded (run AliveTrust funding audit)",
+        "Check beneficiary designations on all non-trust assets (retirement, insurance, POD accounts)",
+        "Review trustee and successor trustee selections — are named individuals still willing and able?",
+        "Confirm all ancillary documents are current (POA, healthcare directive, pour-over will)",
+        "Check for any new assets acquired since last review that need to be funded into the trust",
+        "Review for any changes in federal or state law affecting the trust plan",
+        "Discuss any life changes: marriage, divorce, birth, death, relocation, disability",
+        "Document the review and any recommended changes",
+        "Schedule next annual review"
+      ],
+      "evidence_required": [
+        "Completed annual review checklist (signed and dated)",
+        "Updated asset schedule (if changes were made)",
+        "Notes on any recommended amendments"
+      ],
+      "done_definition": "A comprehensive review of the trust, assets, beneficiaries, and ancillary documents has been completed and documented within the past 12 months.",
+      "escalation_conditions": [
+        "Significant law changes affecting estate tax exemptions or trust rules",
+        "Grantor has moved to a different state since trust creation",
+        "Marriage, divorce, or death of a beneficiary or trustee",
+        "Substantial change in estate value (up or down) affecting tax planning",
+        "Trust has not been reviewed in more than 3 years"
+      ],
+      "estimated_complexity": "moderate",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": false,
+      "jurisdictions": []
+    },
+    {
+      "rule_id": "NBA-009",
+      "name": "Add successor trustee if missing",
+      "description": "The trust does not name a successor trustee, or all named successors are no longer able or willing to serve. Without a successor, a court may need to appoint one upon the grantor's death or incapacity.",
+      "trigger_conditions": {
+        "type": "missing",
+        "field": "trust_profile.successor_trustees",
+        "operator": "missing",
+        "value": null
+      },
+      "category": "trustee",
+      "priority_weights": {
+        "risk_reduction": 0.80,
+        "equity_protected": 0.45,
+        "time_score": 0.65,
+        "dependency_unlock": 0.50
+      },
+      "steps": [
+        "Identify potential successor trustees: family members, trusted friends, professional fiduciaries, or corporate trustees",
+        "Evaluate candidates for willingness, competence, geographic proximity, and impartiality",
+        "Discuss the role and responsibilities with the proposed successor(s)",
+        "Consider naming both an individual and a corporate/professional trustee as backup",
+        "Draft a trust amendment naming the successor trustee(s) with clear succession order",
+        "Execute the amendment with proper formalities (notarization recommended)",
+        "Provide the successor trustee(s) with a copy of the trust or at minimum a letter explaining their role",
+        "Upload the executed amendment as evidence"
+      ],
+      "evidence_required": [
+        "Executed trust amendment naming successor trustee(s)",
+        "Written acceptance or acknowledgment from named successor(s)"
+      ],
+      "done_definition": "At least one successor trustee has been named in the trust via a properly executed amendment, and the named successor is aware of and willing to accept the role.",
+      "escalation_conditions": [
+        "No suitable individual successor trustee is available",
+        "Family dynamics make successor selection contentious",
+        "Estate complexity requires a professional or corporate trustee",
+        "Grantor is incapacitated and cannot execute an amendment"
+      ],
+      "estimated_complexity": "moderate",
+      "owner_suggestion": "attorney",
+      "jurisdiction_specific": false,
+      "jurisdictions": []
+    },
+    {
+      "rule_id": "NBA-010",
+      "name": "Get healthcare directive properly witnessed",
+      "description": "A healthcare directive exists but may not be properly witnessed per state requirements, or is missing entirely. California requires either two witnesses or notarization, with specific witness disqualifications.",
+      "trigger_conditions": {
+        "type": "risk",
+        "field": "documents[].status",
+        "operator": "equals",
+        "value": "needs_review",
+        "additional_filters": {
+          "doc_type": "healthcare_directive"
+        }
+      },
+      "category": "incapacity",
+      "priority_weights": {
+        "risk_reduction": 0.75,
+        "equity_protected": 0.20,
+        "time_score": 0.80,
+        "dependency_unlock": 0.35
+      },
+      "steps": [
+        "Obtain the California statutory advance healthcare directive form (Probate Code 4701)",
+        "Review and complete all sections: healthcare agent designation, treatment preferences, organ donation, HIPAA authorization",
+        "Arrange for proper witnessing: two adult witnesses, at least one of whom is NOT a healthcare provider, operator of a healthcare facility, or related by blood/marriage/adoption",
+        "If the principal is in a skilled nursing facility, one witness must be a patient advocate or ombudsman",
+        "Alternative: have the directive notarized instead of witnessed",
+        "Distribute copies to: healthcare agent(s), primary care physician, hospital, and close family members",
+        "Keep the original in an accessible location (NOT a safe deposit box)",
+        "Upload the signed and witnessed directive as evidence"
+      ],
+      "evidence_required": [
+        "Signed healthcare directive with proper witness signatures or notarization (scan)",
+        "Confirmation of delivery to healthcare agent and physician"
+      ],
+      "done_definition": "Healthcare directive has been executed with proper California witnessing requirements and distributed to all relevant parties.",
+      "escalation_conditions": [
+        "Principal has limited English proficiency and needs translated documents",
+        "Principal is in a skilled nursing facility with special witnessing requirements",
+        "Complex medical situation requiring specific treatment instructions",
+        "Disagreement among family members about healthcare preferences"
+      ],
+      "estimated_complexity": "simple",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": true,
+      "jurisdictions": ["CA"]
+    },
+    {
+      "rule_id": "NBA-011",
+      "name": "Verify bank acceptance of power of attorney",
+      "description": "Even a properly executed POA may be rejected by a financial institution. Proactive registration with key institutions ensures the agent can act without delay when needed.",
+      "trigger_conditions": {
+        "type": "gap",
+        "field": "evidence[].type",
+        "operator": "missing",
+        "value": "poa_acceptance_confirmation",
+        "additional_filters": {
+          "prerequisite": "financial_poa_exists"
+        }
+      },
+      "category": "incapacity",
+      "priority_weights": {
+        "risk_reduction": 0.65,
+        "equity_protected": 0.55,
+        "time_score": 0.50,
+        "dependency_unlock": 0.40
+      },
+      "steps": [
+        "Compile a list of all financial institutions where the principal holds accounts",
+        "Contact each institution to inquire about their POA acceptance process and any institution-specific forms",
+        "Submit the POA to each institution for pre-registration (some institutions require their own POA form in addition to the statutory form)",
+        "Complete any institution-specific POA acknowledgment forms",
+        "Request written confirmation from each institution that the POA is on file and will be honored",
+        "Note that California Probate Code 4303 requires financial institutions to accept statutory POAs and provides remedies for unreasonable refusal",
+        "Upload acceptance confirmations as evidence for each institution"
+      ],
+      "evidence_required": [
+        "Written POA acceptance or acknowledgment from each financial institution",
+        "Copies of any institution-specific POA forms completed"
+      ],
+      "done_definition": "All key financial institutions have acknowledged the POA on file and confirmed they will honor it when presented by the agent.",
+      "escalation_conditions": [
+        "Financial institution refuses to accept the POA",
+        "Institution requires its own proprietary POA form that may conflict with trust terms",
+        "POA is more than 2 years old and institution questions its currency",
+        "Agent is a non-US resident and institution has identification concerns"
+      ],
+      "estimated_complexity": "moderate",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": true,
+      "jurisdictions": ["CA"]
+    },
+    {
+      "rule_id": "NBA-012",
+      "name": "Transfer vehicle title to trust",
+      "description": "A vehicle is titled in the grantor's individual name and has not been transferred to the trust. While vehicles are lower-priority for trust funding, transferring avoids probate and simplifies successor trustee management.",
+      "trigger_conditions": {
+        "type": "gap",
+        "field": "assets[].funding_status",
+        "operator": "equals",
+        "value": "unfunded",
+        "additional_filters": {
+          "asset_subtype": "vehicle"
+        }
+      },
+      "category": "funding",
+      "priority_weights": {
+        "risk_reduction": 0.35,
+        "equity_protected": 0.25,
+        "time_score": 0.75,
+        "dependency_unlock": 0.15
+      },
+      "steps": [
+        "Obtain the current vehicle title (pink slip) from the lender if financed, or from personal records",
+        "Complete California DMV REG 227 (Application for Duplicate or Transfer of Title) transferring ownership to the trust",
+        "The new owner should be listed as: '[Grantor Name], Trustee of [Trust Name] dated [Date]'",
+        "Submit the completed form, current title, and applicable fees to the DMV",
+        "If the vehicle is financed, contact the lienholder first to confirm they allow trust transfer",
+        "Receive the new title reflecting trust ownership",
+        "Update vehicle insurance to reflect trust as named insured (or add trust as additional insured)",
+        "Upload the new title and insurance update as evidence"
+      ],
+      "evidence_required": [
+        "Updated vehicle title showing trust as owner",
+        "DMV transfer confirmation",
+        "Updated insurance declaration page"
+      ],
+      "done_definition": "California DMV has issued a new title reflecting trust ownership and vehicle insurance has been updated accordingly.",
+      "escalation_conditions": [
+        "Vehicle is financed and lienholder refuses trust transfer",
+        "Vehicle is leased rather than owned",
+        "Vehicle is a collector/vintage car with special insurance considerations",
+        "Multiple vehicles requiring transfer (may consider leaving low-value vehicles outside trust)"
+      ],
+      "estimated_complexity": "simple",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": true,
+      "jurisdictions": ["CA"]
+    },
+    {
+      "rule_id": "NBA-013",
+      "name": "Review tax implications of trust funding",
+      "description": "Certain asset transfers into a trust may have tax consequences: property tax reassessment, capital gains recognition, gift tax implications, or retirement account distribution triggers. A tax review ensures no unintended tax liability.",
+      "trigger_conditions": {
+        "type": "threshold",
+        "field": "computed.recent_funding_actions_count",
+        "operator": "greater_than",
+        "value": 0
+      },
+      "category": "tax",
+      "priority_weights": {
+        "risk_reduction": 0.60,
+        "equity_protected": 0.70,
+        "time_score": 0.45,
+        "dependency_unlock": 0.30
+      },
+      "steps": [
+        "Review all recent and planned asset transfers for tax implications",
+        "Real estate: Verify trust transfer qualifies for property tax reassessment exclusion (Proposition 19/13)",
+        "Retirement accounts: Confirm these are NOT being retitled (should use beneficiary designations only)",
+        "Business interests: Check for potential gift tax or income tax recognition on transfer",
+        "Review the trust's grantor trust status for income tax purposes (revocable trusts are generally tax-neutral during grantor's lifetime)",
+        "Confirm no assets are being transferred that would trigger capital gains (e.g., installment obligations, foreign assets)",
+        "Document the tax review conclusions for each asset category",
+        "Consult with CPA or tax advisor if any ambiguous situations arise"
+      ],
+      "evidence_required": [
+        "Tax review memorandum or checklist (signed by preparer)",
+        "CPA or tax advisor confirmation letter (if professional review conducted)",
+        "Filed PCOR forms for real estate transfers"
+      ],
+      "done_definition": "All recent and planned trust funding transfers have been reviewed for tax implications, with no unaddressed tax issues remaining.",
+      "escalation_conditions": [
+        "Estate value approaches or exceeds federal estate tax exemption ($13.61M for 2024)",
+        "Trust holds assets in multiple states with varying tax rules",
+        "Transfer of appreciated property that may not qualify for step-up in basis",
+        "S-Corporation shares being transferred (trust must qualify as eligible shareholder)",
+        "Grantor is a non-US citizen with different estate/gift tax rules"
+      ],
+      "estimated_complexity": "complex",
+      "owner_suggestion": "accountant",
+      "jurisdiction_specific": true,
+      "jurisdictions": ["CA"]
+    },
+    {
+      "rule_id": "NBA-014",
+      "name": "Update digital asset access plan",
+      "description": "Digital assets (online accounts, cryptocurrency, digital files, social media, domain names) are often overlooked in trust planning. Without a digital asset plan, successor trustees may be unable to access or manage these assets.",
+      "trigger_conditions": {
+        "type": "missing",
+        "field": "documents[].doc_type",
+        "operator": "missing",
+        "value": "digital_asset_plan"
+      },
+      "category": "documentation",
+      "priority_weights": {
+        "risk_reduction": 0.45,
+        "equity_protected": 0.35,
+        "time_score": 0.55,
+        "dependency_unlock": 0.20
+      },
+      "steps": [
+        "Create an inventory of all digital assets: email accounts, social media, financial accounts, cryptocurrency wallets, cloud storage, domain names, digital subscriptions, online businesses",
+        "For each digital asset, document: account name, URL, username, and how to access (password manager reference, NOT plaintext passwords)",
+        "Set up a password manager (e.g., 1Password, Bitwarden) and store the master password securely",
+        "Document the location of the master password or recovery key in the trustee instruction letter",
+        "Review each platform's legacy/memorialization/inactive account policies",
+        "Designate legacy contacts where platforms support it (Google Inactive Account Manager, Facebook Legacy Contact, Apple Legacy Contact)",
+        "For cryptocurrency: document wallet types, seed phrase storage location, and recovery procedures",
+        "Include digital asset access instructions in the trust's trustee instruction letter",
+        "Consider whether a specific provision in the trust or a separate digital asset authorization is needed under California's Revised Uniform Fiduciary Access to Digital Assets Act (RUFADAA)"
+      ],
+      "evidence_required": [
+        "Digital asset inventory (encrypted or stored in password manager)",
+        "Password manager setup confirmation",
+        "Legacy contact designations for major platforms",
+        "Digital asset access instructions for successor trustee"
+      ],
+      "done_definition": "A comprehensive digital asset inventory exists with access instructions for the successor trustee, and legacy contacts have been designated where available.",
+      "escalation_conditions": [
+        "Significant cryptocurrency holdings requiring specialized custody/recovery planning",
+        "Digital businesses generating income that require continuity planning",
+        "International digital assets subject to foreign laws",
+        "Complex two-factor authentication setups that could lock out a successor"
+      ],
+      "estimated_complexity": "moderate",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": false,
+      "jurisdictions": []
+    },
+    {
+      "rule_id": "NBA-015",
+      "name": "Create trustee instruction letter",
+      "description": "A trustee instruction letter (also called a letter of intent or memorandum of wishes) provides practical guidance to the successor trustee beyond what is in the legal trust document. It covers logistics, preferences, and practical matters.",
+      "trigger_conditions": {
+        "type": "missing",
+        "field": "documents[].doc_type",
+        "operator": "missing",
+        "value": "trustee_instruction_letter"
+      },
+      "category": "documentation",
+      "priority_weights": {
+        "risk_reduction": 0.40,
+        "equity_protected": 0.25,
+        "time_score": 0.65,
+        "dependency_unlock": 0.55
+      },
+      "steps": [
+        "Draft a letter addressed to the successor trustee(s) covering the following topics:",
+        "Location of important documents: trust original, will, deeds, insurance policies, tax returns, birth/marriage certificates",
+        "List of professional advisors: attorney, CPA, financial advisor, insurance agent — with contact information",
+        "Complete list of assets and accounts with institution names, account numbers, and contact information",
+        "Digital asset access instructions and password manager information",
+        "List of recurring bills, subscriptions, and automatic payments that need to be managed",
+        "Funeral and memorial preferences (if not covered elsewhere)",
+        "Special instructions for specific beneficiaries (e.g., a child with special needs, a beneficiary with substance abuse issues)",
+        "Personal property distribution wishes for items not specifically mentioned in the trust",
+        "Any pending legal matters, disputes, or obligations the trustee should be aware of",
+        "Store the letter with the trust documents but keep it updatable (not notarized — it is not a legal document)",
+        "Upload the letter as evidence and update annually"
+      ],
+      "evidence_required": [
+        "Completed trustee instruction letter (signed and dated)",
+        "Confirmation that successor trustee knows where to find the letter"
+      ],
+      "done_definition": "A comprehensive trustee instruction letter has been drafted, signed, and stored with the trust documents, and the successor trustee has been informed of its existence and location.",
+      "escalation_conditions": [
+        "Complex trust with multiple sub-trusts or special needs provisions",
+        "Business succession instructions requiring detailed operational guidance",
+        "International assets or beneficiaries requiring cross-border instructions",
+        "Contentious family dynamics requiring sensitive handling instructions"
+      ],
+      "estimated_complexity": "moderate",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": false,
+      "jurisdictions": []
+    },
+    {
+      "rule_id": "NBA-016",
+      "name": "Fix beneficiary mismatch on retirement accounts",
+      "description": "A retirement account (IRA, 401(k), 403(b)) has a beneficiary designation that does not align with the trust plan. Retirement accounts pass by beneficiary designation, not by trust terms, so mismatches can defeat the estate plan.",
+      "trigger_conditions": {
+        "type": "conflict",
+        "field": "assets[].beneficiary_designation",
+        "operator": "equals",
+        "value": "beneficiary_mismatch",
+        "additional_filters": {
+          "asset_type": "retirement"
+        }
+      },
+      "category": "beneficiary",
+      "priority_weights": {
+        "risk_reduction": 0.80,
+        "equity_protected": 0.75,
+        "time_score": 0.65,
+        "dependency_unlock": 0.25
+      },
+      "steps": [
+        "Review the trust document for any specific provisions regarding retirement account distribution",
+        "Determine the optimal beneficiary designation strategy with tax advisor: naming individuals directly (preferred for stretch IRA benefits) vs. naming the trust (required for certain control provisions)",
+        "If naming the trust as beneficiary, verify the trust qualifies as a 'see-through' or 'conduit' trust under IRS regulations to preserve favorable distribution options",
+        "Contact the retirement plan administrator to obtain a beneficiary change form",
+        "Complete the form with the correct primary and contingent beneficiary designations",
+        "If married, obtain spousal consent for non-spouse primary beneficiary (required for most qualified plans)",
+        "Submit the completed form and obtain written confirmation",
+        "Upload the confirmation as evidence"
+      ],
+      "evidence_required": [
+        "Updated beneficiary designation form (copy)",
+        "Plan administrator confirmation of beneficiary change",
+        "Spousal consent form (if applicable)"
+      ],
+      "done_definition": "Retirement account beneficiary designations have been updated to align with the trust plan, confirmed in writing by the plan administrator.",
+      "escalation_conditions": [
+        "Significant retirement account balance that could benefit from specialized trust provisions (accumulation trust vs. conduit trust)",
+        "SECURE Act implications for non-spouse beneficiaries and the 10-year rule",
+        "Community property state spousal rights complications",
+        "Qualified plan with restrictive beneficiary designation options",
+        "Beneficiary with special needs requiring a special needs trust as beneficiary"
+      ],
+      "estimated_complexity": "moderate",
+      "owner_suggestion": "financial_advisor",
+      "jurisdiction_specific": false,
+      "jurisdictions": []
+    },
+    {
+      "rule_id": "NBA-017",
+      "name": "Upload missing evidence for funded assets",
+      "description": "Assets are marked as funded but lack supporting evidence (confirmation letters, recorded deeds, retitling confirmations). Evidence is essential for successor trustees and for verifying the trust plan's completeness.",
+      "trigger_conditions": {
+        "type": "gap",
+        "field": "assets[].evidence_ids",
+        "operator": "equals",
+        "value": "empty_array",
+        "additional_filters": {
+          "funding_status_not": "unfunded"
+        }
+      },
+      "category": "evidence",
+      "priority_weights": {
+        "risk_reduction": 0.30,
+        "equity_protected": 0.20,
+        "time_score": 0.85,
+        "dependency_unlock": 0.15
+      },
+      "steps": [
+        "Identify all funded assets that lack uploaded evidence",
+        "For each asset, determine what evidence should exist: deed recording, account statement, beneficiary confirmation, title document",
+        "Gather the supporting documents from files, institutions, or online accounts",
+        "Scan or download digital copies of each document",
+        "Upload each evidence item to AliveTrust, linking it to the correct asset",
+        "Verify each evidence item matches the asset details (account numbers, property addresses, trust name)",
+        "Mark evidence as verified once confirmed"
+      ],
+      "evidence_required": [
+        "Relevant confirmation documents for each funded asset (varies by asset type)"
+      ],
+      "done_definition": "Every funded or partially funded asset has at least one piece of supporting evidence uploaded and verified in the system.",
+      "escalation_conditions": [
+        "Institution no longer exists (merged, closed) and records are unavailable",
+        "Asset was funded so long ago that original documentation cannot be located",
+        "Evidence reveals a discrepancy (e.g., title shows different name than expected)"
+      ],
+      "estimated_complexity": "simple",
+      "owner_suggestion": "grantor",
+      "jurisdiction_specific": false,
+      "jurisdictions": []
+    },
+    {
+      "rule_id": "NBA-018",
+      "name": "Execute pour-over will if missing",
+      "description": "No pour-over will exists to catch assets that are inadvertently left outside the trust at death. Without a pour-over will, unfunded assets pass by intestacy rather than trust terms.",
+      "trigger_conditions": {
+        "type": "missing",
+        "field": "documents[].doc_type",
+        "operator": "missing",
+        "value": "pour_over_will"
+      },
+      "category": "documentation",
+      "priority_weights": {
+        "risk_reduction": 0.70,
+        "equity_protected": 0.55,
+        "time_score": 0.60,
+        "dependency_unlock": 0.40
+      },
+      "steps": [
+        "Engage estate planning attorney to draft a pour-over will",
+        "The will should direct that all probate assets be transferred ('poured over') into the living trust",
+        "Name an executor (personal representative) — typically the same person as successor trustee",
+        "Include guardian nominations for minor children if applicable",
+        "Execute the will with California formalities: signed by testator in presence of two witnesses who also sign",
+        "Do NOT notarize the will (California does not require notarization for wills, and a notarized will is not self-proving in CA)",
+        "Consider adding a self-proving affidavit if the will may need to be probated in another state",
+        "Store the original will in a secure, known location (NOT a safe deposit box unless someone else has access)",
+        "Upload a scan of the executed will as evidence"
+      ],
+      "evidence_required": [
+        "Executed pour-over will (scan showing signatures and witnesses)",
+        "Confirmation of original storage location"
+      ],
+      "done_definition": "A pour-over will has been properly executed with two witnesses and stored in a known, accessible location.",
+      "escalation_conditions": [
+        "Grantor has minor children requiring guardian nominations",
+        "Grantor has assets in multiple states requiring ancillary probate consideration",
+        "Grantor has a prior will that needs to be explicitly revoked",
+        "Blended family situation requiring careful coordination between will and trust"
+      ],
+      "estimated_complexity": "moderate",
+      "owner_suggestion": "attorney",
+      "jurisdiction_specific": true,
+      "jurisdictions": ["CA"]
+    }
+  ]
+}

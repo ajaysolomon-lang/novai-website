@@ -1,0 +1,307 @@
+{
+  "schema_version": "1.0",
+  "description": "Curated list of verified official sources for living trust guidance used by AliveTrust",
+  "last_updated": "2025-01-15",
+  "sources": [
+    {
+      "source_id": "VS-001",
+      "title": "California Probate Code - Trust Law (Division 9)",
+      "category": "trust_formation",
+      "jurisdiction": "CA",
+      "official_url": "https://leginfo.legislature.ca.gov/faces/codes_displayexpandedbranch.xhtml?tocCode=PROB&division=9.&title=&part=&chapter=&article=",
+      "description": "Full text of California Probate Code Division 9, governing the creation, validity, modification, and termination of trusts under California law. The authoritative statutory source for all California trust matters.",
+      "last_verified": "2025-01-10",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-002",
+      "title": "California Secretary of State - Notary Public Information",
+      "category": "trust_formation",
+      "jurisdiction": "CA",
+      "official_url": "https://www.sos.ca.gov/notary",
+      "description": "Official guidance on notarization requirements in California, relevant to trust execution, certification of trust, and deed recordings. Includes notary public handbook and fee schedules.",
+      "last_verified": "2025-01-10",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-003",
+      "title": "Los Angeles County Registrar-Recorder - Recording Real Property Documents",
+      "category": "real_estate",
+      "jurisdiction": "CA",
+      "official_url": "https://www.lavote.gov/home/recorder/real-estate-records/recording-a-document",
+      "description": "Official recording requirements for deeds and real property transfers in Los Angeles County. Includes document formatting requirements, fee schedules, and submission procedures for transferring property into a living trust.",
+      "last_verified": "2025-01-08",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-004",
+      "title": "California State Board of Equalization - Property Tax: Transfers of Real Property (Proposition 19)",
+      "category": "tax_planning",
+      "jurisdiction": "CA",
+      "official_url": "https://www.boe.ca.gov/prop19/",
+      "description": "Official guidance on Proposition 19 property tax reassessment rules affecting trust transfers of real property in California. Critical for understanding when transferring real estate into or out of a trust triggers property tax reassessment.",
+      "last_verified": "2025-01-12",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-005",
+      "title": "IRS - Abusive Trust Tax Evasion Schemes: Questions and Answers",
+      "category": "tax_planning",
+      "jurisdiction": "federal",
+      "official_url": "https://www.irs.gov/businesses/small-businesses-self-employed/abusive-trust-tax-evasion-schemes-questions-and-answers",
+      "description": "IRS guidance distinguishing legitimate living trusts from abusive trust schemes. Helpful for understanding the tax treatment of revocable living trusts and ensuring compliance with federal tax law.",
+      "last_verified": "2025-01-05",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-006",
+      "title": "IRS - Estate and Gift Taxes",
+      "category": "tax_planning",
+      "jurisdiction": "federal",
+      "official_url": "https://www.irs.gov/businesses/small-businesses-self-employed/estate-and-gift-taxes",
+      "description": "Comprehensive IRS resource on federal estate and gift tax rules, exemption amounts, filing requirements, and the interplay between living trusts and estate taxation. Includes Form 706 instructions and current exemption thresholds.",
+      "last_verified": "2025-01-05",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-007",
+      "title": "IRS - Trusts: Common Reporting Requirements",
+      "category": "tax_planning",
+      "jurisdiction": "federal",
+      "official_url": "https://www.irs.gov/charities-non-profits/trusts-common-questions",
+      "description": "IRS overview of reporting requirements for different types of trusts, including when a revocable living trust must file its own tax return (Form 1041) versus reporting on the grantor's individual return.",
+      "last_verified": "2025-01-05",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-008",
+      "title": "California Judicial Branch - Probate Self-Help",
+      "category": "probate_avoidance",
+      "jurisdiction": "CA",
+      "official_url": "https://www.courts.ca.gov/8865.htm",
+      "description": "Official California Courts self-help resource on the probate process, timelines, costs, and thresholds. Useful for understanding what happens to unfunded assets and the probate exposure that a living trust is designed to avoid.",
+      "last_verified": "2025-01-08",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-009",
+      "title": "California Judicial Branch - Small Estate Affidavit (Probate Code 13100)",
+      "category": "probate_avoidance",
+      "jurisdiction": "CA",
+      "official_url": "https://www.courts.ca.gov/10440.htm",
+      "description": "Official guidance on California's small estate affidavit procedure for estates under $184,500 (2024 threshold). Relevant for determining which unfunded assets may pass outside probate even without trust funding.",
+      "last_verified": "2025-01-08",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-010",
+      "title": "California State Bar - Do I Need a Living Trust?",
+      "category": "trust_formation",
+      "jurisdiction": "CA",
+      "official_url": "https://www.calbar.ca.gov/Public/Pamphlets/Do-I-Need-a-Living-Trust",
+      "description": "State Bar of California consumer pamphlet explaining living trusts, their advantages and limitations, and factors to consider. Authoritative bar association resource for general living trust education.",
+      "last_verified": "2025-01-10",
+      "reliability_tier": "bar_association"
+    },
+    {
+      "source_id": "VS-011",
+      "title": "American Bar Association - Estate Planning FAQs",
+      "category": "estate_planning",
+      "jurisdiction": "all_states",
+      "official_url": "https://www.americanbar.org/groups/real_property_trust_estate/resources/estate_planning/estate_planning_faq/",
+      "description": "ABA resource covering fundamental estate planning questions including the role of trusts, wills, powers of attorney, and healthcare directives. National perspective with guidance applicable across all states.",
+      "last_verified": "2025-01-06",
+      "reliability_tier": "bar_association"
+    },
+    {
+      "source_id": "VS-012",
+      "title": "American Bar Association - Guide to Wills and Estates",
+      "category": "estate_planning",
+      "jurisdiction": "all_states",
+      "official_url": "https://www.americanbar.org/groups/real_property_trust_estate/resources/estate_planning/",
+      "description": "ABA's comprehensive estate planning resource hub with articles on trusts, wills, powers of attorney, guardianship, and estate administration. Covers national standards and best practices.",
+      "last_verified": "2025-01-06",
+      "reliability_tier": "bar_association"
+    },
+    {
+      "source_id": "VS-013",
+      "title": "Nolo - Living Trusts: Overview",
+      "category": "trust_formation",
+      "jurisdiction": "all_states",
+      "official_url": "https://www.nolo.com/legal-encyclopedia/living-trusts",
+      "description": "Nolo's comprehensive guide to living trusts covering creation, funding, management, and common questions. Written by attorneys and widely recognized as a reliable legal education resource for consumers.",
+      "last_verified": "2025-01-12",
+      "reliability_tier": "legal_education"
+    },
+    {
+      "source_id": "VS-014",
+      "title": "Nolo - Funding a Living Trust",
+      "category": "asset_funding",
+      "jurisdiction": "all_states",
+      "official_url": "https://www.nolo.com/legal-encyclopedia/funding-living-trust-29785.html",
+      "description": "Step-by-step guide for transferring assets into a living trust, covering real estate, bank accounts, vehicles, business interests, and personal property. Includes state-specific considerations.",
+      "last_verified": "2025-01-12",
+      "reliability_tier": "legal_education"
+    },
+    {
+      "source_id": "VS-015",
+      "title": "Nolo - Transferring Real Estate into a Living Trust",
+      "category": "real_estate",
+      "jurisdiction": "all_states",
+      "official_url": "https://www.nolo.com/legal-encyclopedia/transferring-real-estate-living-trust.html",
+      "description": "Detailed guide on the process of transferring real property into a living trust via quitclaim or grant deed, including recording requirements, title insurance considerations, and mortgage due-on-sale clause issues.",
+      "last_verified": "2025-01-12",
+      "reliability_tier": "legal_education"
+    },
+    {
+      "source_id": "VS-016",
+      "title": "California Legislative Information - Uniform Trust Code (Probate Code 15000-18201)",
+      "category": "trustee_duties",
+      "jurisdiction": "CA",
+      "official_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=PROB&division=9.&title=&part=4.&chapter=1.&article=",
+      "description": "California statutory provisions governing trustee duties, powers, and liabilities. Covers duty of loyalty, duty to inform beneficiaries, standard of care, and investment standards for trustees.",
+      "last_verified": "2025-01-10",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-017",
+      "title": "California Probate Code - Powers of Attorney (Division 4.5)",
+      "category": "incapacity_planning",
+      "jurisdiction": "CA",
+      "official_url": "https://leginfo.legislature.ca.gov/faces/codes_displayexpandedbranch.xhtml?tocCode=PROB&division=4.5.&title=&part=&chapter=&article=",
+      "description": "Full text of California law governing durable powers of attorney for financial matters and healthcare decisions. Essential for incapacity planning alongside a living trust.",
+      "last_verified": "2025-01-10",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-018",
+      "title": "California Attorney General - Advance Health Care Directive",
+      "category": "incapacity_planning",
+      "jurisdiction": "CA",
+      "official_url": "https://oag.ca.gov/consumers/general/healthcare-advance-directive",
+      "description": "Official California Attorney General resource on advance healthcare directives, including the statutory form, witnessing requirements, and HIPAA authorization. Critical companion document to a living trust for incapacity planning.",
+      "last_verified": "2025-01-08",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-019",
+      "title": "California DMV - Transfer of Vehicle Ownership to a Trust",
+      "category": "asset_funding",
+      "jurisdiction": "CA",
+      "official_url": "https://www.dmv.ca.gov/portal/handbook/vehicle-industry-registration-procedures-manual/transfers/transfer-to-a-trust/",
+      "description": "Official DMV procedures for transferring a vehicle title into a living trust in California. Includes required forms (REG 227), fees, and documentation requirements.",
+      "last_verified": "2025-01-08",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-020",
+      "title": "California Franchise Tax Board - Trusts: Filing Requirements",
+      "category": "tax_planning",
+      "jurisdiction": "CA",
+      "official_url": "https://www.ftb.ca.gov/file/business/types/trusts.html",
+      "description": "California FTB guidance on state tax filing requirements for trusts, including when a revocable trust becomes irrevocable and must file its own California fiduciary return (Form 541).",
+      "last_verified": "2025-01-05",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-021",
+      "title": "Nolo - Naming Beneficiaries for Retirement Accounts and Living Trusts",
+      "category": "beneficiary_designations",
+      "jurisdiction": "all_states",
+      "official_url": "https://www.nolo.com/legal-encyclopedia/should-you-name-living-trust-beneficiary-retirement-account.html",
+      "description": "Expert analysis of the complex decision of whether to name a living trust as beneficiary of retirement accounts (IRAs, 401(k)s). Covers IRS distribution rules, SECURE Act implications, and when trust-as-beneficiary is or is not advisable.",
+      "last_verified": "2025-01-12",
+      "reliability_tier": "legal_education"
+    },
+    {
+      "source_id": "VS-022",
+      "title": "Nolo - Life Insurance and Living Trusts",
+      "category": "beneficiary_designations",
+      "jurisdiction": "all_states",
+      "official_url": "https://www.nolo.com/legal-encyclopedia/life-insurance-living-trust.html",
+      "description": "Guide to the relationship between life insurance policies and living trusts, covering beneficiary designation options, irrevocable life insurance trusts (ILITs), and estate tax implications.",
+      "last_verified": "2025-01-12",
+      "reliability_tier": "legal_education"
+    },
+    {
+      "source_id": "VS-023",
+      "title": "California Secretary of State - Business Entities (LLC/Corp Filings)",
+      "category": "business_succession",
+      "jurisdiction": "CA",
+      "official_url": "https://www.sos.ca.gov/business-programs/business-entities",
+      "description": "Official resource for California business entity filings. Relevant when transferring LLC membership interests or corporate shares into a living trust, including required amendments to articles of organization.",
+      "last_verified": "2025-01-10",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-024",
+      "title": "Nolo - Transferring Small Business Interests to a Living Trust",
+      "category": "business_succession",
+      "jurisdiction": "all_states",
+      "official_url": "https://www.nolo.com/legal-encyclopedia/transferring-small-business-interests-living-trust.html",
+      "description": "Practical guide for transferring sole proprietorships, LLCs, partnerships, and corporation shares into a living trust. Covers operating agreement amendments, buy-sell agreement considerations, and EIN requirements.",
+      "last_verified": "2025-01-12",
+      "reliability_tier": "legal_education"
+    },
+    {
+      "source_id": "VS-025",
+      "title": "Uniform Law Commission - Uniform Trust Code",
+      "category": "trustee_duties",
+      "jurisdiction": "all_states",
+      "official_url": "https://www.uniformlaws.org/committees/community-home?CommunityKey=193ff839-7955-4846-8f3c-ce74ac23938d",
+      "description": "The model Uniform Trust Code adopted in whole or part by 35+ states. Provides the foundation for modern trust law including trust creation, modification, trustee duties, and beneficiary rights.",
+      "last_verified": "2025-01-06",
+      "reliability_tier": "industry_standard"
+    },
+    {
+      "source_id": "VS-026",
+      "title": "California Legislative Information - Certification of Trust (Probate Code 18100.5)",
+      "category": "trust_formation",
+      "jurisdiction": "CA",
+      "official_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=18100.5.&lawCode=PROB",
+      "description": "California statute governing certificates of trust, which allow trustees to prove their authority without revealing the full trust document. Required by banks, title companies, and other institutions during trust funding.",
+      "last_verified": "2025-01-10",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-027",
+      "title": "Los Angeles County Assessor - Change of Ownership: Exemptions for Trusts",
+      "category": "real_estate",
+      "jurisdiction": "CA",
+      "official_url": "https://assessor.lacounty.gov/homeowners/change-in-ownership",
+      "description": "LA County Assessor guidance on property tax reassessment exclusions for trust transfers. Covers when transferring property to/from a revocable trust is exempt from reassessment and required documentation (PCOR form).",
+      "last_verified": "2025-01-08",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-028",
+      "title": "ACTEC - Commentaries on the Model Rules of Professional Conduct",
+      "category": "estate_planning",
+      "jurisdiction": "all_states",
+      "official_url": "https://www.actec.org/resources/commentaries-on-the-model-rules-of-professional-conduct/",
+      "description": "American College of Trust and Estate Counsel commentaries on ethical standards for estate planning attorneys. Provides guidance on professional responsibilities in trust drafting and administration.",
+      "last_verified": "2025-01-06",
+      "reliability_tier": "bar_association"
+    },
+    {
+      "source_id": "VS-029",
+      "title": "IRS - Employer Identification Numbers (EIN) for Trusts",
+      "category": "tax_planning",
+      "jurisdiction": "federal",
+      "official_url": "https://www.irs.gov/businesses/small-businesses-self-employed/do-you-need-an-ein",
+      "description": "IRS guidance on when a trust needs its own Employer Identification Number. A revocable trust typically uses the grantor's SSN, but an EIN is needed upon death of the grantor or when the trust becomes irrevocable.",
+      "last_verified": "2025-01-05",
+      "reliability_tier": "official_government"
+    },
+    {
+      "source_id": "VS-030",
+      "title": "California Department of Insurance - Consumer Resources",
+      "category": "beneficiary_designations",
+      "jurisdiction": "CA",
+      "official_url": "https://www.insurance.ca.gov/01-consumers/",
+      "description": "California DOI consumer resources relevant to life insurance beneficiary designations, policy ownership transfers to trusts, and understanding how insurance proceeds interact with estate plans.",
+      "last_verified": "2025-01-08",
+      "reliability_tier": "official_government"
+    }
+  ]
+}

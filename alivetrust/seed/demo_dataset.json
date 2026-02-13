@@ -1,0 +1,480 @@
+{
+  "schema_version": "1.0",
+  "description": "Complete demo dataset for AliveTrust testing and demonstration",
+  "generated_at": "2025-01-15T00:00:00Z",
+
+  "user": {
+    "user_id": "demo-user-001",
+    "name": "Jordan & Casey Rivera",
+    "email": "demo@example.com",
+    "phone": "+1-310-555-0142",
+    "created_at": "2024-06-01T10:00:00Z",
+    "subscription_tier": "premium",
+    "onboarding_complete": true
+  },
+
+  "trust_profile": {
+    "trust_id": "trust-demo-001",
+    "user_id": "demo-user-001",
+    "name": "Rivera Family Living Trust",
+    "type": "revocable",
+    "state": "CA",
+    "county": "Los Angeles",
+    "date_created": "2021-03-15",
+    "date_last_amended": "2023-08-20",
+    "attorney_name": "Maria L. Santos, Esq.",
+    "attorney_firm": "Santos & Whitfield LLP",
+    "attorney_phone": "+1-310-555-0200",
+    "trustees": [
+      {
+        "name": "Jordan Rivera",
+        "role": "co-trustee",
+        "relationship": "grantor",
+        "is_current": true
+      },
+      {
+        "name": "Casey Rivera",
+        "role": "co-trustee",
+        "relationship": "grantor",
+        "is_current": true
+      }
+    ],
+    "successor_trustees": [
+      {
+        "name": "Alex Rivera",
+        "role": "first_successor",
+        "relationship": "child",
+        "order": 1
+      },
+      {
+        "name": "Pacific Trust Company",
+        "role": "institutional_successor",
+        "relationship": "corporate_trustee",
+        "order": 2
+      }
+    ],
+    "beneficiaries": [
+      {
+        "name": "Alex Rivera",
+        "relationship": "child",
+        "share_type": "percentage",
+        "share_value": 40,
+        "age": 28,
+        "is_minor": false,
+        "special_provisions": null
+      },
+      {
+        "name": "Morgan Rivera",
+        "relationship": "child",
+        "share_type": "percentage",
+        "share_value": 40,
+        "age": 24,
+        "is_minor": false,
+        "special_provisions": null
+      },
+      {
+        "name": "Riverside Community Foundation",
+        "relationship": "charitable",
+        "share_type": "percentage",
+        "share_value": 20,
+        "age": null,
+        "is_minor": false,
+        "special_provisions": "To fund annual scholarship in the Rivera family name"
+      }
+    ]
+  },
+
+  "assets": [
+    {
+      "asset_id": "asset-001",
+      "trust_id": "trust-demo-001",
+      "name": "Primary Residence - 742 Elm Street, Pasadena, CA 91101",
+      "type": "real_estate",
+      "subtype": "primary_residence",
+      "estimated_value": 1250000,
+      "funding_status": "funded",
+      "funding_method": "grant_deed_recorded",
+      "deed_recording_number": "20210415-0012345",
+      "deed_recording_date": "2021-04-15",
+      "title_insurance": true,
+      "mortgage_lender": "Wells Fargo Home Mortgage",
+      "mortgage_balance": 380000,
+      "beneficiary_designation": null,
+      "evidence_ids": ["ev-001", "ev-002"],
+      "notes": "Primary residence transferred via grant deed. Title insurance policy updated to reflect trust ownership. Lender notified; no due-on-sale triggered."
+    },
+    {
+      "asset_id": "asset-002",
+      "trust_id": "trust-demo-001",
+      "name": "Rental Property - 1580 Ocean Blvd, Unit 4B, Long Beach, CA 90802",
+      "type": "real_estate",
+      "subtype": "rental_property",
+      "estimated_value": 485000,
+      "funding_status": "unfunded",
+      "funding_method": null,
+      "deed_recording_number": null,
+      "deed_recording_date": null,
+      "title_insurance": false,
+      "mortgage_lender": "Chase Home Lending",
+      "mortgage_balance": 210000,
+      "beneficiary_designation": null,
+      "evidence_ids": [],
+      "notes": "Rental property purchased in 2019 in Jordan Rivera's individual name. Never transferred to trust. PROBATE RISK: This property will require probate if not funded. Deed transfer needed."
+    },
+    {
+      "asset_id": "asset-003",
+      "trust_id": "trust-demo-001",
+      "name": "Joint Checking Account - First Republic Bank",
+      "type": "financial",
+      "subtype": "checking_account",
+      "estimated_value": 42000,
+      "funding_status": "funded",
+      "funding_method": "account_retitled",
+      "account_last_four": "8834",
+      "institution": "First Republic Bank",
+      "beneficiary_designation": null,
+      "evidence_ids": ["ev-003"],
+      "notes": "Account retitled to 'Jordan and Casey Rivera, Trustees of the Rivera Family Living Trust dated March 15, 2021'. Certificate of trust provided to bank."
+    },
+    {
+      "asset_id": "asset-004",
+      "trust_id": "trust-demo-001",
+      "name": "Brokerage Account - Charles Schwab",
+      "type": "financial",
+      "subtype": "brokerage_account",
+      "estimated_value": 315000,
+      "funding_status": "funded",
+      "funding_method": "account_retitled",
+      "account_last_four": "2291",
+      "institution": "Charles Schwab",
+      "beneficiary_designation": "trust",
+      "evidence_ids": ["ev-004"],
+      "notes": "Brokerage account retitled to trust. TOD designation also set to trust. Holds diversified portfolio of index funds and individual equities."
+    },
+    {
+      "asset_id": "asset-005",
+      "trust_id": "trust-demo-001",
+      "name": "Term Life Insurance - Northwestern Mutual",
+      "type": "insurance",
+      "subtype": "term_life",
+      "estimated_value": 500000,
+      "funding_status": "funded",
+      "funding_method": "ownership_transferred",
+      "policy_number_last_four": "7712",
+      "institution": "Northwestern Mutual",
+      "beneficiary_designation": "beneficiary_mismatch",
+      "designated_beneficiary_current": "Casey Rivera (individual)",
+      "designated_beneficiary_expected": "Rivera Family Living Trust",
+      "evidence_ids": [],
+      "notes": "BENEFICIARY MISMATCH: Policy beneficiary is Casey Rivera individually, not the trust. If Casey predeceases Jordan, proceeds go to Casey's estate (probate) rather than trust. Beneficiary form needs updating to name trust as primary beneficiary with individuals as contingent."
+    },
+    {
+      "asset_id": "asset-006",
+      "trust_id": "trust-demo-001",
+      "name": "Rivera Design Studio LLC - 60% Membership Interest",
+      "type": "business",
+      "subtype": "llc_membership",
+      "estimated_value": 280000,
+      "funding_status": "unknown",
+      "funding_method": null,
+      "institution": "California Secretary of State",
+      "entity_ein_last_four": "4456",
+      "beneficiary_designation": null,
+      "evidence_ids": ["ev-005"],
+      "notes": "TRANSFER STATUS UNKNOWN: Jordan holds 60% membership in this LLC. Operating agreement may restrict trust transfers. Need to review operating agreement for transfer restrictions, anti-assignment clauses, and consent requirements from other members. May require amendment to operating agreement."
+    },
+    {
+      "asset_id": "asset-007",
+      "trust_id": "trust-demo-001",
+      "name": "2022 Tesla Model Y - VIN ending 9847",
+      "type": "personal_property",
+      "subtype": "vehicle",
+      "estimated_value": 38000,
+      "funding_status": "unfunded",
+      "funding_method": null,
+      "institution": "California DMV",
+      "beneficiary_designation": null,
+      "evidence_ids": [],
+      "notes": "Vehicle titled in Jordan Rivera's name individually. Not transferred to trust. While vehicles are sometimes left outside trusts due to liability concerns, this creates a minor probate exposure. California allows small estate affidavit for low-value items, but best practice is trust titling."
+    },
+    {
+      "asset_id": "asset-008",
+      "trust_id": "trust-demo-001",
+      "name": "Traditional IRA - Fidelity Investments",
+      "type": "retirement",
+      "subtype": "traditional_ira",
+      "estimated_value": 195000,
+      "funding_status": "funded",
+      "funding_method": "beneficiary_designation",
+      "account_last_four": "6103",
+      "institution": "Fidelity Investments",
+      "beneficiary_designation": "beneficiary_ok",
+      "designated_beneficiary_current": "Casey Rivera (primary, 100%); Alex Rivera (contingent, 50%); Morgan Rivera (contingent, 50%)",
+      "evidence_ids": [],
+      "notes": "Retirement accounts should NOT be retitled into a trust. Proper funding is via beneficiary designation. Current designations are appropriate: spouse as primary, children as contingent. SECURE Act 10-year rule applies to children as non-spouse beneficiaries."
+    },
+    {
+      "asset_id": "asset-009",
+      "trust_id": "trust-demo-001",
+      "name": "Savings Account - Ally Bank",
+      "type": "financial",
+      "subtype": "savings_account",
+      "estimated_value": 85000,
+      "funding_status": "funded",
+      "funding_method": "pod_designation",
+      "account_last_four": "5520",
+      "institution": "Ally Bank",
+      "beneficiary_designation": "trust",
+      "evidence_ids": [],
+      "notes": "Online savings account with POD (payable on death) designation to trust. Acceptable alternative to full retitling for online-only banks that may not support trust accounts directly."
+    }
+  ],
+
+  "documents": [
+    {
+      "doc_id": "doc-001",
+      "trust_id": "trust-demo-001",
+      "name": "Rivera Family Living Trust Agreement",
+      "doc_type": "trust_document",
+      "status": "complete",
+      "date_signed": "2021-03-15",
+      "date_last_amended": "2023-08-20",
+      "pages": 47,
+      "evidence_ids": ["ev-001"],
+      "required": true,
+      "weight": 25,
+      "notes": "Original trust agreement plus First Amendment (2023) adding charitable beneficiary. Properly executed with notarization. Stored in fireproof safe and with attorney."
+    },
+    {
+      "doc_id": "doc-002",
+      "trust_id": "trust-demo-001",
+      "name": "Pour-Over Will - Jordan Rivera",
+      "doc_type": "pour_over_will",
+      "status": "complete",
+      "date_signed": "2021-03-15",
+      "date_last_amended": null,
+      "pages": 8,
+      "evidence_ids": [],
+      "required": true,
+      "weight": 15,
+      "notes": "Pour-over will directs any probate assets into the trust. Properly witnessed by two disinterested witnesses. Nominates Alex Rivera as executor."
+    },
+    {
+      "doc_id": "doc-003",
+      "trust_id": "trust-demo-001",
+      "name": "Durable Financial Power of Attorney - Jordan Rivera",
+      "doc_type": "financial_poa",
+      "status": "missing",
+      "date_signed": null,
+      "date_last_amended": null,
+      "pages": null,
+      "evidence_ids": [],
+      "required": true,
+      "weight": 15,
+      "notes": "MISSING: No financial power of attorney on file for Jordan. This is a critical gap in incapacity planning. If Jordan becomes incapacitated, Casey may face difficulty managing non-trust assets, filing taxes, or handling financial matters not covered by trustee powers. Should be executed immediately."
+    },
+    {
+      "doc_id": "doc-004",
+      "trust_id": "trust-demo-001",
+      "name": "Advance Healthcare Directive - Jordan Rivera",
+      "doc_type": "healthcare_directive",
+      "status": "complete",
+      "date_signed": "2021-03-15",
+      "date_last_amended": null,
+      "pages": 12,
+      "evidence_ids": [],
+      "required": true,
+      "weight": 10,
+      "notes": "Includes healthcare power of attorney naming Casey as agent, living will provisions, HIPAA authorization, and organ donation preferences. Properly witnessed per California requirements."
+    },
+    {
+      "doc_id": "doc-005",
+      "trust_id": "trust-demo-001",
+      "name": "Advance Healthcare Directive - Casey Rivera",
+      "doc_type": "healthcare_directive",
+      "status": "complete",
+      "date_signed": "2021-03-15",
+      "date_last_amended": null,
+      "pages": 12,
+      "evidence_ids": [],
+      "required": true,
+      "weight": 10,
+      "notes": "Includes healthcare power of attorney naming Jordan as agent with Alex Rivera as alternate. Properly witnessed per California requirements."
+    },
+    {
+      "doc_id": "doc-006",
+      "trust_id": "trust-demo-001",
+      "name": "Certificate of Trust",
+      "doc_type": "certificate_of_trust",
+      "status": "complete",
+      "date_signed": "2021-03-20",
+      "date_last_amended": null,
+      "pages": 3,
+      "evidence_ids": [],
+      "required": true,
+      "weight": 5,
+      "notes": "Notarized certificate of trust per California Probate Code 18100.5. Used to prove trustee authority to banks and title companies without revealing full trust terms. Multiple certified copies available."
+    },
+    {
+      "doc_id": "doc-007",
+      "trust_id": "trust-demo-001",
+      "name": "Grant Deed - 742 Elm Street, Pasadena (Primary Residence)",
+      "doc_type": "property_deed",
+      "status": "complete",
+      "date_signed": "2021-04-15",
+      "date_last_amended": null,
+      "pages": 2,
+      "evidence_ids": ["ev-002"],
+      "required": true,
+      "weight": 10,
+      "notes": "Recorded grant deed transferring primary residence from 'Jordan Rivera and Casey Rivera, husband and wife' to 'Jordan Rivera and Casey Rivera, Trustees of the Rivera Family Living Trust dated March 15, 2021'. Recording confirmed by LA County Registrar-Recorder."
+    },
+    {
+      "doc_id": "doc-008",
+      "trust_id": "trust-demo-001",
+      "name": "Grant Deed - 1580 Ocean Blvd, Unit 4B, Long Beach (Rental Property)",
+      "doc_type": "property_deed",
+      "status": "missing",
+      "date_signed": null,
+      "date_last_amended": null,
+      "pages": null,
+      "evidence_ids": [],
+      "required": true,
+      "weight": 10,
+      "notes": "MISSING: No deed transfer has been executed for the rental property. This property remains in Jordan Rivera's individual name and will require probate if not transferred. A new grant deed must be prepared, notarized, and recorded with the LA County Registrar-Recorder."
+    }
+  ],
+
+  "evidence": [
+    {
+      "evidence_id": "ev-001",
+      "trust_id": "trust-demo-001",
+      "linked_to": {
+        "type": "document",
+        "id": "doc-001"
+      },
+      "type": "scan",
+      "file_name": "rivera_trust_agreement_signed_2021-03-15.pdf",
+      "file_size_kb": 4200,
+      "mime_type": "application/pdf",
+      "uploaded_at": "2024-06-15T14:30:00Z",
+      "verified": true,
+      "verified_at": "2024-06-15T14:35:00Z",
+      "verified_by": "system_ocr",
+      "notes": "Full signed and notarized trust agreement including First Amendment. OCR verified signatures and notary seal present on all required pages."
+    },
+    {
+      "evidence_id": "ev-002",
+      "trust_id": "trust-demo-001",
+      "linked_to": {
+        "type": "asset",
+        "id": "asset-001"
+      },
+      "type": "recording",
+      "file_name": "deed_recording_confirmation_742elm_2021-04-15.pdf",
+      "file_size_kb": 850,
+      "mime_type": "application/pdf",
+      "uploaded_at": "2024-06-15T14:45:00Z",
+      "verified": true,
+      "verified_at": "2024-06-15T14:50:00Z",
+      "verified_by": "system_ocr",
+      "notes": "LA County Registrar-Recorder confirmation of deed recording. Document number 20210415-0012345. Recording date April 15, 2021. Grantee confirmed as Rivera Family Living Trust."
+    },
+    {
+      "evidence_id": "ev-003",
+      "trust_id": "trust-demo-001",
+      "linked_to": {
+        "type": "asset",
+        "id": "asset-003"
+      },
+      "type": "letter",
+      "file_name": "first_republic_title_change_confirmation.pdf",
+      "file_size_kb": 320,
+      "mime_type": "application/pdf",
+      "uploaded_at": "2024-06-20T09:15:00Z",
+      "verified": true,
+      "verified_at": "2024-06-20T09:20:00Z",
+      "verified_by": "manual_review",
+      "notes": "Confirmation letter from First Republic Bank acknowledging account retitling to trust. New account title: 'Jordan and Casey Rivera, Trustees of the Rivera Family Living Trust dtd 03/15/2021'. Letter dated April 22, 2021."
+    },
+    {
+      "evidence_id": "ev-004",
+      "trust_id": "trust-demo-001",
+      "linked_to": {
+        "type": "asset",
+        "id": "asset-004"
+      },
+      "type": "form",
+      "file_name": "schwab_account_retitle_confirmation.pdf",
+      "file_size_kb": 480,
+      "mime_type": "application/pdf",
+      "uploaded_at": "2024-06-20T09:30:00Z",
+      "verified": true,
+      "verified_at": "2024-06-20T09:35:00Z",
+      "verified_by": "manual_review",
+      "notes": "Charles Schwab account retitle confirmation and updated beneficiary designation form. Account now held in trust name with TOD designation also pointing to trust."
+    },
+    {
+      "evidence_id": "ev-005",
+      "trust_id": "trust-demo-001",
+      "linked_to": {
+        "type": "asset",
+        "id": "asset-006"
+      },
+      "type": "form",
+      "file_name": "rivera_design_studio_llc_operating_agreement.pdf",
+      "file_size_kb": 1800,
+      "mime_type": "application/pdf",
+      "uploaded_at": "2024-07-01T11:00:00Z",
+      "verified": false,
+      "verified_at": null,
+      "verified_by": null,
+      "notes": "Operating agreement uploaded but NOT verified. Need to review for transfer restriction clauses, consent requirements, and whether trust assignment of membership interest is permitted. Attorney review recommended before attempting transfer."
+    },
+    {
+      "evidence_id": "ev-006",
+      "trust_id": "trust-demo-001",
+      "linked_to": {
+        "type": "document",
+        "id": "doc-007"
+      },
+      "type": "scan",
+      "file_name": "recorded_deed_742elm_certified_copy.pdf",
+      "file_size_kb": 1100,
+      "mime_type": "application/pdf",
+      "uploaded_at": "2024-07-10T16:00:00Z",
+      "verified": true,
+      "verified_at": "2024-07-10T16:05:00Z",
+      "verified_by": "system_ocr",
+      "notes": "Certified copy of the recorded grant deed from LA County Registrar-Recorder. Confirms trust name on title, recording date, and document number match."
+    }
+  ],
+
+  "expected_computed_scores": {
+    "description": "Expected approximate scores when the scoring engine processes this demo dataset. Used for testing and validation.",
+    "funding_coverage_value_pct": 72,
+    "funding_coverage_value_detail": "Funded: $1,250,000 (residence) + $42,000 (checking) + $315,000 (brokerage) + $500,000 (life ins, ownership transferred) + $195,000 (IRA, beneficiary ok) + $85,000 (savings, POD) = $2,387,000 funded. Unfunded/problem: $485,000 (rental) + $280,000 (LLC unknown) + $38,000 (vehicle) = $803,000. Total: $3,190,000. Funded %: ~74.8%. Using stricter 'fully verified' may lower to ~72%.",
+    "funding_coverage_count_pct": 50,
+    "funding_coverage_count_detail": "Of 9 assets: 5 clearly funded (residence, checking, brokerage, savings, IRA via beneficiary), 1 ownership transferred but beneficiary mismatch (life ins), 1 unknown (LLC), 2 unfunded (rental, vehicle). Strict count: ~50% (4-5 of 9).",
+    "probate_exposure_amount": 485000,
+    "probate_exposure_detail": "Rental property ($485,000) is the primary probate exposure. Vehicle ($38,000) is additional but may qualify for small estate affidavit. LLC ($280,000) status unknown. Life insurance passes by beneficiary designation regardless of trust funding, but mismatch could cause unintended distribution.",
+    "document_completeness": 71,
+    "document_completeness_detail": "Of 8 documents (weighted): 6 complete, 2 missing (financial POA, rental deed). Weighted: complete items = 75 of total weight 100 = 75%. With missing critical items penalty: ~71%.",
+    "incapacity_readiness": 67,
+    "incapacity_readiness_detail": "Healthcare directives for both grantors: complete. Financial POA for Jordan: missing. Successor trustees named: yes. Overall incapacity readiness: ~67% (critical gap is missing financial POA).",
+    "evidence_completeness": 62,
+    "evidence_completeness_detail": "6 evidence items uploaded covering 4 of 9 assets and 2 of 8 documents. Several funded assets lack uploaded evidence (savings POD confirmation, IRA beneficiary form). One evidence item (LLC operating agreement) is unverified. Overall: ~62%.",
+    "red_flags": [
+      "unfunded_real_estate",
+      "beneficiary_mismatch",
+      "business_transfer_unknown",
+      "missing_poa"
+    ],
+    "red_flags_detail": {
+      "unfunded_real_estate": "Rental property at 1580 Ocean Blvd, Long Beach is not titled in the trust. $485,000 probate exposure.",
+      "beneficiary_mismatch": "Northwestern Mutual term life insurance ($500,000) lists Casey Rivera individually as beneficiary instead of the trust.",
+      "business_transfer_unknown": "Rivera Design Studio LLC (60% membership, $280,000 value) has unknown transfer status. Operating agreement not yet reviewed for transfer restrictions.",
+      "missing_poa": "No durable financial power of attorney on file for Jordan Rivera. Critical incapacity planning gap."
+    }
+  }
+}

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AliveTrust — Living trust health and verification system. Track your trust funding, documents, and estate planning health in one place.">
+  <meta name="robots" content="noindex, nofollow">
+  <title>AliveTrust — Trust Health Dashboard</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F6E1;</text></svg>">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       AUTH OVERLAY — Login / Register
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="auth-overlay" id="auth-overlay">
+    <div class="auth-container">
+      <div class="auth-brand">
+        <div class="auth-brand-icon">&#x1F6E1;</div>
+        <h1>Alive<span>Trust</span></h1>
+        <p>Your living trust, clearly understood.</p>
+      </div>
+
+      <!-- Login View -->
+      <div id="auth-login">
+        <div class="auth-card">
+          <h2>Welcome back</h2>
+          <p class="auth-subtitle">Sign in to check on your trust health.</p>
+          <div class="auth-error" id="login-error"></div>
+          <form id="login-form">
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-input" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" name="password" class="form-input" placeholder="Your password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem;">Sign In</button>
+          </form>
+          <div class="auth-toggle">
+            Don't have an account? <a href="#" id="show-register">Create one</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Register View -->
+      <div id="auth-register" class="hidden">
+        <div class="auth-card">
+          <h2>Get started</h2>
+          <p class="auth-subtitle">Create your account to begin understanding your trust health.</p>
+          <div class="auth-error" id="register-error"></div>
+          <form id="register-form">
+            <div class="form-group">
+              <label class="form-label">Your Name</label>
+              <input type="text" name="name" class="form-input" placeholder="Jane Smith" required autocomplete="name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-input" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" name="password" class="form-input" placeholder="At least 8 characters" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm Password</label>
+              <input type="password" name="confirm" class="form-input" placeholder="Confirm your password" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 0.5rem;">Create Account</button>
+          </form>
+          <div class="auth-toggle">
+            Already have an account? <a href="#" id="show-login">Sign in</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       APP LAYOUT — Sidebar + Main
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="app-layout">
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+      <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle navigation">&#9776;</button>
+      <span style="font-weight: 600;">AliveTrust</span>
+    </div>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">&#x1F6E1;</div>
+        <div class="sidebar-brand-text">Alive<span>Trust</span></div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-nav-section">Overview</div>
+        <a href="#/dashboard" class="sidebar-link active">
+          <span class="sidebar-link-icon">&#x1F4CA;</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#/equity-map" class="sidebar-link">
+          <span class="sidebar-link-icon">&#x1F3E0;</span>
+          <span>My Equity Map</span>
+        </a>
+
+        <div class="sidebar-nav-section">Actions</div>
+        <a href="#/nba" class="sidebar-link">
+          <span class="sidebar-link-icon">&#x1F3AF;</span>
+          <span>My Next 3 Moves</span>
+        </a>
+        <a href="#/proof-pack" class="sidebar-link">
+          <span class="sidebar-link-icon">&#x1F4C2;</span>
+          <span>My Proof Pack</span>
+        </a>
+
+        <div class="sidebar-nav-section">Resources</div>
+        <a href="#/providers" class="sidebar-link">
+          <span class="sidebar-link-icon">&#x1F464;</span>
+          <span>Provider Directory</span>
+        </a>
+        <a href="#/settings" class="sidebar-link">
+          <span class="sidebar-link-icon">&#x2699;</span>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="user-avatar">U</div>
+          <span class="sidebar-user-name" id="user-display-name">User</span>
+          <button class="sidebar-logout-btn" id="logout-btn" title="Sign out">&#x2192;</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div id="app-content">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <footer class="app-footer">
+        <p>
+          AliveTrust provides educational tools for estate planning awareness.
+          This is not legal advice. Consult qualified professionals for your specific situation.
+        </p>
+        <p style="margin-top: 0.375rem;">
+          &copy; 2025 AliveTrust. All rights reserved.
+        </p>
+      </footer>
+    </main>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TOAST CONTAINER
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="toast-container" id="toast-container"></div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SCRIPTS
+       ═══════════════════════════════════════════════════════════ -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pages/onboarding.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/equity-map.js"></script>
+  <script src="js/pages/nba.js"></script>
+  <script src="js/pages/proof-pack.js"></script>
+  <script src="js/pages/providers.js"></script>
+
+</body>
+</html>

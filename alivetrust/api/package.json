@@ -1,0 +1,19 @@
+{
+  "name": "alivetrust-api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:migrate": "wrangler d1 execute alivetrust-db --file=../schema/schema.sql",
+    "db:seed": "wrangler d1 execute alivetrust-db --file=../schema/seed.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240117.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0",
+    "wrangler": "^3.28.0"
+  }
+}
