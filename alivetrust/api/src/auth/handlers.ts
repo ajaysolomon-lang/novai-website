@@ -200,7 +200,7 @@ export async function login(request: Request, env: Env): Promise<Response> {
     });
 
     return jsonResponse({
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, full_name: user.full_name },
       token,
     });
   } catch (err) {

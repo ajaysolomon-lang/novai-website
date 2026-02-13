@@ -57,7 +57,7 @@ export async function create(
 
     await env.DB.prepare(
       `INSERT INTO document (
-        id, trust_id, document_type, title, description, file_key,
+        id, trust_id, doc_type, title, description, file_key,
         file_name, file_size, mime_type, status, notes, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
@@ -132,7 +132,7 @@ export async function list(
     }
 
     const { results } = await env.DB.prepare(
-      `SELECT id, trust_id, document_type, title, description, file_key,
+      `SELECT id, trust_id, doc_type, title, description, file_key,
               file_name, file_size, mime_type, status, notes, created_at, updated_at
        FROM document
        WHERE trust_id = ?
@@ -170,7 +170,7 @@ export async function update(
 
     // Capture before state for audit
     const before = await env.DB.prepare(
-      `SELECT id, trust_id, document_type, title, description, file_key,
+      `SELECT id, trust_id, doc_type, title, description, file_key,
               file_name, file_size, mime_type, status, notes, created_at, updated_at
        FROM document
        WHERE id = ? AND trust_id = ?`
@@ -198,7 +198,7 @@ export async function update(
 
     await env.DB.prepare(
       `UPDATE document SET
-        document_type = COALESCE(?, document_type),
+        doc_type = COALESCE(?, doc_type),
         title = COALESCE(?, title),
         description = COALESCE(?, description),
         file_key = COALESCE(?, file_key),
@@ -228,7 +228,7 @@ export async function update(
 
     // Fetch updated record
     const after = await env.DB.prepare(
-      `SELECT id, trust_id, document_type, title, description, file_key,
+      `SELECT id, trust_id, doc_type, title, description, file_key,
               file_name, file_size, mime_type, status, notes, created_at, updated_at
        FROM document
        WHERE id = ? AND trust_id = ?`

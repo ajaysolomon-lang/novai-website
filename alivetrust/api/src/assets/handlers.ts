@@ -30,7 +30,7 @@ export async function create(
       description?: string;
       estimated_value?: number;
       institution?: string;
-      account_number?: string;
+      account_number_last4?: string;
       address?: string;
       notes?: string;
     }>();
@@ -41,7 +41,7 @@ export async function create(
       description,
       estimated_value,
       institution,
-      account_number,
+      account_number_last4,
       address,
       notes,
     } = body;
@@ -56,7 +56,7 @@ export async function create(
     await env.DB.prepare(
       `INSERT INTO asset (
         id, trust_id, asset_type, name, description, estimated_value,
-        institution, account_number, address, notes, created_at, updated_at
+        institution, account_number_last4, location_address, notes, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
@@ -67,7 +67,7 @@ export async function create(
         description ?? null,
         estimated_value ?? null,
         institution ?? null,
-        account_number ?? null,
+        account_number_last4 ?? null,
         address ?? null,
         notes ?? null,
         now,
@@ -83,7 +83,7 @@ export async function create(
       description: description ?? undefined,
       estimated_value: estimated_value ?? undefined,
       institution: institution ?? undefined,
-      account_number: account_number ?? undefined,
+      account_number_last4: account_number_last4 ?? undefined,
       address: address ?? undefined,
       notes: notes ?? undefined,
       created_at: now,
@@ -129,7 +129,7 @@ export async function list(
 
     const { results } = await env.DB.prepare(
       `SELECT id, trust_id, asset_type, name, description, estimated_value,
-              institution, account_number, address, notes, created_at, updated_at
+              institution, account_number_last4, location_address, notes, created_at, updated_at
        FROM asset
        WHERE trust_id = ?
        ORDER BY created_at DESC`
@@ -167,7 +167,7 @@ export async function update(
     // Capture before state for audit
     const before = await env.DB.prepare(
       `SELECT id, trust_id, asset_type, name, description, estimated_value,
-              institution, account_number, address, notes, created_at, updated_at
+              institution, account_number_last4, location_address, notes, created_at, updated_at
        FROM asset
        WHERE id = ? AND trust_id = ?`
     )
@@ -184,7 +184,7 @@ export async function update(
       description?: string;
       estimated_value?: number;
       institution?: string;
-      account_number?: string;
+      account_number_last4?: string;
       address?: string;
       notes?: string;
     }>();
@@ -198,8 +198,8 @@ export async function update(
         description = COALESCE(?, description),
         estimated_value = COALESCE(?, estimated_value),
         institution = COALESCE(?, institution),
-        account_number = COALESCE(?, account_number),
-        address = COALESCE(?, address),
+        account_number_last4 = COALESCE(?, account_number_last4),
+        location_address = COALESCE(?, location_address),
         notes = COALESCE(?, notes),
         updated_at = ?
        WHERE id = ? AND trust_id = ?`
@@ -210,8 +210,8 @@ export async function update(
         body.description ?? null,
         body.estimated_value ?? null,
         body.institution ?? null,
-        body.account_number ?? null,
-        body.address ?? null,
+        body.account_number_last4 ?? null,
+        body.location_address ?? null,
         body.notes ?? null,
         now,
         assetId,
@@ -222,7 +222,7 @@ export async function update(
     // Fetch updated record
     const after = await env.DB.prepare(
       `SELECT id, trust_id, asset_type, name, description, estimated_value,
-              institution, account_number, address, notes, created_at, updated_at
+              institution, account_number_last4, location_address, notes, created_at, updated_at
        FROM asset
        WHERE id = ? AND trust_id = ?`
     )
@@ -270,7 +270,7 @@ export async function remove(
     // Capture before state for audit
     const before = await env.DB.prepare(
       `SELECT id, trust_id, asset_type, name, description, estimated_value,
-              institution, account_number, address, notes, created_at, updated_at
+              institution, account_number_last4, location_address, notes, created_at, updated_at
        FROM asset
        WHERE id = ? AND trust_id = ?`
     )

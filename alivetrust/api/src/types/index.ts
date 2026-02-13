@@ -76,19 +76,20 @@ export interface TrustProfile {
 export interface Asset {
   id: string;
   trust_id: string;
+  user_id?: string;
   asset_type: string;
   name: string;
   description?: string | null;
+  subtype?: string | null;
   estimated_value?: number | null;
-  institution?: string | null;
-  account_number?: string | null;
-  account_number_last4?: string | null;
-  address?: string | null;
-  funding_status?: 'funded' | 'unfunded' | 'partial' | 'unknown';
+  ownership_status?: 'funded' | 'unfunded' | 'partially_funded' | 'beneficiary_designated' | 'joint_tenancy' | 'unknown';
   funding_method?: string | null;
   funding_date?: string | null;
   beneficiary_designation?: string | null;
   intended_beneficiary?: string | null;
+  location_address?: string | null;
+  account_number_last4?: string | null;
+  institution?: string | null;
   notes?: string | null;
   created_at: string;
   updated_at: string;
@@ -99,22 +100,16 @@ export interface Asset {
 export interface Document {
   id: string;
   trust_id: string;
-  document_type: string;
-  doc_type?: string;
+  user_id?: string;
   title: string;
-  description?: string | null;
-  file_key?: string | null;
-  file_name?: string | null;
-  file_size?: number | null;
+  doc_type: string;
+  status: string;
   file_url?: string | null;
   file_hash?: string | null;
-  mime_type?: string | null;
   page_count?: number | null;
   date_signed?: string | null;
   date_notarized?: string | null;
-  date_expires?: string | null;
   expiration_date?: string | null;
-  status: string;
   required?: number;
   weight?: number;
   linked_asset_id?: string | null;
@@ -128,25 +123,22 @@ export interface Document {
 export interface Evidence {
   id: string;
   trust_id: string;
+  user_id?: string;
   evidence_type: string;
-  title?: string;
-  description?: string | null;
-  linked_asset_id?: string | null;
-  linked_doc_id?: string | null;
   related_asset_id?: string | null;
   related_doc_id?: string | null;
-  file_key?: string | null;
-  file_name?: string | null;
-  file_size?: number | null;
+  description?: string | null;
   file_url?: string | null;
   file_hash?: string | null;
+  file_name?: string | null;
+  file_key?: string | null;
   mime_type?: string | null;
+  file_size?: number | null;
   verified?: boolean | number;
-  verified_at?: string | null;
   verified_by?: string | null;
+  verified_at?: string | null;
   notes?: string | null;
   created_at: string;
-  updated_at?: string;
 }
 
 // ─── Document Chunks (RAG) ──────────────────────────────────────────────────

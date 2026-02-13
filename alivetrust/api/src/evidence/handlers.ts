@@ -32,8 +32,8 @@ export async function create(
       file_name?: string;
       file_size?: number;
       mime_type?: string;
-      linked_asset_id?: string;
-      linked_doc_id?: string;
+      related_asset_id?: string;
+      related_doc_id?: string;
       notes?: string;
     }>();
 
@@ -45,8 +45,8 @@ export async function create(
       file_name,
       file_size,
       mime_type,
-      linked_asset_id,
-      linked_doc_id,
+      related_asset_id,
+      related_doc_id,
       notes,
     } = body;
 
@@ -54,12 +54,12 @@ export async function create(
       return errorResponse('evidence_type and title are required');
     }
 
-    // Validate linked_asset_id exists if provided
-    if (linked_asset_id) {
+    // Validate related_asset_id exists if provided
+    if (related_asset_id) {
       const asset = await env.DB.prepare(
         'SELECT id FROM asset WHERE id = ? AND trust_id = ?'
       )
-        .bind(linked_asset_id, trustId)
+        .bind(related_asset_id, trustId)
         .first();
 
       if (!asset) {
@@ -67,12 +67,12 @@ export async function create(
       }
     }
 
-    // Validate linked_doc_id exists if provided
-    if (linked_doc_id) {
+    // Validate related_doc_id exists if provided
+    if (related_doc_id) {
       const doc = await env.DB.prepare(
         'SELECT id FROM document WHERE id = ? AND trust_id = ?'
       )
-        .bind(linked_doc_id, trustId)
+        .bind(related_doc_id, trustId)
         .first();
 
       if (!doc) {
@@ -84,27 +84,28 @@ export async function create(
     const now = new Date().toISOString();
 
     // file_key is a placeholder for R2 storage — actual upload handled separately
+    // Schema columns: id, trust_id, user_id, evidence_type, related_asset_id, related_doc_id,
+    //                  description, file_url, file_hash, file_name, file_key, mime_type, file_size,
+    //                  verified, verified_by, verified_at, notes, created_at
     await env.DB.prepare(
       `INSERT INTO evidence (
-        id, trust_id, evidence_type, title, description, file_key,
-        file_name, file_size, mime_type, linked_asset_id, linked_doc_id,
-        notes, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        id, trust_id, evidence_type, description, file_key,
+        file_name, file_size, mime_type, related_asset_id, related_doc_id,
+        notes, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         evidenceId,
         trustId,
         evidence_type,
-        title,
-        description ?? null,
+        title ?? description ?? null,
         file_key ?? null,
         file_name ?? null,
         file_size ?? null,
         mime_type ?? null,
-        linked_asset_id ?? null,
-        linked_doc_id ?? null,
+        related_asset_id ?? null,
+        related_doc_id ?? null,
         notes ?? null,
-        now,
         now
       )
       .run();
@@ -113,17 +114,15 @@ export async function create(
       id: evidenceId,
       trust_id: trustId,
       evidence_type,
-      title,
-      description: description ?? undefined,
+      description: title ?? description ?? undefined,
       file_key: file_key ?? undefined,
       file_name: file_name ?? undefined,
       file_size: file_size ?? undefined,
       mime_type: mime_type ?? undefined,
-      linked_asset_id: linked_asset_id ?? undefined,
-      linked_doc_id: linked_doc_id ?? undefined,
+      related_asset_id: related_asset_id ?? undefined,
+      related_doc_id: related_doc_id ?? undefined,
       notes: notes ?? undefined,
       created_at: now,
-      updated_at: now,
     };
 
     // Log audit — logAudit(db, entry) expects D1Database as first arg
@@ -136,8 +135,8 @@ export async function create(
       details: JSON.stringify({
         evidence_type,
         title,
-        linked_asset_id: linked_asset_id ?? null,
-        linked_doc_id: linked_doc_id ?? null,
+        related_asset_id: related_asset_id ?? null,
+        related_doc_id: related_doc_id ?? null,
       }),
       ip_address: request.headers.get('CF-Connecting-IP') ?? null,
     });
@@ -170,39 +169,39 @@ export async function list(
 
     // Check for optional query param filters
     const url = new URL(request.url);
-    const linkedAssetId = url.searchParams.get('linked_asset_id');
-    const linkedDocId = url.searchParams.get('linked_doc_id');
+    const linkedAssetId = url.searchParams.get('related_asset_id');
+    const linkedDocId = url.searchParams.get('related_doc_id');
 
     let query: string;
     const bindings: (string | null)[] = [trustId];
 
     if (linkedAssetId && linkedDocId) {
       query = `SELECT id, trust_id, evidence_type, title, description, file_key,
-                      file_name, file_size, mime_type, linked_asset_id, linked_doc_id,
+                      file_name, file_size, mime_type, related_asset_id, related_doc_id,
                       notes, created_at, updated_at
                FROM evidence
-               WHERE trust_id = ? AND linked_asset_id = ? AND linked_doc_id = ?
+               WHERE trust_id = ? AND related_asset_id = ? AND related_doc_id = ?
                ORDER BY created_at DESC`;
       bindings.push(linkedAssetId, linkedDocId);
     } else if (linkedAssetId) {
       query = `SELECT id, trust_id, evidence_type, title, description, file_key,
-                      file_name, file_size, mime_type, linked_asset_id, linked_doc_id,
+                      file_name, file_size, mime_type, related_asset_id, related_doc_id,
                       notes, created_at, updated_at
                FROM evidence
-               WHERE trust_id = ? AND linked_asset_id = ?
+               WHERE trust_id = ? AND related_asset_id = ?
                ORDER BY created_at DESC`;
       bindings.push(linkedAssetId);
     } else if (linkedDocId) {
       query = `SELECT id, trust_id, evidence_type, title, description, file_key,
-                      file_name, file_size, mime_type, linked_asset_id, linked_doc_id,
+                      file_name, file_size, mime_type, related_asset_id, related_doc_id,
                       notes, created_at, updated_at
                FROM evidence
-               WHERE trust_id = ? AND linked_doc_id = ?
+               WHERE trust_id = ? AND related_doc_id = ?
                ORDER BY created_at DESC`;
       bindings.push(linkedDocId);
     } else {
       query = `SELECT id, trust_id, evidence_type, title, description, file_key,
-                      file_name, file_size, mime_type, linked_asset_id, linked_doc_id,
+                      file_name, file_size, mime_type, related_asset_id, related_doc_id,
                       notes, created_at, updated_at
                FROM evidence
                WHERE trust_id = ?
