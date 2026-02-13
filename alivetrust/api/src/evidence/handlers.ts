@@ -176,33 +176,33 @@ export async function list(
     const bindings: (string | null)[] = [trustId];
 
     if (linkedAssetId && linkedDocId) {
-      query = `SELECT id, trust_id, evidence_type, title, description, file_key,
+      query = `SELECT id, trust_id, evidence_type, description, file_key,
                       file_name, file_size, mime_type, related_asset_id, related_doc_id,
-                      notes, created_at, updated_at
+                      notes, created_at
                FROM evidence
                WHERE trust_id = ? AND related_asset_id = ? AND related_doc_id = ?
                ORDER BY created_at DESC`;
       bindings.push(linkedAssetId, linkedDocId);
     } else if (linkedAssetId) {
-      query = `SELECT id, trust_id, evidence_type, title, description, file_key,
+      query = `SELECT id, trust_id, evidence_type, description, file_key,
                       file_name, file_size, mime_type, related_asset_id, related_doc_id,
-                      notes, created_at, updated_at
+                      notes, created_at
                FROM evidence
                WHERE trust_id = ? AND related_asset_id = ?
                ORDER BY created_at DESC`;
       bindings.push(linkedAssetId);
     } else if (linkedDocId) {
-      query = `SELECT id, trust_id, evidence_type, title, description, file_key,
+      query = `SELECT id, trust_id, evidence_type, description, file_key,
                       file_name, file_size, mime_type, related_asset_id, related_doc_id,
-                      notes, created_at, updated_at
+                      notes, created_at
                FROM evidence
                WHERE trust_id = ? AND related_doc_id = ?
                ORDER BY created_at DESC`;
       bindings.push(linkedDocId);
     } else {
-      query = `SELECT id, trust_id, evidence_type, title, description, file_key,
+      query = `SELECT id, trust_id, evidence_type, description, file_key,
                       file_name, file_size, mime_type, related_asset_id, related_doc_id,
-                      notes, created_at, updated_at
+                      notes, created_at
                FROM evidence
                WHERE trust_id = ?
                ORDER BY created_at DESC`;
