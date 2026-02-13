@@ -36,13 +36,13 @@ export interface User {
   id: string;
   email: string;
   password_hash: string;
-  name: string;
+  full_name: string;
   phone?: string | null;
   role?: 'owner' | 'trustee' | 'advisor' | 'admin';
   created_at: string;
   updated_at: string;
-  last_login: string | null;
-  status: 'active' | 'inactive' | 'suspended';
+  last_login?: string | null;
+  status?: 'active' | 'inactive' | 'suspended';
 }
 
 // ─── Trust Profile ──────────────────────────────────────────────────────────

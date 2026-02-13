@@ -88,7 +88,7 @@ export async function register(request: Request, env: Env): Promise<Response> {
 
     // Check if user already exists
     const existing = await env.DB.prepare(
-      'SELECT id FROM users WHERE email = ?'
+      'SELECT id FROM user WHERE email = ?'
     )
       .bind(email.toLowerCase())
       .first();
@@ -105,7 +105,7 @@ export async function register(request: Request, env: Env): Promise<Response> {
     const now = new Date().toISOString();
 
     await env.DB.prepare(
-      'INSERT INTO users (id, email, name, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT INTO user (id, email, full_name, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
     )
       .bind(userId, email.toLowerCase(), name, passwordHash, now, now)
       .run();
@@ -115,11 +115,9 @@ export async function register(request: Request, env: Env): Promise<Response> {
       id: userId,
       email: email.toLowerCase(),
       password_hash: passwordHash,
-      name,
+      full_name: name,
       created_at: now,
       updated_at: now,
-      last_login: null,
-      status: 'active' as const,
     });
 
     // Log audit — logAudit(db, entry) expects D1Database as first arg
@@ -129,13 +127,13 @@ export async function register(request: Request, env: Env): Promise<Response> {
       action: 'create',
       entity_type: 'user',
       entity_id: userId,
-      details: JSON.stringify({ email: email.toLowerCase(), name }),
+      details: JSON.stringify({ email: email.toLowerCase(), full_name: name }),
       ip_address: request.headers.get('CF-Connecting-IP') ?? null,
     });
 
     return jsonResponse(
       {
-        user: { id: userId, email: email.toLowerCase(), name },
+        user: { id: userId, email: email.toLowerCase(), full_name: name },
         token,
       },
       201
@@ -157,10 +155,10 @@ export async function login(request: Request, env: Env): Promise<Response> {
 
     // Look up user by email
     const user = await env.DB.prepare(
-      'SELECT id, email, name, password_hash FROM users WHERE email = ?'
+      'SELECT id, email, full_name, password_hash FROM user WHERE email = ?'
     )
       .bind(email.toLowerCase())
-      .first<{ id: string; email: string; name: string; password_hash: string }>();
+      .first<{ id: string; email: string; full_name: string; password_hash: string }>();
 
     if (!user) {
       return errorResponse('Invalid email or password', 401);
@@ -178,16 +176,14 @@ export async function login(request: Request, env: Env): Promise<Response> {
       id: user.id,
       email: user.email,
       password_hash: user.password_hash,
-      name: user.name,
+      full_name: user.full_name,
       created_at: '',
       updated_at: '',
-      last_login: null,
-      status: 'active' as const,
     });
 
     // Update last_login
     await env.DB.prepare(
-      'UPDATE users SET last_login = ? WHERE id = ?'
+      'UPDATE user SET last_login = ? WHERE id = ?'
     )
       .bind(now, user.id)
       .run();

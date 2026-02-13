@@ -200,7 +200,7 @@ async function triggerFreshCompute(
     `SELECT id, trust_id, user_id, name, type, subtype, estimated_value,
             funding_status, funding_method, beneficiary_designation, intended_beneficiary,
             location_address, account_number_last4, institution, notes, created_at, updated_at
-     FROM assets WHERE trust_id = ?`
+     FROM asset WHERE trust_id = ?`
   )
     .bind(trustId)
     .all<AssetRow>();
@@ -209,7 +209,7 @@ async function triggerFreshCompute(
   const documentsResult = await env.DB.prepare(
     `SELECT id, trust_id, user_id, name, doc_type, status, date_signed,
             date_expires, required, weight, linked_asset_id, notes, created_at, updated_at
-     FROM documents WHERE trust_id = ?`
+     FROM document WHERE trust_id = ?`
   )
     .bind(trustId)
     .all<DocumentRow>();
@@ -239,7 +239,7 @@ async function triggerFreshCompute(
   const now = new Date().toISOString();
 
   await env.DB.prepare(
-    `INSERT INTO computations (id, trust_id, user_id, computed_at, version, input_hash, results, trigger)
+    `INSERT INTO computation (id, trust_id, user_id, computed_at, version, input_hash, results, trigger)
      VALUES (?, ?, ?, ?, 1, 'fresh-from-nba', ?, 'manual')`
   )
     .bind(

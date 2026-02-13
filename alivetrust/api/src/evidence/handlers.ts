@@ -57,7 +57,7 @@ export async function create(
     // Validate linked_asset_id exists if provided
     if (linked_asset_id) {
       const asset = await env.DB.prepare(
-        'SELECT id FROM assets WHERE id = ? AND trust_id = ?'
+        'SELECT id FROM asset WHERE id = ? AND trust_id = ?'
       )
         .bind(linked_asset_id, trustId)
         .first();
@@ -70,7 +70,7 @@ export async function create(
     // Validate linked_doc_id exists if provided
     if (linked_doc_id) {
       const doc = await env.DB.prepare(
-        'SELECT id FROM documents WHERE id = ? AND trust_id = ?'
+        'SELECT id FROM document WHERE id = ? AND trust_id = ?'
       )
         .bind(linked_doc_id, trustId)
         .first();

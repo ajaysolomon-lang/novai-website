@@ -180,7 +180,7 @@ export async function ingestDocument(
 
     await db
       .prepare(
-        `INSERT INTO doc_chunks (
+        `INSERT INTO doc_chunk (
           id, trust_id, user_id, source_doc_id, source_evidence_id,
           source_type, source_id, chunk_index, content, metadata
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -247,9 +247,9 @@ export async function queryChunks(
   // SQL structure:
   //   SELECT id, ..., COUNT(*) as match_count
   //   FROM (
-  //     SELECT * FROM doc_chunks WHERE trust_id = ? AND content LIKE ?
+  //     SELECT * FROM doc_chunk WHERE trust_id = ? AND content LIKE ?
   //     UNION ALL
-  //     SELECT * FROM doc_chunks WHERE trust_id = ? AND content LIKE ?
+  //     SELECT * FROM doc_chunk WHERE trust_id = ? AND content LIKE ?
   //     ...
   //   )
   //   GROUP BY id
@@ -266,7 +266,7 @@ export async function queryChunks(
   for (const keyword of keywords) {
     unionParts.push(
       `SELECT id, trust_id, source_type, source_id, source_doc_id, content, metadata
-       FROM doc_chunks
+       FROM doc_chunk
        WHERE trust_id = ?${sourceFilter}
          AND LOWER(content) LIKE ?`
     );
@@ -384,7 +384,7 @@ export async function ingestVerifiedSources(
 
       await db
         .prepare(
-          `INSERT INTO doc_chunks (
+          `INSERT INTO doc_chunk (
             id, trust_id, user_id, source_doc_id, source_evidence_id,
             source_type, source_id, chunk_index, content, metadata
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`

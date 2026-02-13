@@ -168,7 +168,7 @@ export async function healthReport(
     const computation = await env.DB
       .prepare(
         `SELECT id, computed_at, version, results
-         FROM computations
+         FROM computation
          WHERE trust_id = ?
          ORDER BY computed_at DESC
          LIMIT 1`
@@ -370,7 +370,7 @@ export async function trusteePacket(
     const assetRows = await env.DB
       .prepare(
         `SELECT id, name, type, estimated_value, funding_status
-         FROM assets
+         FROM asset
          WHERE trust_id = ?
          ORDER BY estimated_value DESC`
       )

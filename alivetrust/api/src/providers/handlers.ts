@@ -138,7 +138,7 @@ export async function search(
           p.id, p.name, p.specialty, p.state, p.county, p.city,
           p.phone, p.email, p.website, p.description, p.active,
           p.created_at, p.updated_at
-        FROM providers p
+        FROM provider p
         INNER JOIN provider_verification pv ON pv.provider_id = p.id
         ${whereClause}
         ORDER BY p.name ASC
@@ -296,7 +296,7 @@ export async function create(
     // Insert the provider.
     await env.DB
       .prepare(
-        `INSERT INTO providers (
+        `INSERT INTO provider (
           id, name, specialty, state, county, city,
           phone, email, website, description, active,
           created_at, updated_at
@@ -427,7 +427,7 @@ export async function update(
       .prepare(
         `SELECT id, name, specialty, state, county, city, phone, email,
                 website, description, active, created_at, updated_at
-         FROM providers
+         FROM provider
          WHERE id = ?`
       )
       .bind(providerId)
@@ -534,7 +534,7 @@ export async function update(
     bindings.push(providerId);
 
     await env.DB
-      .prepare(`UPDATE providers SET ${updates.join(', ')} WHERE id = ?`)
+      .prepare(`UPDATE provider SET ${updates.join(', ')} WHERE id = ?`)
       .bind(...bindings)
       .run();
 
@@ -543,7 +543,7 @@ export async function update(
       .prepare(
         `SELECT id, name, specialty, state, county, city, phone, email,
                 website, description, active, created_at, updated_at
-         FROM providers
+         FROM provider
          WHERE id = ?`
       )
       .bind(providerId)

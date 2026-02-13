@@ -56,7 +56,7 @@ export async function create(
     const now = new Date().toISOString();
 
     await env.DB.prepare(
-      `INSERT INTO documents (
+      `INSERT INTO document (
         id, trust_id, document_type, title, description, file_key,
         file_name, file_size, mime_type, status, notes, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -134,7 +134,7 @@ export async function list(
     const { results } = await env.DB.prepare(
       `SELECT id, trust_id, document_type, title, description, file_key,
               file_name, file_size, mime_type, status, notes, created_at, updated_at
-       FROM documents
+       FROM document
        WHERE trust_id = ?
        ORDER BY created_at DESC`
     )
@@ -172,7 +172,7 @@ export async function update(
     const before = await env.DB.prepare(
       `SELECT id, trust_id, document_type, title, description, file_key,
               file_name, file_size, mime_type, status, notes, created_at, updated_at
-       FROM documents
+       FROM document
        WHERE id = ? AND trust_id = ?`
     )
       .bind(docId, trustId)
@@ -197,7 +197,7 @@ export async function update(
     const now = new Date().toISOString();
 
     await env.DB.prepare(
-      `UPDATE documents SET
+      `UPDATE document SET
         document_type = COALESCE(?, document_type),
         title = COALESCE(?, title),
         description = COALESCE(?, description),
@@ -230,7 +230,7 @@ export async function update(
     const after = await env.DB.prepare(
       `SELECT id, trust_id, document_type, title, description, file_key,
               file_name, file_size, mime_type, status, notes, created_at, updated_at
-       FROM documents
+       FROM document
        WHERE id = ? AND trust_id = ?`
     )
       .bind(docId, trustId)

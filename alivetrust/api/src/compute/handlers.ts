@@ -95,7 +95,7 @@ export async function compute(
       `SELECT id, trust_id, user_id, name, type, subtype, estimated_value,
               funding_status, funding_method, beneficiary_designation, intended_beneficiary,
               location_address, account_number_last4, institution, notes, created_at, updated_at
-       FROM assets
+       FROM asset
        WHERE trust_id = ?`
     )
       .bind(trustId)
@@ -107,7 +107,7 @@ export async function compute(
     const documentsResult = await env.DB.prepare(
       `SELECT id, trust_id, user_id, name, doc_type, status, date_signed,
               date_expires, required, weight, linked_asset_id, notes, created_at, updated_at
-       FROM documents
+       FROM document
        WHERE trust_id = ?`
     )
       .bind(trustId)
@@ -136,7 +136,7 @@ export async function compute(
 
     // Check if we already have a computation with this exact input hash
     const existingComputation = await env.DB.prepare(
-      `SELECT id, results FROM computations
+      `SELECT id, results FROM computation
        WHERE trust_id = ? AND input_hash = ?
        ORDER BY computed_at DESC
        LIMIT 1`
@@ -163,7 +163,7 @@ export async function compute(
 
     // Determine the latest version number
     const versionRow = await env.DB.prepare(
-      `SELECT MAX(version) AS max_version FROM computations WHERE trust_id = ?`
+      `SELECT MAX(version) AS max_version FROM computation WHERE trust_id = ?`
     )
       .bind(trustId)
       .first<{ max_version: number | null }>();
@@ -174,7 +174,7 @@ export async function compute(
     const trigger = getTriggerSource(request);
 
     await env.DB.prepare(
-      `INSERT INTO computations (id, trust_id, user_id, computed_at, version, input_hash, results, trigger)
+      `INSERT INTO computation (id, trust_id, user_id, computed_at, version, input_hash, results, trigger)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
@@ -233,7 +233,7 @@ export async function getLatestComputation(
   const row = await db
     .prepare(
       `SELECT id, results, computed_at, version
-       FROM computations
+       FROM computation
        WHERE trust_id = ?
        ORDER BY computed_at DESC
        LIMIT 1`

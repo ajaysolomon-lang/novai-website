@@ -54,7 +54,7 @@ export async function create(
     const now = new Date().toISOString();
 
     await env.DB.prepare(
-      `INSERT INTO assets (
+      `INSERT INTO asset (
         id, trust_id, asset_type, name, description, estimated_value,
         institution, account_number, address, notes, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -130,7 +130,7 @@ export async function list(
     const { results } = await env.DB.prepare(
       `SELECT id, trust_id, asset_type, name, description, estimated_value,
               institution, account_number, address, notes, created_at, updated_at
-       FROM assets
+       FROM asset
        WHERE trust_id = ?
        ORDER BY created_at DESC`
     )
@@ -168,7 +168,7 @@ export async function update(
     const before = await env.DB.prepare(
       `SELECT id, trust_id, asset_type, name, description, estimated_value,
               institution, account_number, address, notes, created_at, updated_at
-       FROM assets
+       FROM asset
        WHERE id = ? AND trust_id = ?`
     )
       .bind(assetId, trustId)
@@ -192,7 +192,7 @@ export async function update(
     const now = new Date().toISOString();
 
     await env.DB.prepare(
-      `UPDATE assets SET
+      `UPDATE asset SET
         asset_type = COALESCE(?, asset_type),
         name = COALESCE(?, name),
         description = COALESCE(?, description),
@@ -223,7 +223,7 @@ export async function update(
     const after = await env.DB.prepare(
       `SELECT id, trust_id, asset_type, name, description, estimated_value,
               institution, account_number, address, notes, created_at, updated_at
-       FROM assets
+       FROM asset
        WHERE id = ? AND trust_id = ?`
     )
       .bind(assetId, trustId)
@@ -271,7 +271,7 @@ export async function remove(
     const before = await env.DB.prepare(
       `SELECT id, trust_id, asset_type, name, description, estimated_value,
               institution, account_number, address, notes, created_at, updated_at
-       FROM assets
+       FROM asset
        WHERE id = ? AND trust_id = ?`
     )
       .bind(assetId, trustId)
@@ -290,7 +290,7 @@ export async function remove(
 
     // Delete the asset
     await env.DB.prepare(
-      'DELETE FROM assets WHERE id = ? AND trust_id = ?'
+      'DELETE FROM asset WHERE id = ? AND trust_id = ?'
     )
       .bind(assetId, trustId)
       .run();
