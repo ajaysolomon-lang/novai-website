@@ -44,10 +44,11 @@ export async function compute(
 
     // Load trust profile
     const trustRow = await env.DB.prepare(
-      `SELECT id, user_id, name AS trust_name, type AS trust_type, state AS jurisdiction,
-              county, date_created AS date_established, date_last_amended,
+      `SELECT id, user_id, trust_name, trust_type, jurisdiction,
+              county, date_established, date_last_amended,
               grantor_names, trustee_names, successor_trustee_names, beneficiary_names,
-              notes, created_at, updated_at
+              estimated_estate_value, has_pour_over_will, has_power_of_attorney,
+              has_healthcare_directive, status, notes, created_at, updated_at
        FROM trust_profile
        WHERE id = ?`
     )
@@ -65,6 +66,11 @@ export async function compute(
         trustee_names: string | null;
         successor_trustee_names: string | null;
         beneficiary_names: string | null;
+        estimated_estate_value: number | null;
+        has_pour_over_will: number;
+        has_power_of_attorney: number;
+        has_healthcare_directive: number;
+        status: string;
         notes: string | null;
         created_at: string;
         updated_at: string;
@@ -74,7 +80,7 @@ export async function compute(
       return errorResponse('Trust profile not found', 404);
     }
 
-    // Parse JSON array fields
+    // Parse JSON array fields and convert SQLite booleans
     const trust: TrustProfile = {
       ...trustRow,
       trust_type: trustRow.trust_type as TrustProfile['trust_type'],
@@ -82,18 +88,17 @@ export async function compute(
       trustee_names: safeParseArray(trustRow.trustee_names),
       successor_trustee_names: safeParseArray(trustRow.successor_trustee_names),
       beneficiary_names: safeParseArray(trustRow.beneficiary_names),
-      // Fields that exist on TrustProfile but are derived / not stored directly
-      estimated_estate_value: null,
-      has_pour_over_will: false,   // Will be inferred from documents
-      has_power_of_attorney: false,
-      has_healthcare_directive: false,
-      status: 'active' as const,
+      estimated_estate_value: trustRow.estimated_estate_value,
+      has_pour_over_will: !!trustRow.has_pour_over_will,
+      has_power_of_attorney: !!trustRow.has_power_of_attorney,
+      has_healthcare_directive: !!trustRow.has_healthcare_directive,
+      status: trustRow.status as TrustProfile['status'],
     };
 
     // Load all assets for this trust
     const assetsResult = await env.DB.prepare(
-      `SELECT id, trust_id, user_id, name, type, subtype, estimated_value,
-              funding_status, funding_method, beneficiary_designation, intended_beneficiary,
+      `SELECT id, trust_id, user_id, name, asset_type, subtype, estimated_value,
+              ownership_status, funding_method, beneficiary_designation, intended_beneficiary,
               location_address, account_number_last4, institution, notes, created_at, updated_at
        FROM asset
        WHERE trust_id = ?`
@@ -105,8 +110,9 @@ export async function compute(
 
     // Load all documents for this trust
     const documentsResult = await env.DB.prepare(
-      `SELECT id, trust_id, user_id, name, doc_type, status, date_signed,
-              date_expires, required, weight, linked_asset_id, notes, created_at, updated_at
+      `SELECT id, trust_id, user_id, title, doc_type, status, file_url, file_hash,
+              page_count, date_signed, date_notarized, expiration_date,
+              required, weight, linked_asset_id, notes, created_at, updated_at
        FROM document
        WHERE trust_id = ?`
     )
@@ -117,9 +123,9 @@ export async function compute(
 
     // Load all evidence for this trust
     const evidenceResult = await env.DB.prepare(
-      `SELECT id, trust_id, user_id, linked_asset_id, linked_doc_id, type,
-              file_name, file_key, mime_type, file_size, uploaded_at,
-              verified, verified_by, verified_at, notes
+      `SELECT id, trust_id, user_id, evidence_type, related_asset_id, related_doc_id,
+              description, file_url, file_hash, file_name, file_key, mime_type, file_size,
+              verified, verified_by, verified_at, notes, created_at
        FROM evidence
        WHERE trust_id = ?`
     )
@@ -134,25 +140,8 @@ export async function compute(
     // Hash the inputs for cache-check / deduplication
     const inputHash = await hashInput(computeInput);
 
-    // Check if we already have a computation with this exact input hash
-    const existingComputation = await env.DB.prepare(
-      `SELECT id, results FROM computation
-       WHERE trust_id = ? AND input_hash = ?
-       ORDER BY computed_at DESC
-       LIMIT 1`
-    )
-      .bind(trustId, inputHash)
-      .first<{ id: string; results: string }>();
-
-    if (existingComputation) {
-      // Return cached results — data hasn't changed
-      const cachedResults: ComputeResults = JSON.parse(existingComputation.results);
-      return jsonResponse({
-        computation_id: existingComputation.id,
-        cached: true,
-        results: cachedResults,
-      });
-    }
+    // Note: input_hash caching is not supported in the current schema.
+    // Each compute request generates a new computation record.
 
     // Run the deterministic scoring engine
     const results: ComputeResults = computeTrustHealth(computeInput);
@@ -173,19 +162,24 @@ export async function compute(
     // Determine trigger source
     const trigger = getTriggerSource(request);
 
+    // Schema columns: id, trust_id, computed_at, trust_health_score, funding_coverage_pct,
+    //                  probate_exposure, document_completeness_pct, incapacity_readiness_pct, results, version
     await env.DB.prepare(
-      `INSERT INTO computation (id, trust_id, user_id, computed_at, version, input_hash, results, trigger)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO computation (id, trust_id, computed_at, trust_health_score, funding_coverage_pct,
+       probate_exposure, document_completeness_pct, incapacity_readiness_pct, results, version)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         computationId,
         trustId,
-        session.user_id,
         now,
-        nextVersion,
-        inputHash,
+        results.funding_coverage_value_pct ?? 0,
+        results.funding_coverage_count_pct ?? 0,
+        results.probate_exposure_amount ?? 0,
+        results.document_completeness_score ?? 0,
+        results.incapacity_readiness_score ?? 0,
         JSON.stringify(results),
-        trigger
+        nextVersion
       )
       .run();
 

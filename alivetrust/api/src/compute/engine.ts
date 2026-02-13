@@ -27,10 +27,10 @@ export interface AssetRow {
   trust_id: string;
   user_id: string;
   name: string;
-  type: 'real_estate' | 'financial' | 'insurance' | 'business' | 'retirement' | 'personal_property' | 'digital' | 'other';
+  asset_type: string;
   subtype: string | null;
   estimated_value: number | null;
-  funding_status: 'funded' | 'unfunded' | 'partial' | 'unknown';
+  ownership_status: 'funded' | 'unfunded' | 'partially_funded' | 'beneficiary_designated' | 'joint_tenancy' | 'unknown';
   funding_method: string | null;
   beneficiary_designation: string | null;
   intended_beneficiary: string | null;
@@ -46,11 +46,15 @@ export interface DocumentRow {
   id: string;
   trust_id: string;
   user_id: string;
-  name: string;
-  doc_type: 'trust_document' | 'amendment' | 'pour_over_will' | 'financial_poa' | 'healthcare_directive' | 'certificate_of_trust' | 'property_deed' | 'beneficiary_form' | 'account_title_change' | 'operating_agreement' | 'insurance_policy' | 'tax_return' | 'other';
-  status: 'complete' | 'missing' | 'outdated' | 'needs_review';
+  title: string;
+  doc_type: string;
+  status: string;
+  file_url: string | null;
+  file_hash: string | null;
+  page_count: number | null;
   date_signed: string | null;
-  date_expires: string | null;
+  date_notarized: string | null;
+  expiration_date: string | null;
   required: number; // 0 or 1 (SQLite boolean)
   weight: number;
   linked_asset_id: string | null;
@@ -63,18 +67,21 @@ export interface EvidenceRow {
   id: string;
   trust_id: string;
   user_id: string;
-  linked_asset_id: string | null;
-  linked_doc_id: string | null;
-  type: string;
+  evidence_type: string;
+  related_asset_id: string | null;
+  related_doc_id: string | null;
+  description: string | null;
+  file_url: string | null;
+  file_hash: string | null;
   file_name: string | null;
   file_key: string | null;
   mime_type: string | null;
   file_size: number | null;
-  uploaded_at: string;
   verified: number; // 0 or 1
   verified_by: string | null;
   verified_at: string | null;
   notes: string | null;
+  created_at: string;
 }
 
 // ─── Engine Input ──────────────────────────────────────────────────────────
@@ -167,7 +174,7 @@ interface FundingValueResult {
 
 function computeFundingCoverageValue(assets: AssetRow[]): FundingValueResult {
   // Exclude retirement accounts from this metric
-  const eligible = assets.filter(a => !EXCLUDED_FROM_VALUE_FUNDING.has(a.type));
+  const eligible = assets.filter(a => !EXCLUDED_FROM_VALUE_FUNDING.has(a.asset_type));
 
   if (eligible.length === 0) {
     return {
@@ -187,7 +194,7 @@ function computeFundingCoverageValue(assets: AssetRow[]): FundingValueResult {
     };
   }
 
-  const fundedAssets = eligible.filter(a => a.funding_status === 'funded');
+  const fundedAssets = eligible.filter(a => a.ownership_status === 'funded');
   const fundedValue = fundedAssets.reduce((sum, a) => sum + (a.estimated_value ?? 0), 0);
   const pct = round2(fundedValue / totalValue * 100);
 
@@ -209,7 +216,7 @@ interface FundingCountResult {
 
 function computeFundingCoverageCount(assets: AssetRow[]): FundingCountResult {
   // Exclude retirement and insurance (they pass by beneficiary designation)
-  const eligible = assets.filter(a => !EXCLUDED_FROM_COUNT_FUNDING.has(a.type));
+  const eligible = assets.filter(a => !EXCLUDED_FROM_COUNT_FUNDING.has(a.asset_type));
 
   if (eligible.length === 0) {
     return {
@@ -219,7 +226,7 @@ function computeFundingCoverageCount(assets: AssetRow[]): FundingCountResult {
     };
   }
 
-  const fundedAssets = eligible.filter(a => a.funding_status === 'funded');
+  const fundedAssets = eligible.filter(a => a.ownership_status === 'funded');
   const pct = round2(fundedAssets.length / eligible.length * 100);
 
   const contributingAssetIds = fundedAssets.map(a => a.id);
@@ -241,7 +248,7 @@ interface ProbateResult {
 function computeProbateExposure(assets: AssetRow[]): ProbateResult {
   // Unfunded assets that are NOT retirement/insurance
   const exposed = assets.filter(
-    a => !EXCLUDED_FROM_PROBATE.has(a.type) && a.funding_status !== 'funded'
+    a => !EXCLUDED_FROM_PROBATE.has(a.asset_type) && a.ownership_status !== 'funded'
   );
 
   if (exposed.length === 0) {
@@ -290,7 +297,7 @@ function computeDocumentCompleteness(
   }
 
   // Dynamically add property_deed requirements based on real_estate count
-  const realEstateAssets = assets.filter(a => a.type === 'real_estate');
+  const realEstateAssets = assets.filter(a => a.asset_type === 'real_estate');
   for (let i = 0; i < realEstateAssets.length; i++) {
     requiredDocs.push({
       docType: 'property_deed',
@@ -431,8 +438,8 @@ function computeEvidenceCompleteness(
   const assetEvidenceIds: string[] = [];
 
   for (const e of evidenceItems) {
-    if (e.linked_asset_id) {
-      assetsWithEvidence.add(e.linked_asset_id);
+    if (e.related_asset_id) {
+      assetsWithEvidence.add(e.related_asset_id);
       assetEvidenceIds.push(e.id);
     }
   }
@@ -443,8 +450,8 @@ function computeEvidenceCompleteness(
   const docEvidenceIds: string[] = [];
 
   for (const e of evidenceItems) {
-    if (e.linked_doc_id) {
-      docsWithEvidence.add(e.linked_doc_id);
+    if (e.related_doc_id) {
+      docsWithEvidence.add(e.related_doc_id);
       docEvidenceIds.push(e.id);
     }
   }
@@ -498,7 +505,7 @@ function detectRedFlags(
 
   // 1. unfunded_real_estate: Any real_estate with funding_status !== 'funded'
   const unfundedRealEstate = assets.filter(
-    a => a.type === 'real_estate' && a.funding_status !== 'funded'
+    a => a.asset_type === 'real_estate' && a.ownership_status !== 'funded'
   );
   for (const a of unfundedRealEstate) {
     const value = a.estimated_value ?? 0;
@@ -514,7 +521,7 @@ function detectRedFlags(
   }
 
   // 2. deed_recording_gap: Real estate exists but no complete property_deed
-  const realEstateAssets = assets.filter(a => a.type === 'real_estate');
+  const realEstateAssets = assets.filter(a => a.asset_type === 'real_estate');
   for (const a of realEstateAssets) {
     const hasDeed = documents.some(
       d => d.doc_type === 'property_deed' &&
@@ -600,7 +607,7 @@ function detectRedFlags(
 
   // 7. business_transfer_unknown: Business asset with funding_status === 'unknown'
   const unknownBusinesses = assets.filter(
-    a => a.type === 'business' && a.funding_status === 'unknown'
+    a => a.asset_type === 'business' && a.ownership_status === 'unknown'
   );
   for (const a of unknownBusinesses) {
     flags.push({
@@ -620,7 +627,7 @@ function detectRedFlags(
       flag_id: nextId(),
       type: 'outdated_documents',
       severity: 'medium',
-      message: `Document "${d.name}" is outdated and may no longer reflect current trust terms.`,
+      message: `Document "${d.title}" is outdated and may no longer reflect current trust terms.`,
       related_asset_ids: [],
       related_doc_ids: [d.id],
     });
@@ -673,7 +680,7 @@ function detectDataGaps(
 
   // 2. Asset with funding_status 'unknown'
   for (const a of assets) {
-    if (a.funding_status === 'unknown') {
+    if (a.ownership_status === 'unknown') {
       gaps.push({
         gap_id: nextId(),
         field: `assets[${a.id}].funding_status`,
@@ -696,13 +703,13 @@ function detectDataGaps(
   // 4. Missing beneficiary info on insurance/retirement accounts
   for (const a of assets) {
     if (
-      (a.type === 'insurance' || a.type === 'retirement') &&
+      (a.asset_type === 'insurance' || a.asset_type === 'retirement') &&
       !a.beneficiary_designation
     ) {
       gaps.push({
         gap_id: nextId(),
         field: `assets[${a.id}].beneficiary_designation`,
-        message: `${a.type === 'insurance' ? 'Insurance' : 'Retirement'} account "${a.name}" is missing beneficiary designation information.`,
+        message: `${a.asset_type === 'insurance' ? 'Insurance' : 'Retirement'} account "${a.name}" is missing beneficiary designation information.`,
         resolution_hint: 'Contact the institution to obtain the current beneficiary designation form and enter who is currently named.',
       });
     }
@@ -714,7 +721,7 @@ function detectDataGaps(
       gaps.push({
         gap_id: nextId(),
         field: `documents[${d.id}].status`,
-        message: `Document "${d.name}" needs review. Its current status may be inaccurate or it may need attorney attention.`,
+        message: `Document "${d.title}" needs review. Its current status may be inaccurate or it may need attorney attention.`,
         resolution_hint: 'Review this document with your estate planning attorney and update its status to complete or outdated.',
       });
     }

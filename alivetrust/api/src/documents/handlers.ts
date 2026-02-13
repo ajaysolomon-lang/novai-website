@@ -25,31 +25,39 @@ export async function create(
     }
 
     const body = await request.json<{
-      document_type: string;
+      doc_type: string;
       title: string;
-      description?: string;
-      file_key?: string;
-      file_name?: string;
-      file_size?: number;
-      mime_type?: string;
       status?: string;
+      file_url?: string;
+      file_hash?: string;
+      page_count?: number;
+      date_signed?: string;
+      date_notarized?: string;
+      expiration_date?: string;
+      required?: number;
+      weight?: number;
+      linked_asset_id?: string;
       notes?: string;
     }>();
 
     const {
-      document_type,
+      doc_type,
       title,
-      description,
-      file_key,
-      file_name,
-      file_size,
-      mime_type,
       status,
+      file_url,
+      file_hash,
+      page_count,
+      date_signed,
+      date_notarized,
+      expiration_date,
+      required,
+      weight,
+      linked_asset_id,
       notes,
     } = body;
 
-    if (!document_type || !title) {
-      return errorResponse('document_type and title are required');
+    if (!doc_type || !title) {
+      return errorResponse('doc_type and title are required');
     }
 
     const docId = crypto.randomUUID();
@@ -57,21 +65,26 @@ export async function create(
 
     await env.DB.prepare(
       `INSERT INTO document (
-        id, trust_id, doc_type, title, description, file_key,
-        file_name, file_size, mime_type, status, notes, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        id, trust_id, title, doc_type, status, file_url, file_hash,
+        page_count, date_signed, date_notarized, expiration_date,
+        required, weight, linked_asset_id, notes, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         docId,
         trustId,
-        document_type,
         title,
-        description ?? null,
-        file_key ?? null,
-        file_name ?? null,
-        file_size ?? null,
-        mime_type ?? null,
+        doc_type,
         status ?? 'draft',
+        file_url ?? null,
+        file_hash ?? null,
+        page_count ?? null,
+        date_signed ?? null,
+        date_notarized ?? null,
+        expiration_date ?? null,
+        required ?? 0,
+        weight ?? 1.0,
+        linked_asset_id ?? null,
         notes ?? null,
         now,
         now
@@ -81,13 +94,8 @@ export async function create(
     const document: Partial<TrustDocument> = {
       id: docId,
       trust_id: trustId,
-      document_type,
       title,
-      description: description ?? undefined,
-      file_key: file_key ?? undefined,
-      file_name: file_name ?? undefined,
-      file_size: file_size ?? undefined,
-      mime_type: mime_type ?? undefined,
+      doc_type,
       status: status ?? 'draft',
       notes: notes ?? undefined,
       created_at: now,
@@ -101,7 +109,7 @@ export async function create(
       action: 'create',
       entity_type: 'document',
       entity_id: docId,
-      details: JSON.stringify({ document_type, title }),
+      details: JSON.stringify({ doc_type, title }),
       ip_address: request.headers.get('CF-Connecting-IP') ?? null,
     });
 
@@ -132,8 +140,9 @@ export async function list(
     }
 
     const { results } = await env.DB.prepare(
-      `SELECT id, trust_id, doc_type, title, description, file_key,
-              file_name, file_size, mime_type, status, notes, created_at, updated_at
+      `SELECT id, trust_id, title, doc_type, status, file_url, file_hash,
+              page_count, date_signed, date_notarized, expiration_date,
+              required, weight, linked_asset_id, notes, created_at, updated_at
        FROM document
        WHERE trust_id = ?
        ORDER BY created_at DESC`
@@ -170,8 +179,9 @@ export async function update(
 
     // Capture before state for audit
     const before = await env.DB.prepare(
-      `SELECT id, trust_id, doc_type, title, description, file_key,
-              file_name, file_size, mime_type, status, notes, created_at, updated_at
+      `SELECT id, trust_id, title, doc_type, status, file_url, file_hash,
+              page_count, date_signed, date_notarized, expiration_date,
+              required, weight, linked_asset_id, notes, created_at, updated_at
        FROM document
        WHERE id = ? AND trust_id = ?`
     )
@@ -183,14 +193,18 @@ export async function update(
     }
 
     const body = await request.json<{
-      document_type?: string;
+      doc_type?: string;
       title?: string;
-      description?: string;
-      file_key?: string;
-      file_name?: string;
-      file_size?: number;
-      mime_type?: string;
       status?: string;
+      file_url?: string;
+      file_hash?: string;
+      page_count?: number;
+      date_signed?: string;
+      date_notarized?: string;
+      expiration_date?: string;
+      required?: number;
+      weight?: number;
+      linked_asset_id?: string;
       notes?: string;
     }>();
 
@@ -200,25 +214,27 @@ export async function update(
       `UPDATE document SET
         doc_type = COALESCE(?, doc_type),
         title = COALESCE(?, title),
-        description = COALESCE(?, description),
-        file_key = COALESCE(?, file_key),
-        file_name = COALESCE(?, file_name),
-        file_size = COALESCE(?, file_size),
-        mime_type = COALESCE(?, mime_type),
         status = COALESCE(?, status),
+        file_url = COALESCE(?, file_url),
+        file_hash = COALESCE(?, file_hash),
+        page_count = COALESCE(?, page_count),
+        date_signed = COALESCE(?, date_signed),
+        date_notarized = COALESCE(?, date_notarized),
+        expiration_date = COALESCE(?, expiration_date),
         notes = COALESCE(?, notes),
         updated_at = ?
        WHERE id = ? AND trust_id = ?`
     )
       .bind(
-        body.document_type ?? null,
+        body.doc_type ?? null,
         body.title ?? null,
-        body.description ?? null,
-        body.file_key ?? null,
-        body.file_name ?? null,
-        body.file_size ?? null,
-        body.mime_type ?? null,
         body.status ?? null,
+        body.file_url ?? null,
+        body.file_hash ?? null,
+        body.page_count ?? null,
+        body.date_signed ?? null,
+        body.date_notarized ?? null,
+        body.expiration_date ?? null,
         body.notes ?? null,
         now,
         docId,
@@ -228,8 +244,9 @@ export async function update(
 
     // Fetch updated record
     const after = await env.DB.prepare(
-      `SELECT id, trust_id, doc_type, title, description, file_key,
-              file_name, file_size, mime_type, status, notes, created_at, updated_at
+      `SELECT id, trust_id, title, doc_type, status, file_url, file_hash,
+              page_count, date_signed, date_notarized, expiration_date,
+              required, weight, linked_asset_id, notes, created_at, updated_at
        FROM document
        WHERE id = ? AND trust_id = ?`
     )

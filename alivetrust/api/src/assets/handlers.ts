@@ -84,7 +84,7 @@ export async function create(
       estimated_value: estimated_value ?? undefined,
       institution: institution ?? undefined,
       account_number_last4: account_number_last4 ?? undefined,
-      address: address ?? undefined,
+      location_address: address ?? undefined,
       notes: notes ?? undefined,
       created_at: now,
       updated_at: now,

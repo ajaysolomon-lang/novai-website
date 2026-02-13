@@ -154,10 +154,11 @@ async function triggerFreshCompute(
 ): Promise<{ id: string; results: import('../types/index').ComputeResults; computed_at: string; version: number } | null> {
   // Load trust profile
   const trustRow = await env.DB.prepare(
-    `SELECT id, user_id, name AS trust_name, type AS trust_type, state AS jurisdiction,
-            county, date_created AS date_established,
+    `SELECT id, user_id, trust_name, trust_type, jurisdiction,
+            county, date_established, date_last_amended,
             grantor_names, trustee_names, successor_trustee_names, beneficiary_names,
-            notes, created_at, updated_at
+            estimated_estate_value, has_pour_over_will, has_power_of_attorney,
+            has_healthcare_directive, status, notes, created_at, updated_at
      FROM trust_profile
      WHERE id = ?`
   )
@@ -195,30 +196,31 @@ async function triggerFreshCompute(
     status: 'active' as const,
   };
 
-  // Load assets
+  // Load assets (use schema column names: asset_type, ownership_status)
   const assetsResult = await env.DB.prepare(
-    `SELECT id, trust_id, user_id, name, type, subtype, estimated_value,
-            funding_status, funding_method, beneficiary_designation, intended_beneficiary,
+    `SELECT id, trust_id, user_id, name, asset_type, subtype, estimated_value,
+            ownership_status, funding_method, beneficiary_designation, intended_beneficiary,
             location_address, account_number_last4, institution, notes, created_at, updated_at
      FROM asset WHERE trust_id = ?`
   )
     .bind(trustId)
     .all<AssetRow>();
 
-  // Load documents
+  // Load documents (use schema column names: title, expiration_date)
   const documentsResult = await env.DB.prepare(
-    `SELECT id, trust_id, user_id, name, doc_type, status, date_signed,
-            date_expires, required, weight, linked_asset_id, notes, created_at, updated_at
+    `SELECT id, trust_id, user_id, title, doc_type, status, file_url, file_hash,
+            page_count, date_signed, date_notarized, expiration_date,
+            required, weight, linked_asset_id, notes, created_at, updated_at
      FROM document WHERE trust_id = ?`
   )
     .bind(trustId)
     .all<DocumentRow>();
 
-  // Load evidence
+  // Load evidence (use schema column names: evidence_type, related_asset_id, related_doc_id)
   const evidenceResult = await env.DB.prepare(
-    `SELECT id, trust_id, user_id, linked_asset_id, linked_doc_id, type,
-            file_name, file_key, mime_type, file_size, uploaded_at,
-            verified, verified_by, verified_at, notes
+    `SELECT id, trust_id, user_id, evidence_type, related_asset_id, related_doc_id,
+            description, file_url, file_hash, file_name, file_key, mime_type, file_size,
+            verified, verified_by, verified_at, notes, created_at
      FROM evidence WHERE trust_id = ?`
   )
     .bind(trustId)
@@ -238,15 +240,22 @@ async function triggerFreshCompute(
   const computationId = crypto.randomUUID();
   const now = new Date().toISOString();
 
+  // Schema columns: id, trust_id, computed_at, trust_health_score, funding_coverage_pct,
+  //                  probate_exposure, document_completeness_pct, incapacity_readiness_pct, results, version
   await env.DB.prepare(
-    `INSERT INTO computation (id, trust_id, user_id, computed_at, version, input_hash, results, trigger)
-     VALUES (?, ?, ?, ?, 1, 'fresh-from-nba', ?, 'manual')`
+    `INSERT INTO computation (id, trust_id, computed_at, trust_health_score, funding_coverage_pct,
+     probate_exposure, document_completeness_pct, incapacity_readiness_pct, results, version)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`
   )
     .bind(
       computationId,
       trustId,
-      session.user_id,
       now,
+      results.funding_coverage_value_pct ?? 0,
+      results.funding_coverage_count_pct ?? 0,
+      results.probate_exposure_amount ?? 0,
+      results.document_completeness_score ?? 0,
+      results.incapacity_readiness_score ?? 0,
       JSON.stringify(results)
     )
     .run();
